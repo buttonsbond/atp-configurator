@@ -3,6 +3,7 @@
 A modern, modular WordPress plugin for creating interactive cost estimation wizards with drag-and-drop functionality, real-time analytics, and comprehensive quote management.
 
 **Current version: 3.4.11**
+**GitHub Repository**: https://github.com/buttonsbond/atp-configurator
 
 ## Features
 

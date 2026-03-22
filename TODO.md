@@ -1,10 +1,11 @@
 # WP Configurator Wizard - Project Overview
 
-## Current State (v3.2.8)
+## Current State (v3.4.11)
 **Live**: https://all-tech-plus.com/wizard
 **Shortcode**: `[wp_configurator_wizard]`
 **Stack**: PHP (WordPress), jQuery, custom CSS; no build step
 **Currency**: EUR
+**GitHub**: https://github.com/buttonsbond/atp-configurator
 
 **For detailed historical changelog of stats enhancements, see `fridaytodo.md`.
 For current refactoring roadmap, see `REFACTORINGTODO.md`.**
@@ -28,6 +29,7 @@ Key milestones:
 - **v3.1.5-3.1.8**: Ongoing enhancements, bug fixes, and minor features (including built-in emoji picker)
 - **v3.2.7**: Category Information Field (frontend display)
 - **v3.2.8**: Bug fix: category info now correctly placed inside collapsible sections
+- **v3.4.11**: State Persistence Revolution - all admin UI state (tabs, collapse, sections) persists across page reloads; GitHub Actions integration complete
 
 ---
 

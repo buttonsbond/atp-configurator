@@ -72,7 +72,7 @@ wp-configurator-wizard/
 │       ├── wizard.js            # Frontend drag/drop, pricing
 │       └── admin.js             # Admin DnD, modals, emoji picker
 ├── languages/                   # Translation files (empty)
-└── README.md
+└── (no README.md here - documentation at repository root)
 ```
 
 ### Data Model
@@ -108,7 +108,7 @@ wp-configurator-wizard/
 - Always regenerate ZIP and bump version after updates
 
 ## Current Version
-- **3.2.9** (GPLv3 licensed, with donation support)
+- **3.4.11** (GPLv3 licensed, with donation support)
 
 ## Common Gotchas
 - Adding a feature requires a category selected and enabled checkbox.
