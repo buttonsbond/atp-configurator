@@ -145,9 +145,13 @@ wp-configurator-wizard/
 
 - `wp_configurator_total_cost` – modify calculated total cost
 
-## Credits
+## GitHub Integration
 
-Developed by [All Tech Plus](https://all-tech-plus.com) and [AICognitio](https://aicognitio.com).
+This repository is integrated with GitHub Actions for automated Claude Code reviews:
+- Pull requests trigger automated code reviews
+- Commits to main can be reviewed via workflow dispatch
+
+See `.github/workflows/` for configuration details.
 
 ## License
 
