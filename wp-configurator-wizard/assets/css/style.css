@@ -1,0 +1,641 @@
+/* WP Configurator Wizard - Configurable Interface */
+
+:root {
+    --config-primary: #6366f1;
+    --config-primary-dark: #4f46e5;
+    --config-secondary: #8b5cf6;
+    --config-success: #10b981;
+    --config-text: #1f2937;
+    --config-text-light: #6b7280;
+    --config-border: #e5e7eb;
+    --config-bg: #ffffff;
+    --config-bg-light: #f9fafb;
+    --config-bg-selected: #eef2ff;
+}
+
+/* Reset */
+.wp-configurator-wizard {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0;
+    font-family: inherit;
+    color: var(--config-text);
+}
+
+.wp-configurator-wizard * {
+    box-sizing: border-box;
+}
+
+/* Main Container */
+.configurator-container {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 24px;
+    padding: 0 20px;
+    position: relative;
+}
+
+/* Header & Price */
+.header-section {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 24px 20px;
+    border-bottom: 2px solid var(--config-border);
+    margin-bottom: 24px;
+}
+
+.header-section h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.header-section p {
+    color: var(--config-text-light);
+    font-size: 1.1rem;
+}
+
+/* Price Display - Removed purple box, moved to drop zone */
+/* Drop Zone Panel */
+.drop-zone-panel {
+    background: var(--config-bg);
+    border: 2px dashed var(--config-border);
+    border-radius: 12px;
+    padding: 24px;
+    position: sticky;
+    top: 100px;
+    align-self: start;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+.drop-zone-panel.drag-over {
+    border-color: var(--config-primary);
+    background: var(--config-bg-selected);
+    border-style: solid;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--config-text-light);
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 16px;
+    opacity: 0.3;
+}
+
+.empty-state p {
+    font-size: 0.875rem;
+}
+
+/* Selected Items */
+.selected-items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.selected-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--config-bg-light);
+    border-radius: 8px;
+    border: 1px solid var(--config-border);
+    animation: slideIn 0.3s ease;
+    cursor: grab;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.selected-item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.selected-item.dragging {
+    opacity: 0.5;
+    background: #e8f4fd;
+    border-style: dashed;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Drop placeholder - very obvious */
+.selected-item-placeholder {
+    height: 68px; /* matches .selected-item padding + content */
+    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+    border: 2px dashed #6366f1;
+    border-radius: 8px;
+    margin: 12px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 1.5s infinite;
+    position: relative;
+    overflow: hidden;
+}
+
+.selected-item-placeholder::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 5px,
+        rgba(99, 102, 241, 0.05) 5px,
+        rgba(99, 102, 241, 0.05) 10px
+    );
+}
+
+.placeholder-label {
+    position: relative;
+    z-index: 1;
+    font-weight: 600;
+    color: #6366f1;
+    font-size: 0.875rem;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 6px 12px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    }
+    50% {
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.selected-item-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--config-success) 0%, #059669 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+}
+
+.selected-item-info {
+    flex-grow: 1;
+}
+
+.selected-item-title {
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 2px;
+}
+
+.selected-item-price {
+    font-size: 0.75rem;
+    color: var(--config-text-light);
+}
+
+.billing-period {
+    font-size: 0.7rem;
+    color: #666;
+    background: #eee;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-left: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.remove-item {
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.remove-item:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* Left Panel - Tiles */
+.tiles-panel {
+    background: var(--config-bg-light);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid var(--config-border);
+}
+
+.section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--config-text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.compulsory-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #d63638;
+    background: #f8d7da;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tiles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+    padding: 8px 12px 0; /* Add left/right padding so tiles don't touch edges */
+}
+
+/* Draggable Tile */
+.tile {
+    background: var(--config-bg);
+    border: 2px solid var(--config-border);
+    border-radius: 12px;
+    padding: 16px;
+    cursor: grab;
+    transition: all 0.2s ease;
+    text-align: center;
+    user-select: none;
+}
+
+.tile:hover {
+    border-color: var(--config-primary);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.15);
+}
+
+.tile:active {
+    cursor: grabbing;
+    opacity: 0.8;
+}
+
+.tile.dragging {
+    opacity: 0.4;
+    transform: scale(0.95);
+}
+
+.tile.selected {
+    background: var(--config-bg-selected);
+    border-color: var(--config-success);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.tile.incompatible-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(100%);
+}
+
+.tile.incompatible-disabled:hover {
+    transform: none;
+    border-color: var(--config-border);
+    box-shadow: none;
+}
+
+.tile-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 12px;
+    background: linear-gradient(135deg, var(--config-primary) 0%, var(--config-secondary) 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    transition: background 0.2s;
+}
+.tile-icon.has-category-color {
+    background: var(--category-color) !important;
+}
+
+.tile-title {
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 4px;
+    color: var(--config-text);
+}
+
+.tile-price {
+    font-size: 0.813rem;
+    color: var(--config-primary);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.tile-billing-badge {
+    font-size: 0.7rem;
+    color: #666;
+    background: #e5e7eb;
+    padding: 1px 6px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+.tile-price-included {
+    color: var(--config-success);
+    font-weight: 600;
+}
+
+.tile-description {
+    font-size: 0.75rem;
+    color: var(--config-text-light);
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+/* Info alert for page package selection */
+.tiles-panel > div:first-of-type {
+    margin-bottom: 24px;
+}
+
+/* Summary */
+.summary-section {
+    border-top: 2px solid var(--config-border);
+    padding-top: 16px;
+    margin-top: 16px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 0.875rem;
+}
+
+.summary-row.highlight {
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: var(--config-primary);
+    border-top: 1px solid var(--config-border);
+    padding-top: 12px;
+    margin-top: 12px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .configurator-container {
+        grid-template-columns: 1fr;
+    }
+
+    .drop-zone-panel {
+        position: static;
+        max-height: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .tiles-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+
+    .header-section h1 {
+        font-size: 1.5rem;
+    }
+
+    .price-amount {
+        font-size: 2rem;
+    }
+}
+
+/* Accessibility */
+.tile:focus {
+    outline: 2px solid var(--config-primary);
+    outline-offset: 2px;
+}
+
+.remove-item:focus {
+    outline: 2px solid var(--config-primary);
+    outline-offset: 2px;
+}
+/* Convert to Quote Button */
+#convert-to-quote-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #ccc !important;
+    border-color: #ccc !important;
+    color: #666 !important;
+}
+
+#convert-to-quote-btn:disabled:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.quote-requirements-hint {
+    font-size: 0.85rem;
+    color: var(--config-text-light);
+    margin-top: 8px;
+    text-align: center;
+}
+
+/* Collapsible Categories */
+.tiles-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.tiles-panel-header .section-title {
+    margin-bottom: 0;
+    flex-grow: 1;
+}
+
+#toggle-all-categories {
+    font-size: 0.75rem;
+    padding: 4px 12px;
+    height: auto;
+    white-space: nowrap;
+}
+
+/* Compulsory badge as warning emoji instead of text */
+.category-header .compulsory-badge {
+    font-size: 1.25rem; /* Same as category icon */
+    background: none;
+    padding: 0;
+    color: #f59e0b;
+    margin-left: 4px;
+    position: relative;
+    line-height: 1;
+}
+
+.category-header .compulsory-badge[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1d2327;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    z-index: 10;
+}
+
+/* Category section collapsible wrapper */
+.category-section.collapsible {
+    margin-bottom: 16px;
+    border: 1px solid var(--config-border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.category-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--config-bg-light);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s ease;
+    margin-bottom: 4px; /* Space for tiles hover lift */
+}
+
+.category-header:hover {
+    background: #f3f4f6;
+}
+
+/* Category info text (displayed above tiles when collapsible, or after title) */
+.category-info-text {
+    padding: 12px 16px;
+    background: #fef3c7;
+    border-left: 4px solid #f59e0b;
+    font-size: 0.9em;
+    line-height: 1.5;
+    color: #92400e;
+}
+
+.category-info-text:empty {
+    display: none;
+}
+
+.category-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-grow: 1;
+}
+
+.category-icon {
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.category-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--config-text);
+}
+
+.category-toggle {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--config-text);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+/* Compulsory badge - positioned right before toggle */
+.category-header .compulsory-badge {
+    font-size: 1.25rem; /* Same as category icon/name */
+    background: none;
+    padding: 0;
+    color: #f59e0b;
+    margin-left: auto; /* Pushes to the right */
+    margin-right: 4px; /* Small gap before toggle */
+    position: relative;
+    line-height: 1;
+}
+
+.category-toggle .toggle-icon {
+    display: inline-block;
+    transition: transform 0.2s ease;
+    font-size: 0.75rem;
+    line-height: 1;
+}
+
+.category-section:not(.collapsed) .category-toggle .toggle-icon {
+    transform: rotate(0deg);
+}
+
+.category-section.collapsed .category-toggle .toggle-icon {
+    transform: rotate(-90deg);
+}
+
+.category-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    flex-grow: 1;
+    color: var(--config-text);
+}
+
+/* Collapsible content area */
+.category-section.collapsible .tiles-grid {
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+    max-height: 2000px; /* large enough to fit content */
+    opacity: 1;
+    overflow: hidden;
+}
+
+.category-section.collapsible.collapsed .tiles-grid {
+    max-height: 0;
+    opacity: 0;
+    margin-bottom: 0;
+}
+
+/* Ensure tiles-grid has no margin when collapsed (avoid visual jump) */
+.category-section.collapsible.collapsed .tiles-grid .tile {
+    /* Optional: hide tiles entirely */
+}
+

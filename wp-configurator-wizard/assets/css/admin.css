@@ -1,0 +1,1744 @@
+/* CSS Variables to match frontend */
+:root {
+	--config-primary: #6366f1;
+	--config-primary-dark: #4f46e5;
+	--config-secondary: #8b5cf6;
+	--config-success: #10b981;
+	--config-text: #1f2937;
+	--config-text-light: #6b7280;
+	--config-border: #e5e7eb;
+	--config-bg: #ffffff;
+	--config-bg-light: #f9fafb;
+	--config-bg-selected: #eef2ff;
+}
+
+/* ========================================
+   Admin Header / Welcome Section
+   ======================================== */
+
+.wp-configurator-admin-header {
+	background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+	border: 1px solid var(--config-border);
+	border-radius: 8px;
+	padding: 24px 32px;
+	margin: 20px 0;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Reduce bottom padding when collapsed */
+.wp-configurator-admin-header.collapsed {
+	padding-bottom: 12px;
+}
+
+/* Header Top Row: Title + Donate Button */
+.wp-configurator-header-top {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 16px;
+	margin-bottom: 16px;
+	cursor: pointer;
+}
+
+.wp-configurator-title-section {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex: 1;
+}
+
+.wp-configurator-header-toggle-icon {
+	font-size: 28px;
+	color: #646970;
+	transition: transform 0.2s ease;
+	cursor: pointer;
+}
+
+.wp-configurator-header-toggle-icon:hover {
+	color: var(--config-primary);
+}
+
+.wp-configurator-title-section .dashicons-admin-generic {
+	font-size: 28px;
+	color: var(--config-primary);
+}
+
+.wp-configurator-admin-header .wp-configurator-header-toggle-icon {
+	transform: rotate(0deg);
+}
+
+.wp-configurator-admin-header.collapsed .wp-configurator-header-toggle-icon {
+	transform: rotate(180deg);
+}
+
+.wp-configurator-header-top h1 {
+	margin: 0;
+	font-size: 26px;
+	font-weight: 600;
+	color: #1d2327;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.wp-configurator-header-version {
+	background: var(--config-primary);
+	color: #fff;
+	padding: 4px 10px;
+	border-radius: 20px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.5px;
+	text-transform: uppercase;
+}
+
+.wp-configurator-donate-btn {
+	padding: 6px 14px !important;
+	font-size: 12px !important;
+}
+
+/* Header Info Row: Description + Support Badge */
+.wp-configurator-header-info-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	flex-wrap: wrap;
+	gap: 16px;
+	margin-bottom: 16px;
+}
+
+.wp-configurator-header-description {
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.6;
+	color: #50575e;
+	flex: 1;
+	min-width: 300px;
+}
+
+.wp-configurator-support-badge-mini {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	background: linear-gradient(135deg, #d7fcdf 0%, #e6f7f0 100%);
+	color: #1a6b37;
+	padding: 12px 16px;
+	border-radius: 6px;
+	border: 1px solid #c6e6d2;
+	flex-shrink: 0;
+}
+
+.wp-configurator-support-badge-mini .dashicons {
+	font-size: 16px;
+	color: #46b450;
+	margin-top: 2px;
+}
+
+.wp-configurator-support-text-mini {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.wp-configurator-support-text-mini strong {
+	font-size: 13px;
+}
+
+.wp-configurator-support-text-mini .wp-configurator-support-desc {
+	font-size: 12px;
+	color: #158038;
+	line-height: 1.4;
+}
+
+/* Meta Row */
+.wp-configurator-header-meta {
+	display: flex;
+	gap: 24px;
+	flex-wrap: wrap;
+	align-items: center;
+	padding-top: 12px;
+	border-top: 1px solid var(--config-border);
+}
+
+.wp-configurator-meta-item {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+	color: #646970;
+}
+
+.wp-configurator-meta-item strong {
+	color: #1d2327;
+	font-weight: 600;
+}
+
+.wp-configurator-meta-item code {
+	background: #f0f0f1;
+	padding: 3px 8px;
+	border-radius: 4px;
+	font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+	font-size: 12px;
+	color: #d63638;
+	border: 1px solid #ddd;
+}
+
+.wp-configurator-header-bottom {
+	display: none; /* No longer used - removed */
+}
+
+.wp-configurator-header-top {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	flex-wrap: wrap;
+	gap: 20px;
+	margin-bottom: 24px;
+}
+
+.wp-configurator-header-title {
+	margin: 0;
+	font-size: 28px;
+	font-weight: 600;
+	color: #1d2327;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.wp-configurator-header-title .dashicons {
+	font-size: 32px;
+	color: var(--config-primary);
+	width: 32px;
+	height: 32px;
+}
+
+.wp-configurator-header-version {
+	background: var(--config-primary);
+	color: #fff;
+	padding: 4px 12px;
+	border-radius: 20px;
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.5px;
+	text-transform: uppercase;
+}
+
+.wp-configurator-header-description {
+	font-size: 15px;
+	line-height: 1.7;
+	color: #50575e;
+	margin: 0 0 20px 0;
+	max-width: 900px;
+}
+
+.wp-configurator-header-meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 24px;
+	padding: 16px 0;
+	border-top: 1px solid var(--config-border);
+	border-bottom: 1px solid var(--config-border);
+}
+
+.wp-configurator-meta-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+	color: #646970;
+}
+
+.wp-configurator-meta-item strong {
+	color: #1d2327;
+	font-weight: 600;
+}
+
+.wp-configurator-meta-item code {
+	background: #f0f0f1;
+	padding: 3px 8px;
+	border-radius: 4px;
+	font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+	font-size: 13px;
+	color: #d63638;
+	border: 1px solid #ddd;
+}
+
+.wp-configurator-meta-item a {
+	color: var(--config-primary);
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.wp-configurator-meta-item a:hover {
+	color: var(--config-primary-dark);
+	text-decoration: underline;
+}
+
+.wp-configurator-header-bottom {
+	margin-top: 20px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 16px;
+}
+
+.wp-configurator-developers {
+	font-size: 14px;
+	color: #646970;
+}
+
+.wp-configurator-developers a {
+	color: var(--config-primary);
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.wp-configurator-developers a:hover {
+	text-decoration: underline;
+}
+
+.wp-configurator-support-badge {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 8px;
+	background: linear-gradient(135deg, #d7fcdf 0%, #e6f7f0 100%);
+	color: #1a6b37;
+	padding: 16px 20px;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 500;
+	border: 1px solid #c6e6d2;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.wp-configurator-support-badge .dashicons {
+	font-size: 18px;
+	color: #46b450;
+	margin-bottom: 4px;
+}
+
+.wp-configurator-donate-btn {
+	margin-top: 8px !important;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 16px !important;
+	font-size: 13px !important;
+	font-weight: 600 !important;
+	text-decoration: none !important;
+	border-radius: 4px !important;
+	cursor: pointer;
+	transition: all 0.15s ease;
+	align-self: flex-end; /* Align to right */
+}
+
+.wp-configurator-donate-btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.wp-configurator-vat-note {
+	margin: 8px 0 0 0;
+	font-size: 12px;
+	color: #158038;
+	font-style: italic;
+	text-align: right;
+}
+
+.wp-configurator-vat-note a {
+	color: #2271b1;
+	text-decoration: underline;
+	font-weight: 500;
+	font-style: normal;
+}
+
+.wp-configurator-vat-note a:hover {
+	color: #135e96;
+}
+
+/* Use default WordPress spacing for tab content */
+.wp-configurator-tab-content {
+	/* No custom padding - inherit from .wrap */
+}
+
+.wp-configurator-donate-btn {
+	margin-top: 8px !important;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 16px !important;
+	font-size: 13px !important;
+	font-weight: 600 !important;
+	text-decoration: none !important;
+	border-radius: 4px !important;
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.wp-configurator-donate-btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.wp-configurator-vat-note {
+	margin: 8px 0 0 0;
+	font-size: 12px;
+	color: #158038;
+	font-style: italic;
+}
+
+.wp-configurator-vat-note a {
+	color: #2271b1;
+	text-decoration: underline;
+	font-weight: 500;
+	font-style: normal;
+}
+
+.wp-configurator-vat-note a:hover {
+	color: #135e96;
+}
+
+.wp-configurator-support-badge .dashicons {
+	font-size: 16px;
+	color: #46b450;
+}
+
+.wp-configurator-support-badge a {
+	color: var(--config-primary);
+	text-decoration: none;
+	font-weight: 600;
+	margin-left: 4px;
+}
+
+.wp-configurator-support-badge a:hover {
+	text-decoration: underline;
+}
+
+/* Support Banner (between header and tabs) */
+.wp-configurator-support-banner {
+	background: linear-gradient(135deg, #fef3cd 0%, #fff9e6 100%);
+	border: 1px solid #ffeaa7;
+	border-left: 4px solid #f39c12;
+	border-radius: 6px;
+	padding: 20px 24px;
+	margin: 24px 0;
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.wp-configurator-support-banner .dashicons {
+	font-size: 24px;
+	color: #f39c12;
+	margin-top: 2px;
+}
+
+.wp-configurator-support-banner-content {
+	flex: 1;
+}
+
+.wp-configurator-support-banner h3 {
+	margin: 0 0 8px 0;
+	font-size: 16px;
+	color: #d68910;
+	font-weight: 600;
+}
+
+.wp-configurator-support-banner p {
+	margin: 0;
+	color: #7d6608;
+	font-size: 14px;
+	line-height: 1.6;
+}
+
+.wp-configurator-support-banner a {
+	color: var(--config-primary);
+	text-decoration: none;
+	font-weight: 600;
+}
+
+.wp-configurator-support-banner a:hover {
+	text-decoration: underline;
+}
+
+/* Donors Wall (standalone - kept for reference but not used) */
+.wp-configurator-donors-wall {
+	background: #ffffff;
+	border: 1px solid var(--config-border);
+	border-radius: 6px;
+	padding: 20px 24px;
+	margin: 20px 0;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.wp-configurator-donors-wall-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 16px 0;
+	font-size: 16px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.wp-configurator-donors-wall-header .dashicons {
+	font-size: 20px;
+	color: #d64a3a;
+}
+
+.wp-configurator-donors-wall-subtitle {
+	font-size: 13px;
+	color: #646970;
+	font-style: italic;
+	margin-bottom: 16px;
+}
+
+.wp-configurator-donors-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.wp-configurator-donor-badge {
+	background: linear-gradient(135deg, #f6f7f7 0%, #e9ecef 100%);
+	border: 1px solid #ddd;
+	color: #2c3338;
+	padding: 6px 14px;
+	border-radius: 20px;
+	font-size: 13px;
+	font-weight: 500;
+	transition: all 0.15s ease;
+}
+
+.wp-configurator-donor-badge:hover {
+	background: #eef2f7;
+	border-color: #c3d2df;
+	transform: translateY(-1px);
+}
+
+/* Donors Wall inside Header (compact style) */
+.wp-configurator-donors-wall-inside {
+	margin-top: 20px;
+	padding-top: 16px;
+	border-top: 1px solid var(--config-border);
+}
+
+.wp-configurator-donors-wall-inside .wp-configurator-donors-wall-header {
+	font-size: 14px;
+	margin: 0 0 10px 0;
+}
+
+.wp-configurator-donors-wall-inside .wp-configurator-donors-wall-header .dashicons {
+	font-size: 16px;
+	color: var(--config-secondary);
+}
+
+.wp-configurator-donors-grid-compact {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.wp-configurator-donor-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 14px;
+	font-size: 14px;
+	border-radius: 16px;
+	color: #1d2327;
+	text-decoration: none;
+	transition: transform 0.15s ease, box-shadow 0.15s ease;
+	border: 1px solid rgba(0,0,0,0.1);
+	height: 36px;
+}
+
+.wp-configurator-donor-badge:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.wp-configurator-donor-emojis {
+	display: inline-flex;
+	gap: 0;
+	font-size: 16px;
+	line-height: 1;
+	letter-spacing: -1px;
+	font-weight: bold;
+}
+
+.wp-configurator-donor-name {
+	font-weight: 600;
+}
+
+.wp-configurator-donor-demo-badge {
+	background: rgba(255,255,255,0.6);
+	color: #2271b1;
+	padding: 2px 8px;
+	border-radius: 8px;
+	font-size: 11px;
+	font-weight: 600;
+	text-decoration: none;
+	letter-spacing: 0.3px;
+	transition: background 0.15s ease;
+}
+
+.wp-configurator-donor-demo-badge:hover {
+	background: rgba(255,255,255,0.9);
+	text-decoration: none;
+}
+
+.wp-configurator-donors-empty {
+	color: #646970;
+	font-size: 14px;
+	font-style: italic;
+}
+
+/* Recent Interactions Section */
+.wp-configurator-recent-section {
+	background: #ffffff;
+	border: 1px solid var(--config-border);
+	border-radius: 8px;
+	padding: 20px 24px;
+	margin: 24px 0;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.wp-configurator-recent-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 16px;
+}
+
+.wp-configurator-recent-title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 16px;
+	font-weight: 600;
+	color: #1d2327;
+	margin: 0;
+	flex: 1;
+}
+
+.wp-configurator-recent-title .dashicons-clock {
+	font-size: 20px;
+	color: var(--config-secondary);
+}
+
+.wp-configurator-recent-title .dashicons-arrow-down,
+.wp-configurator-recent-title .dashicons-arrow-up {
+	font-size: 16px;
+	color: #646970;
+}
+
+/* Header Body - collapsible container */
+.wp-configurator-header-body {
+	margin-top: 16px;
+	padding-top: 16px;
+	border-top: 1px solid var(--config-border);
+}
+
+/* Collapsible Sections (inside header body) */
+.wp-configurator-collapsible-sections {
+	margin-top: 20px;
+	padding-top: 16px;
+	border-top: 1px solid var(--config-border);
+}
+
+/* Header collapsed state */
+.wp-configurator-admin-header.collapsed .wp-configurator-header-body {
+	display: none;
+}
+
+.wp-configurator-collapsible-section {
+	background: #f9fafb;
+	border: 1px solid var(--config-border);
+	border-radius: 6px;
+	margin-bottom: 12px;
+	overflow: hidden;
+}
+
+.wp-configurator-collapsible-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 16px;
+	cursor: pointer;
+	user-select: none;
+	transition: background 0.15s ease;
+}
+
+.wp-configurator-collapsible-header:hover {
+	background: #f0f0f1;
+}
+
+.wp-configurator-collapsible-header .dashicons {
+	font-size: 18px;
+	color: var(--config-secondary);
+}
+
+.wp-configurator-collapsible-header strong {
+	flex: 1;
+	font-size: 14px;
+	color: #1d2327;
+}
+
+.wp-configurator-collapsible-header .wp-configurator-chevron {
+	font-size: 20px;
+	color: #646970;
+	transition: transform 0.2s ease;
+}
+
+.wp-configurator-collapsible-section.collapsed .wp-configurator-chevron {
+	transform: rotate(-90deg);
+}
+
+.wp-configurator-collapsible-content {
+	padding: 16px;
+	display: block;
+}
+
+.wp-configurator-collapsible-section.collapsed .wp-configurator-collapsible-content {
+	display: none;
+}
+
+/* Refresh button in collapsible header */
+.wp-configurator-refresh-btn {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 11px;
+	padding: 4px 10px;
+	margin-left: auto;
+}
+
+.wp-configurator-refresh-btn .dashicons {
+	font-size: 12px;
+}
+
+/* Donors specific */
+.wp-configurator-donors-subtitle {
+	font-size: 13px;
+	color: #646970;
+	font-style: italic;
+	margin: 0 0 12px 0;
+}
+
+/* Interactions content */
+.interactions-content {
+	margin-top: 0;
+}
+
+/* Refresh button (standalone not used) */
+#refresh-interactions {
+	display: none;
+}
+
+/* Refresh button updating state */
+.wp-configurator-refresh-btn.updating {
+	opacity: 0.6;
+}
+
+/* Category Tabs Styling */
+.category-tabs-wrapper {
+	padding: 10px 0;
+}
+
+#category-tabs-container {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	border-bottom: 1px solid #ddd;
+	padding-bottom: 10px;
+}
+
+.category-tab {
+	background: #f6f7f7;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	padding: 8px 16px;
+	font-size: 14px;
+	line-height: 1.5;
+	cursor: pointer;
+	transition: all 0.15s ease;
+	color: #2c3338;
+	text-decoration: none;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	user-select: none;
+	position: relative;
+}
+
+.category-tab:hover {
+	background: #f0f0f0;
+	border-color: #999;
+}
+
+.category-tab.active {
+	background: #2271b1;
+	border-color: #2271b1;
+	color: #fff;
+}
+
+.category-tab.dragging {
+	opacity: 0.5;
+	background: #e8f4fd;
+}
+
+.category-tab .tab-icon {
+	font-size: 16px;
+}
+
+.category-tab .tab-name {
+	font-weight: 500;
+}
+
+.category-tab .tab-badge {
+	font-size: 0.65rem;
+	background: #d63638;
+	color: #fff;
+	padding: 1px 5px;
+	border-radius: 3px;
+	text-transform: uppercase;
+	letter-spacing: 0.3px;
+}
+
+.category-tab .tab-edit-btn,
+.category-tab .tab-delete-btn,
+.category-tab .tab-clone-btn {
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	font-size: 14px;
+	padding: 2px 4px;
+	margin-left: 4px;
+	border-radius: 3px;
+	transition: background 0.15s;
+}
+
+.category-tab .tab-edit-btn:hover {
+	background: rgba(0,0,0,0.1);
+}
+
+.category-tab .tab-delete-btn:hover {
+	background: #dc3232;
+	color: #fff;
+}
+
+.category-tab .tab-clone-btn:hover {
+	background: #2271b1;
+	color: #fff;
+}
+
+.category-tab.ui-sortable-helper {
+	box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Category Edit Modal - Centered with fade */
+.category-edit-modal {
+	display: flex;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0,0,0,0.5);
+	z-index: 99999;
+	align-items: center;
+	justify-content: center;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.2s ease, background 0.2s ease;
+}
+
+.category-edit-modal.is-visible {
+	opacity: 1;
+	visibility: visible;
+}
+
+.category-edit-modal .modal-content {
+	background: #fff;
+	padding: 28px 32px;
+	border-radius: 12px;
+	max-width: 700px;
+	width: 90%;
+	max-height: 90vh;
+	overflow-y: auto;
+	box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+	transform: translateY(-10px);
+	transition: transform 0.2s ease;
+}
+
+.category-edit-modal.is-visible .modal-content {
+	transform: translateY(0);
+}
+
+.category-edit-modal h3 {
+	margin-top: 0;
+	margin-bottom: 20px;
+	font-size: 1.25em;
+	color: #1d2327;
+}
+
+.category-edit-modal .form-row {
+	margin-bottom: 20px;
+}
+
+/* Wide modal layout - 2 column grid */
+.category-edit-modal.wide-modal .form-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 20px 30px;
+}
+
+.category-edit-modal.wide-modal .form-row {
+	margin-bottom: 0;
+}
+
+/* Icon input with emoji picker button */
+.icon-input-wrapper {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.icon-input-wrapper input[type="text"] {
+	flex: 1;
+}
+
+.icon-input-wrapper .button {
+	padding: 8px 12px;
+	font-size: 18px;
+	line-height: 1;
+	height: auto;
+}
+
+/* Color input wrapper */
+.color-input-wrapper {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.color-input-wrapper input[type="color"] {
+	width: 50px !important;
+	height: 38px !important;
+	padding: 2px;
+	background: #fff;
+	cursor: pointer;
+}
+
+.color-preview {
+	display: inline-block;
+	width: 36px;
+	height: 36px;
+	border-radius: 6px;
+	border: 2px solid #ddd;
+	background: #6366f1;
+}
+
+/* Emoji Picker Popup */
+.emoji-picker-popup {
+	position: fixed;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+	padding: 12px;
+	z-index: 100000;
+	max-width: 320px;
+	max-height: 300px;
+	overflow-y: auto;
+}
+
+.emoji-grid {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 8px;
+}
+
+/* Emoji Category Tabs */
+.emoji-category-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin-bottom: 10px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid #eee;
+}
+
+.emoji-tab {
+	background: #f9f9f9;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	padding: 4px 10px;
+	font-size: 12px;
+	cursor: pointer;
+	transition: all 0.15s;
+	white-space: nowrap;
+}
+
+.emoji-tab:hover {
+	background: #e0e0e0;
+}
+
+.emoji-tab.active {
+	background: #6366f1;
+	color: #fff;
+	border-color: #6366f1;
+}
+
+.emoji-option {
+	background: transparent;
+	border: 1px solid transparent;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 24px;
+	padding: 8px;
+	transition: all 0.15s;
+	line-height: 1;
+}
+
+.emoji-option:hover {
+	background: #f0f0f0;
+	border-color: #ddd;
+	transform: scale(1.2);
+}
+
+.emoji-option:active {
+	transform: scale(0.95);
+}
+
+/* Checkbox label styling */
+.category-edit-modal .checkbox-label {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	cursor: pointer;
+	font-weight: 600;
+	color: #2c3338;
+}
+
+.category-edit-modal .checkbox-label input[type="checkbox"] {
+	width: 18px;
+	height: 18px;
+	cursor: pointer;
+}
+
+/* Responsive: single column on small screens */
+@media screen and (max-width: 600px) {
+	.category-edit-modal.wide-modal .form-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+.category-edit-modal label {
+	display: block;
+	margin-bottom: 6px;
+	font-weight: 600;
+	color: #2c3338;
+}
+
+.category-edit-modal input[type="text"] {
+	width: 100%;
+	padding: 10px 14px;
+	border: 1px solid #ccc;
+	border-radius: 6px;
+	font-size: 14px;
+	background: #fff;
+	transition: border-color 0.1s ease;
+}
+
+.category-edit-modal input[type="text"]:focus {
+	outline: none;
+	border-color: #2271b1;
+	box-shadow: 0 0 0 1px #2271b1;
+}
+
+.category-edit-modal input[type="checkbox"] {
+	width: 18px;
+	height: 18px;
+	margin-right: 8px;
+	vertical-align: middle;
+}
+
+.category-edit-modal .form-row:has(input[type="checkbox"]) {
+	display: flex;
+	align-items: center;
+}
+
+.category-edit-modal .form-row:has(input[type="checkbox"]) label {
+	margin-bottom: 0;
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+}
+
+.category-edit-modal .modal-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	margin-top: 20px;
+}
+
+/* Hide ID field when in adding mode */
+.category-edit-modal.adding-mode .id-row {
+	display: none;
+}
+
+/* Drag and drop styling for feature rows */
+.feature-row.dragging {
+	opacity: 0.8;
+	background: #e8f4fd;
+	border-left: 3px solid #2271b1;
+	position: fixed;
+	z-index: 9999;
+	pointer-events: none;
+	box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.feature-row.drag-over-before {
+	border-top: 2px solid #2271b1;
+}
+
+.feature-row.drag-over-after {
+	border-bottom: 2px solid #2271b1;
+}
+
+.feature-desc-row.dragging {
+	opacity: 0.6;
+	background: #f0f8ff;
+}
+
+/* Drag handle styling */
+.drag-handle {
+	cursor: grab;
+	font-size: 18px;
+	color: #666;
+	display: inline-block;
+	user-select: none;
+	padding: 0 5px;
+	line-height: 1;
+}
+
+.drag-handle:hover {
+	color: #2271b1;
+}
+
+.drag-handle:active {
+	cursor: grabbing;
+}
+
+/* Toast notifications */
+.wp-configurator-toast {
+	position: fixed;
+	bottom: 30px;
+	left: 50%;
+	transform: translateX(-50%) translateY(20px);
+	background: #d7ffd7;
+	color: #1f7a1f;
+	padding: 12px 20px;
+	border-radius: 6px;
+	border: 1px solid #46b464;
+	box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+	z-index: 100000;
+	opacity: 0;
+	transition: opacity 0.3s, transform 0.3s;
+	font-size: 14px;
+	max-width: 300px;
+	text-align: center;
+}
+.wp-configurator-toast.show {
+	opacity: 1;
+	transform: translateX(-50%) translateY(0);
+}
+.wp-configurator-toast.error {
+	background: #ffd7d7;
+	color: #a00;
+	border-color: #dc3232;
+}
+
+/* Modern Settings Layout */
+.wp-configurator-settings-section {
+	background: #fff;
+	border: 1px solid #ccc;
+	border-radius: 8px;
+	padding: 20px;
+	margin-bottom: 24px;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.wp-configurator-settings-section h2 {
+	margin-top: 0;
+	margin-bottom: 16px;
+	font-size: 18px;
+	font-weight: 600;
+	color: #1d2327;
+	border-bottom: 1px solid #eee;
+	padding-bottom: 10px;
+}
+.wp-configurator-settings-section h3 {
+	margin-top: 0;
+	margin-bottom: 12px;
+	font-size: 16px;
+	font-weight: 600;
+	color: #1d2327;
+}
+.wp-configurator-field-row {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 20px;
+	margin-bottom: 16px;
+}
+.wp-configurator-field-group {
+	display: flex;
+	flex-direction: column;
+}
+.wp-configurator-field-group label {
+	font-weight: 600;
+	margin-bottom: 6px;
+	color: #2c3338;
+}
+.wp-configurator-field-group input[type="text"],
+.wp-configurator-field-group input[type="url"],
+.wp-configurator-field-group input[type="email"],
+.wp-configurator-field-group select,
+.wp-configurator-field-group textarea {
+	max-width: 100%;
+	padding: 8px 12px;
+	border: 1px solid #8c8f94;
+	border-radius: 4px;
+	background: #fff;
+	min-height: 32px;
+}
+.wp-configurator-field-group input:focus,
+.wp-configurator-field-group select:focus,
+.wp-configurator-field-group textarea:focus {
+	border-color: #2271b1;
+	box-shadow: 0 0 0 1px #2271b1;
+	outline: none;
+}
+.wp-configurator-field-group .description {
+	margin-top: 6px;
+	font-size: 13px;
+	color: #646970;
+}
+@media (max: 768px) {
+	.wp-configurator-field-row {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* Admin Feature Grid - equal height tiles */
+.features-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	gap: 10px;
+	margin-bottom: 16px;
+}
+
+/* Category Info in Admin (above feature grid) */
+.admin-category-info {
+    padding: 12px 16px;
+    background: #fef3c7;
+    border-left: 4px solid #f59e0b;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #92400e;
+    margin-bottom: 16px;
+    border-radius: 0 4px 4px 0;
+    grid-column: 1 / -1; /* Span full width in grid */
+}
+
+.admin-category-info:empty {
+    display: none;
+}
+
+.feature-tile {
+	min-height: 140px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+	padding: 12px;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+	position: relative;
+	cursor: pointer;
+	transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.feature-tile:hover {
+	box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+	border-color: #2271b1;
+}
+.feature-tile.dragging {
+	opacity: 0.5;
+	border-style: dashed;
+}
+.feature-tile.disabled {
+	background: #f9f9f9;
+	opacity: 0.7;
+	filter: grayscale(100%);
+}
+.feature-tile.disabled .tile-badge {
+	background: #666;
+	color: #fff;
+}
+.tile-icon {
+	font-size: 28px;
+	line-height: 1;
+	margin-bottom: 6px;
+	display: inline-block;
+	background: #e8f4fd;
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background-color 0.2s;
+}
+.tile-icon.has-category-color {
+	background-color: var(--category-color);
+}
+.tile-title {
+	font-weight: 600;
+	font-size: 14px;
+	color: #1d2327;
+	margin-bottom: 4px;
+	word-break: break-word;
+}
+.tile-price {
+	font-size: 15px;
+	font-weight: 700;
+	color: #1d2327;
+	margin-bottom: 2px;
+	text-align: center;
+}
+.tile-price small {
+	font-size: 11px;
+	font-weight: 400;
+	color: #666;
+}
+.tile-desc {
+	font-size: 11px;
+	color: #646970;
+	line-height: 1.4;
+	flex-grow: 1;
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	margin-bottom: 6px;
+}
+.tile-sku {
+	font-size: 0.75em;
+	color: #666;
+	margin-bottom: 4px;
+}
+.tile-badge {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	font-size: 9px;
+	background: #2271b1;
+	color: #fff;
+	padding: 2px 6px;
+	border-radius: 6px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+.tile-badge:empty {
+	display: none;
+}
+.tile-handle {
+	position: absolute;
+	bottom: 6px;
+	right: 6px;
+	cursor: grab;
+	font-size: 14px;
+	color: #999;
+	padding: 2px;
+}
+.tile-handle:hover {
+	background: #f0f0f0;
+	color: #666;
+}
+.tile-handle:active {
+	cursor: grabbing;
+}
+
+/* Admin Tabs Navigation */
+.nav-tab-wrapper {
+	border-bottom: 1px solid #ccd0d4;
+}
+.nav-tab {
+	background: #f1f1f1;
+	border: 1px solid #ccd0d4;
+	border-bottom: none;
+	padding: 8px 16px;
+	cursor: pointer;
+	margin-right: 4px;
+	border-radius: 4px 4px 0 0;
+	font-size: 14px;
+	line-height: 1.5;
+}
+.nav-tab.nav-tab-active {
+	background: #fff;
+	border-bottom: 1px solid #fff;
+	font-weight: 600;
+	position: relative;
+	bottom: -1px;
+}
+.nav-tab:hover {
+	background: #ddd;
+}
+.wp-configurator-tab-content {
+	display: none;
+}
+.wp-configurator-tab-content.active {
+	display: block;
+}
+
+/* Miscellaneous Settings - Modern Sections */
+.settings-section {
+	background: #fff;
+	border: 1px solid var(--config-border, #ccd0d4);
+	border-radius: 8px;
+	padding: 24px;
+	margin-bottom: 24px;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.section-title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px 0;
+	font-size: 18px;
+	font-weight: 600;
+	color: #1d2327;
+	padding-bottom: 12px;
+	border-bottom: 1px solid #eee;
+}
+
+.section-icon {
+	font-size: 20px;
+}
+
+.section-description {
+	margin: -4px 0 16px 0;
+	font-size: 13px;
+	color: #646970;
+	line-height: 1.5;
+}
+
+.subsection-title {
+	margin: 20px 0 8px 0;
+	font-size: 15px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.subsection-description {
+	margin: -4px 0 12px 0;
+	font-size: 13px;
+	color: #646970;
+}
+
+/* Full width field row */
+.wp-configurator-field-row.full-width {
+	grid-template-columns: 1fr;
+}
+
+/* Layout row - three equal columns */
+.wp-configurator-field-row.layout-row {
+	grid-template-columns: repeat(3, 1fr);
+}
+
+/* Value display next to label */
+.value-display {
+	display: inline-block;
+	margin-left: 8px;
+	padding: 2px 8px;
+	background: var(--config-bg-light, #f9fafb);
+	border: 1px solid var(--config-border, #e5e7eb);
+	border-radius: 4px;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--config-primary, #6366f1);
+	min-width: 32px;
+	text-align: center;
+}
+
+/* Range slider styling */
+input[type="range"].range-slider {
+	width: 100%;
+	height: 6px;
+	background: #ddd;
+	border-radius: 3px;
+	outline: none;
+	-webkit-appearance: none;
+	appearance: none;
+	margin: 8px 0;
+}
+
+input[type="range"].range-slider::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 18px;
+	height: 18px;
+	background: var(--config-primary, #6366f1);
+	border-radius: 50%;
+	cursor: pointer;
+	border: 2px solid #fff;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+input[type="range"].range-slider::-moz-range-thumb {
+	width: 18px;
+	height: 18px;
+	background: var(--config-primary, #6366f1);
+	border-radius: 50%;
+	cursor: pointer;
+	border: 2px solid #fff;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Input with button group */
+.input-with-button {
+	display: flex;
+	gap: 8px;
+}
+
+.input-with-button input {
+	flex: 1;
+}
+
+.input-with-button .button {
+	flex-shrink: 0;
+	white-space: nowrap;
+}
+
+/* Responsive adjustments for settings */
+@media screen and (max-width: 1200px) {
+	.wp-configurator-field-row.layout-row {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media screen and (max-width: 768px) {
+	.wp-configurator-field-row {
+		grid-template-columns: 1fr !important;
+	}
+
+	.section-title {
+		font-size: 16px;
+	}
+
+	.input-with-button {
+		flex-direction: column;
+	}
+
+	.input-with-button .button {
+		width: 100%;
+	}
+}
+
+/* Search & Filter Bar */
+.filter-bar {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+	flex-wrap: wrap;
+	background: #f9f9f9;
+	padding: 16px;
+	border-radius: 8px;
+	border: 1px solid #e5e7eb;
+}
+.filter-bar input[type="text"] {
+	flex: 1;
+	min-width: 250px;
+	padding: 8px 12px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	font-size: 14px;
+}
+.filter-bar input[type="text"]:focus {
+	outline: none;
+	border-color: #2271b1;
+	box-shadow: 0 0 0 1px #2271b1;
+}
+.filter-bar select {
+	padding: 8px 12px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	font-size: 14px;
+	background: #fff;
+	cursor: pointer;
+}
+.filter-bar label {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 14px;
+	cursor: pointer;
+	user-select: none;
+}
+.filter-bar label input[type="checkbox"] {
+	width: 16px;
+	height: 16px;
+	cursor: pointer;
+}
+
+/* Bulk Actions Toolbar */
+.bulk-actions-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 12px 16px;
+	background: #e8f4fd;
+	border: 1px solid #2271b1;
+	border-radius: 6px;
+	flex-wrap: wrap;
+}
+.bulk-actions-toolbar .button-small {
+	font-size: 12px;
+	padding: 4px 10px;
+	height: auto;
+}
+.bulk-actions-toolbar #selected-count {
+	font-size: 13px;
+	color: #666;
+	margin-left: auto;
+	font-weight: 500;
+}
+
+/* Category Tab Feature Count */
+.tab-count {
+	background: #fff;
+	border: 1px solid #ddd;
+	color: #646970;
+	font-size: 0.75rem;
+	padding: 2px 8px;
+	border-radius: 10px;
+	font-weight: 600;
+}
+.category-tab.active .tab-count {
+	background: rgba(255,255,255,0.3);
+	border-color: rgba(255,255,255,0.3);
+	color: #fff;
+}
+
+/* Compulsory Badge Enhancer */
+.compulsory-badge {
+	background: #f56e28 !important;
+	color: #fff !important;
+	font-size: 0.7rem;
+	padding: 2px 6px;
+	border-radius: 4px;
+	text-transform: none;
+	letter-spacing: 0;
+}
+.category-tab.active .compulsory-badge {
+	background: rgba(255,255,255,0.9) !important;
+	color: #d63638 !important;
+}
+
+/* Feature Tile Checkbox Selection */
+.feature-tile {
+	position: relative;
+	padding-top: 20px; /* Space for checkbox */
+}
+.feature-tile .tile-checkbox {
+	position: absolute;
+	top: 8px;
+	left: 8px;
+	width: 18px;
+	height: 18px;
+	cursor: pointer;
+	z-index: 10;
+}
+.feature-tile.selected {
+	border-color: #2271b1;
+	background: #eef2ff;
+	box-shadow: 0 0 0 2px rgba(34,113,177,0.2);
+}
+.feature-tile.selected .tile-checkbox {
+	accent-color: #2271b1;
+}
+
+/* Quick Enable Toggle Button */
+.tile-toggle {
+	position: absolute;
+	top: 8px;
+	right: 34px; /* Left of the handle */
+	width: 36px;
+	height: 20px;
+	background: #ddd;
+	border-radius: 10px;
+	cursor: pointer;
+	transition: background 0.2s;
+	display: flex;
+	align-items: center;
+	padding: 2px;
+}
+.tile-toggle::after {
+	content: '';
+	width: 16px;
+	height: 16px;
+	background: #fff;
+	border-radius: 50%;
+	transition: transform 0.2s;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.feature-tile:not(.disabled) .tile-toggle.enabled {
+	background: #10b981;
+}
+.feature-tile.disabled .tile-toggle.disabled {
+	background: #666;
+}
+.feature-tile.disabled .tile-toggle.enabled {
+	background: #10b981;
+}
+.feature-tile .tile-toggle:hover::after {
+	transform: scale(1.1);
+}
+
+/* Billing Badge Color Coding */
+.feature-tile[data-billing="one-off"] .tile-price {
+	color: #6366f1;
+}
+.feature-tile[data-billing="monthly"] .tile-price {
+	color: #10b981;
+}
+.feature-tile[data-billing="quarterly"] .tile-price {
+	color: #f56e28;
+}
+.feature-tile[data-billing="annual"] .tile-price {
+	color: #8b5cf6;
+}
+
+/* Disabled state for toggle */
+.feature-tile.disabled .tile-toggle.enabled::after {
+	background: #999;
+}
+
+/* Category Color Accent (left border on tab) */
+.category-tab {
+	border-left: 4px solid transparent;
+}
+.category-tab[data-color] {
+	border-left-color: var(--category-color, #ddd);
+}

@@ -1,0 +1,53 @@
+# WordPress plugin specific
+*.log
+wp-config.php
+.wp-config.php
+
+# Dependency directories
+node_modules/
+vendor/
+
+# Build outputs and archives
+*.zip
+*.tar.gz
+*.rar
+
+# IDE and editor files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*~
+.DS_Store
+
+#OS generated files
+Thumbs.db
+.DS_Store
+
+# Backup files
+*backup*.zip
+*complete*.zip
+*start*.zip
+
+# Temporary files
+*.tmp
+*.temp
+
+# Environment files (if any)
+.env
+.env.local
+.env.*.local
+
+# Testing files
+screen.png
+screen2.png
+
+# Claude specific
+.claude/
+CLAUDE_STATE_*.md
+fridaytodo.md
+
+# Misc documentation (keep CLAUDE.md and TODO.md)
+!CLAUDE.md
+!TODO.md
+!REFACTORINGTODO.md

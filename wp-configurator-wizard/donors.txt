@@ -1,0 +1,5 @@
+All Tech Plus,5,https://all-tech-plus.com/wizard
+AICognitio,3,https://aicognitio.com#pricing
+Claude,5
+Wayne Duffy,2
+James Turner,1

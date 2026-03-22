@@ -1,0 +1,79 @@
+/**
+ * Admin Stats Dashboard Styles
+ * Plugin Version: 2.9.28
+ */
+
+/* Summary Cards */
+.stats-summary-cards {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 16px;
+	margin-bottom: 24px;
+}
+
+.stat-card {
+	background: #fff;
+	border: 1px solid #ccd0d4;
+	border-radius: 8px;
+	padding: 20px;
+	text-align: center;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.stat-value {
+	font-size: 2em;
+	font-weight: 700;
+	color: #2271b1;
+	margin-bottom: 8px;
+}
+
+.stat-label {
+	font-size: 14px;
+	color: #666;
+	line-height: 1.4;
+}
+
+/* Charts Row */
+.stats-charts-row {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 20px;
+	margin-bottom: 20px;
+}
+
+.chart-container {
+	background: #fff;
+	border: 1px solid #ccd0d4;
+	border-radius: 8px;
+	padding: 20px;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.chart-container h3 {
+	margin-top: 0;
+	margin-bottom: 16px;
+	font-size: 16px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.chart-container canvas {
+	max-height: 300px;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 1200px) {
+	.stats-summary-cards {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media screen and (max-width: 768px) {
+	.stats-summary-cards {
+		grid-template-columns: 1fr;
+	}
+
+	.stats-charts-row {
+		grid-template-columns: 1fr;
+	}
+}
