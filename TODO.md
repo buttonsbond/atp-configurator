@@ -1,6 +1,6 @@
 # WP Configurator Wizard - Project Overview
 
-## Current State (v3.4.13 - Testing)
+## Current State (v3.4.14 - Stable)
 **Live**: https://all-tech-plus.com/wizard
 **Shortcode**: `[wp_configurator_wizard]`
 **Stack**: PHP (WordPress), jQuery, custom CSS; no build step
@@ -37,12 +37,18 @@ Key milestones:
   - Admin notification emails now use beautiful HTML format (matching client email styling)
   - System Status tab: Split into two separate test buttons - "Send Test Client Email" and "Send Test Admin Email"
   - Improved email testing workflow for both email types
-- **v3.4.13** (In Development): Admin UI modernization:
-  - Miscellaneous Settings: Card-based layout with toggle switches, live preview, collapsible sections, tooltips
+- **v3.4.13**: Admin UI modernization (stable release):
+  - Miscellaneous Settings: Card-based layout with toggle switches, live preview, collapsible sections
   - Quote Requests: Enhanced responsive design and UI improvements
   - Stats Dashboard: Card grouping and visual refinements
   - System Status: Modern card-based diagnostic display with color-coded status indicators
-  - Ongoing debugging and testing on live WordPress site
+- **v3.4.14**: Miscellaneous Settings enhancements:
+  - All sections now collapsible with smooth animations
+  - Sections start collapsed by default
+  - State persistence via localStorage for collapsed/expanded state
+  - Live preview toggle (enable/disable)
+  - Simplified Advanced Settings structure
+  - Bug fix: `enable_live_preview` setting now properly saved
 
 ---
 

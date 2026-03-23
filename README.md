@@ -2,7 +2,7 @@
 
 A modern, modular WordPress plugin for creating interactive cost estimation wizards with drag-and-drop functionality, real-time analytics, and comprehensive quote management.
 
-**Current version: 3.4.13** (testing)
+**Current version: 3.4.14** (stable)
 **GitHub Repository**: https://github.com/buttonsbond/atp-configurator
 
 ## Features
@@ -38,13 +38,23 @@ A modern, modular WordPress plugin for creating interactive cost estimation wiza
 - **Enhanced**: System Status tab split into two separate test buttons - "Send Test Client Email" and "Send Test Admin Email"
 - **Improved**: Email testing workflow for both email types
 
-### Version 3.4.13 (Testing - In Development)
-- **Modernized**: Miscellaneous Settings tab with card-based layout, toggle switches, live preview, collapsible sections, and tooltips
+### Version 3.4.13 (2025)
+- **Modernized**: Miscellaneous Settings tab with card-based layout, toggle switches, live preview, collapsible sections
 - **Modernized**: Quote Requests tab with enhanced responsive design and UI improvements
 - **Modernized**: Stats Dashboard with card grouping and visual refinements
 - **Modernized**: System Status tab with modern card-based diagnostic display and color-coded status indicators
 - **Improved**: Overall admin UI consistency and user experience
-- **Status**: Currently in active debugging on live WordPress site before release
+- **Status**: Testing release
+
+### Version 3.4.14 (2026-03-23)
+- **Enhanced**: Miscellaneous Settings with collapsible sections (all 5 main sections now collapse/expand)
+- **Enhanced**: Sections start collapsed by default to reduce page scrolling
+- **Enhanced**: State persistence via localStorage for section collapse states
+- **Enhanced**: Logical grouping of settings into clear card categories
+- **Enhanced**: Live preview pane now has enable/disable toggle
+- **Simplified**: Advanced Settings structure (removed redundant nested accordion)
+- **Fixed**: `enable_live_preview` setting now properly saved and sanitized
+- **Added**: `enable_live_preview` option to settings defaults
 
 ### Version 3.4.0 – 3.4.10 (Earlier 2025)
 - See full history in wp-configurator-wizard.php (plugin header)

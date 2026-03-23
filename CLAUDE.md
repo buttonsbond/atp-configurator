@@ -139,11 +139,11 @@ wp-configurator-wizard/
 - Always regenerate ZIP and bump version after updates
 
 ## Current Version
-- **3.4.13** (testing version - in active debugging on WordPress site before release)
+- **3.4.14** (stable - GPLv3 licensed)
 
 ## Development Workflow Notes
-- **Current State**: Version 3.4.13 is in active development and testing on a live WordPress site.
-- **Do NOT**: Commit, push, or create release ZIP until testing is complete and approved.
+- **Current State**: Version 3.4.14 released and stable.
+- **Next**: Continue development for future versions following the standard workflow.
 - **Workflow**: All changes are made locally; debugging happens on the test site; documentation updated incrementally.
 - **When Ready**: Follow the "When Ready for Release/Commit" steps below (version bump already done in code, just test and package).
 
