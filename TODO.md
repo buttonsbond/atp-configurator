@@ -1,6 +1,6 @@
 # WP Configurator Wizard - Project Overview
 
-## Current State (v3.4.11)
+## Current State (v3.4.13 - Testing)
 **Live**: https://all-tech-plus.com/wizard
 **Shortcode**: `[wp_configurator_wizard]`
 **Stack**: PHP (WordPress), jQuery, custom CSS; no build step
@@ -9,6 +9,9 @@
 
 **For detailed historical changelog of stats enhancements, see `fridaytodo.md`.
 For current refactoring roadmap, see `REFACTORINGTODO.md`.**
+
+## Git Workflow
+**Important**: Development work happens locally without automatic commits to GitHub. Only push changes when explicitly instructed. Follow the workflow in `CLAUDE.md` for releasing new versions.
 
 ### Features
 - Frontend: drag-and-drop wizard, real-time pricing, responsive, sticky header, configurable "Convert to Quote" button, contact modal, webhook + email notifications.
@@ -30,6 +33,16 @@ Key milestones:
 - **v3.2.7**: Category Information Field (frontend display)
 - **v3.2.8**: Bug fix: category info now correctly placed inside collapsible sections
 - **v3.4.11**: State Persistence Revolution - all admin UI state (tabs, collapse, sections) persists across page reloads; GitHub Actions integration complete
+- **v3.4.12**: Enhanced email formatting and testing:
+  - Admin notification emails now use beautiful HTML format (matching client email styling)
+  - System Status tab: Split into two separate test buttons - "Send Test Client Email" and "Send Test Admin Email"
+  - Improved email testing workflow for both email types
+- **v3.4.13** (In Development): Admin UI modernization:
+  - Miscellaneous Settings: Card-based layout with toggle switches, live preview, collapsible sections, tooltips
+  - Quote Requests: Enhanced responsive design and UI improvements
+  - Stats Dashboard: Card grouping and visual refinements
+  - System Status: Modern card-based diagnostic display with color-coded status indicators
+  - Ongoing debugging and testing on live WordPress site
 
 ---
 
@@ -292,6 +305,18 @@ Key milestones:
 4. Add live preview pane (AJAX not needed - just JS DOM manipulation)
 5. Use Dashicons or emoji for section icons inline
 6. Improve form field grouping: use CSS Grid for multi-column layouts on wide screens
+
+**Status**: ✅ Completed (2026-03-23)
+- Modern card-based layout with icons and enhanced shadows
+- Toggle switches replace all checkboxes with smooth animations
+- Live preview for frontend title and subtitle with toggle to enable/disable
+- Tooltips added for field guidance
+- Advanced settings moved to collapsible accordion section
+- Settings reorganized into logical card groups (Email & Notifications, Frontend Content, Display & Layout, Tracking & Privacy)
+- **All main sections are collapsible** with smooth animations and toggle arrows
+- **Sections start collapsed by default** (reduces page scrolling; click header to expand)
+- State persists via localStorage (remembers collapsed/expanded across page reloads)
+- Full responsive design maintains usability on mobile
 
 ---
 

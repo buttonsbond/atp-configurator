@@ -79,6 +79,7 @@ final class Ajax_Handler {
 
 		// System status tests (admin)
 		add_action( 'wp_ajax_send_test_email', array( $this, 'ajax_send_test_email' ) );
+		add_action( 'wp_ajax_send_test_admin_email', array( $this, 'ajax_send_test_admin_email' ) );
 		add_action( 'wp_ajax_test_webhook', array( $this, 'ajax_test_webhook' ) );
 	}
 

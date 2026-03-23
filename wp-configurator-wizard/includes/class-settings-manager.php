@@ -262,6 +262,8 @@ final class Settings_Manager {
 					$sanitized['exclude_zero_cost_from_stats'] = ! empty( $value ) ? 1 : 0;
 				} elseif ( $key === 'custom_styles' ) {
 					$sanitized['custom_styles'] = sanitize_textarea_field( $value );
+				} elseif ( $key === 'enable_live_preview' ) {
+					$sanitized['enable_live_preview'] = ! empty( $value ) ? 1 : 0;
 				} else {
 					$sanitized[ $key ] = sanitize_text_field( $value );
 				}
@@ -334,6 +336,7 @@ final class Settings_Manager {
 				'tiles_per_row_mobile' => 1,
 				'custom_styles' => '',
 				'exclude_zero_cost_from_stats' => 0,
+				'enable_live_preview' => 1,
 			),
 		);
 	}

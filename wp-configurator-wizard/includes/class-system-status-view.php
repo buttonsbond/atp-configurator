@@ -167,9 +167,9 @@ final class System_Status_View {
 					location.reload();
 				});
 
-				// Test Email button
-				window.sendTestEmail = function(email) {
-					if ( ! confirm( 'Send test email to: ' + email + '?' ) ) {
+				// Test Client Email button
+				window.sendTestClientEmail = function(email) {
+					if ( ! confirm( 'Send test client email to: ' + email + '?' ) ) {
 						return;
 					}
 
@@ -183,7 +183,7 @@ final class System_Status_View {
 						nonce: wpConfiguratorAdmin.exportNonce
 					}, function(response) {
 						button.disabled = false;
-						button.textContent = 'Send Test Email';
+						button.textContent = 'Send Test Client Email';
 						if ( response.success ) {
 							alert( 'Success: ' + response.data.message );
 						} else {
@@ -191,7 +191,36 @@ final class System_Status_View {
 						}
 					}).fail(function(xhr, status, error) {
 						button.disabled = false;
-						button.textContent = 'Send Test Email';
+						button.textContent = 'Send Test Client Email';
+						alert( 'AJAX error: ' + error );
+					});
+				};
+
+				// Test Admin Email button
+				window.sendTestAdminEmail = function(email) {
+					if ( ! confirm( 'Send test admin email to: ' + email + '?' ) ) {
+						return;
+					}
+
+					var button = event.target;
+					button.disabled = true;
+					button.textContent = 'Sending...';
+
+					jQuery.post(ajaxurl, {
+						action: 'send_test_admin_email',
+						email: email,
+						nonce: wpConfiguratorAdmin.exportNonce
+					}, function(response) {
+						button.disabled = false;
+						button.textContent = 'Send Test Admin Email';
+						if ( response.success ) {
+							alert( 'Success: ' + response.data.message );
+						} else {
+							alert( 'Error: ' + response.data.message );
+						}
+					}).fail(function(xhr, status, error) {
+						button.disabled = false;
+						button.textContent = 'Send Test Admin Email';
 						alert( 'AJAX error: ' + error );
 					});
 				};
@@ -517,7 +546,7 @@ final class System_Status_View {
 		$webhook_url = $options['settings']['webhook_url'] ?? '';
 
 		$email_status = 'success';
-		$email_desc = 'Email notifications are configured. Test email sends a sample client email with dummy data.';
+		$email_desc = 'Email notifications are configured. Use the buttons below to send test emails (client and admin formats).';
 		$webhook_status = 'success';
 		$webhook_desc = 'Webhook is configured.';
 
@@ -548,11 +577,18 @@ final class System_Status_View {
 
 		// Build action buttons for test functionality
 		$action_buttons = '';
-		// Test email button uses test_email if set, otherwise admin email
-		$test_target = $test_email ?: $admin_email;
-		if ( $test_target && is_email( $test_target ) ) {
-			$action_buttons .= '<button type="button" class="button button-small" onclick="sendTestEmail(\'' . esc_js( $test_target ) . '\')">Send Test Email</button> ';
+
+		// Test Client Email button (uses test_email if set, otherwise admin email)
+		$test_client_target = $test_email ?: $admin_email;
+		if ( $test_client_target && is_email( $test_client_target ) ) {
+			$action_buttons .= '<button type="button" class="button button-small" onclick="sendTestClientEmail(\'' . esc_js( $test_client_target ) . '\')">Send Test Client Email</button> ';
 		}
+
+		// Test Admin Email button (uses admin email)
+		if ( $admin_email && is_email( $admin_email ) ) {
+			$action_buttons .= '<button type="button" class="button button-small" onclick="sendTestAdminEmail(\'' . esc_js( $admin_email ) . '\')">Send Test Admin Email</button> ';
+		}
+
 		if ( $webhook_url && filter_var( $webhook_url, FILTER_VALIDATE_URL ) ) {
 			$action_buttons .= '<button type="button" class="button button-small" onclick="sendTestWebhook(\'' . esc_js( $webhook_url ) . '\')">Test Webhook</button>';
 		}

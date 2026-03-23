@@ -1742,3 +1742,491 @@ input[type="range"].range-slider::-moz-range-thumb {
 .category-tab[data-color] {
 	border-left-color: var(--category-color, #ddd);
 }
+
+/* ========================================
+   Modern Miscellaneous Settings UI
+   ======================================== */
+
+/* Card Grid Layout for Settings Sections */
+.settings-section {
+	background: #fff;
+	border: 1px solid var(--config-border, #e5e7eb);
+	border-radius: 12px;
+	padding: 28px 32px;
+	margin-bottom: 28px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+	transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.settings-section:hover {
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+	border-color: #d1d5db;
+}
+
+.section-header {
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+	margin-bottom: 24px;
+	padding-bottom: 16px;
+	border-bottom: 1px solid #f0f0f0;
+}
+
+.section-icon {
+	font-size: 28px;
+	line-height: 1;
+	flex-shrink: 0;
+}
+
+.section-title-group {
+	flex: 1;
+}
+
+.section-title {
+	margin: 0 0 6px 0;
+	font-size: 19px;
+	font-weight: 700;
+	color: #1d2327;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.section-description {
+	margin: 0;
+	font-size: 13px;
+	color: #646970;
+	line-height: 1.6;
+}
+
+/* Modern Toggle Switch */
+.toggle-switch {
+	display: inline-flex;
+	align-items: center;
+	gap: 12px;
+	cursor: pointer;
+	user-select: none;
+}
+
+.toggle-switch input[type="checkbox"] {
+	display: none;
+}
+
+.toggle-track {
+	position: relative;
+	width: 52px;
+	height: 28px;
+	background: #d1d5db;
+	border-radius: 14px;
+	transition: background 0.2s ease;
+	flex-shrink: 0;
+}
+
+.toggle-track::after {
+	content: '';
+	position: absolute;
+	top: 3px;
+	left: 3px;
+	width: 22px;
+	height: 22px;
+	background: #fff;
+	border-radius: 50%;
+	transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.toggle-switch input[type="checkbox"]:checked + .toggle-track {
+	background: var(--config-primary, #6366f1);
+}
+
+.toggle-switch input[type="checkbox"]:checked + .toggle-track::after {
+	transform: translateX(24px);
+}
+
+.toggle-switch input[type="checkbox"]:focus + .toggle-track {
+	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.toggle-label {
+	font-weight: 600;
+	color: #1d2327;
+	font-size: 14px;
+}
+
+.toggle-description {
+	display: block;
+	font-size: 12px;
+	color: #666;
+	margin-top: 2px;
+	font-weight: 400;
+}
+
+/* Tooltip */
+.tooltip-trigger {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	cursor: help;
+}
+
+.tooltip-trigger::after {
+	content: attr(data-tooltip);
+	position: absolute;
+	bottom: 100%;
+	left: 50%;
+	transform: translateX(-50%) translateY(-6px);
+	background: #1d2327;
+	color: #fff;
+	padding: 8px 12px;
+	border-radius: 6px;
+	font-size: 12px;
+	white-space: nowrap;
+	max-width: 250px;
+	white-space: normal;
+	line-height: 1.4;
+	z-index: 1000;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.2s ease, transform 0.2s ease;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	pointer-events: none;
+}
+
+.tooltip-trigger:hover::after {
+	opacity: 1;
+	visibility: visible;
+	transform: translateX(-50%) translateY(-2px);
+}
+
+/* Accordion for Advanced Settings */
+.accordion-section {
+	border: 1px solid #e5e7eb;
+	border-radius: 8px;
+	margin-top: 20px;
+	overflow: hidden;
+	background: #f9fafb;
+}
+
+.accordion-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 14px 18px;
+	cursor: pointer;
+	user-select: none;
+	transition: background 0.15s ease;
+}
+
+.accordion-header:hover {
+	background: #f0f0f1;
+}
+
+.accordion-title {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-weight: 600;
+	color: #1d2327;
+	font-size: 14px;
+}
+
+.accordion-icon {
+	font-size: 18px;
+	color: #646970;
+	transition: transform 0.2s ease;
+}
+
+.accordion-section.collapsed .accordion-icon {
+	transform: rotate(-90deg);
+}
+
+.accordion-content {
+	padding: 20px 24px;
+	background: #fff;
+	border-top: 1px solid #e5e7eb;
+	display: block;
+}
+
+.accordion-section.collapsed .accordion-content {
+	display: none;
+}
+
+/* Live Preview Pane */
+.preview-pane {
+	background: #f9fafb;
+	border: 1px solid #e5e7eb;
+	border-radius: 8px;
+	padding: 20px;
+	margin-top: 16px;
+}
+
+.preview-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 12px;
+	font-size: 13px;
+	font-weight: 600;
+	color: #666;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.preview-content {
+	background: #fff;
+	border: 1px solid #e5e7eb;
+	border-radius: 6px;
+	padding: 24px;
+	min-height: 80px;
+}
+
+.preview-content h1 {
+	margin: 0 0 12px 0;
+	font-size: 28px;
+	color: #1d2327;
+}
+
+.preview-content p {
+	margin: 0;
+	color: #666;
+	line-height: 1.6;
+}
+
+/* Enhanced Field Groups */
+.wp-configurator-field-group {
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 0;
+}
+
+.wp-configurator-field-group label {
+	font-weight: 600;
+	margin-bottom: 8px;
+	color: #1d2327;
+	font-size: 14px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.wp-configurator-field-group input[type="text"],
+.wp-configurator-field-group input[type="url"],
+.wp-configurator-field-group input[type="email"],
+.wp-configurator-field-group select,
+.wp-configurator-field-group textarea {
+	max-width: 100%;
+	padding: 10px 14px;
+	border: 1px solid #d1d5db;
+	border-radius: 6px;
+	background: #fff;
+	min-height: 36px;
+	font-size: 14px;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.wp-configurator-field-group input:focus,
+.wp-configurator-field-group select:focus,
+.wp-configurator-field-group textarea:focus {
+	border-color: var(--config-primary, #6366f1);
+	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+	outline: none;
+}
+
+.wp-configurator-field-group .description {
+	margin-top: 8px;
+	font-size: 12px;
+	color: #666;
+	line-height: 1.5;
+}
+
+/* Card-style subsection grouping */
+.settings-card {
+	background: #fff;
+	border: 1px solid #e5e7eb;
+	border-radius: 8px;
+	padding: 20px 24px;
+	margin-bottom: 16px;
+}
+
+.settings-card-header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 16px;
+}
+
+.settings-card-title {
+	font-size: 15px;
+	font-weight: 600;
+	color: #1d2327;
+	margin: 0;
+}
+
+.settings-card-icon {
+	font-size: 18px;
+}
+
+/* Better spacing for field rows */
+.wp-configurator-field-row {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	gap: 24px;
+	margin-bottom: 20px;
+}
+
+.wp-configurator-field-row.full-width {
+	grid-template-columns: 1fr;
+}
+
+.wp-configurator-field-row.layout-row {
+	grid-template-columns: repeat(3, 1fr);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 1200px) {
+	.wp-configurator-field-row.layout-row {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media screen and (max-width: 768px) {
+	.wp-configurator-field-row {
+		grid-template-columns: 1fr !important;
+	}
+
+	.settings-section {
+		padding: 20px;
+	}
+
+	.section-title {
+		font-size: 16px;
+	}
+
+	.input-with-button {
+		flex-direction: column;
+	}
+
+	.input-with-button .button {
+		width: 100%;
+	}
+}
+
+/* Enhanced TinyMCE editor container */
+.wp-configurator-field-group .wp-editor-wrap {
+	border: 1px solid #d1d5db;
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.wp-configurator-field-group .wp-editor-tabs {
+	background: #f9fafb;
+	border-bottom: 1px solid #e5e7eb;
+}
+
+.wp-configurator-field-group .wp-editor-area {
+	border: none;
+	min-height: 150px;
+}
+
+/* Range slider improvements (already present, enhance) */
+input[type="range"].range-slider {
+	width: 100%;
+	height: 8px;
+	background: linear-gradient(to right, var(--config-primary, #6366f1) 0%, var(--config-primary, #6366f1) var(--value, 50%), #d1d5db var(--value, 50%), #d1d5db 100%);
+	border-radius: 4px;
+	outline: none;
+	-webkit-appearance: none;
+	appearance: none;
+	margin: 12px 0;
+}
+
+input[type="range"].range-slider::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 24px;
+	height: 24px;
+	background: #fff;
+	border: 3px solid var(--config-primary, #6366f1);
+	border-radius: 50%;
+	cursor: pointer;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+	transition: transform 0.15s ease;
+}
+
+input[type="range"].range-slider::-webkit-slider-thumb:hover {
+	transform: scale(1.1);
+}
+
+input[type="range"].range-slider::-moz-range-thumb {
+	width: 24px;
+	height: 24px;
+	background: #fff;
+	border: 3px solid var(--config-primary, #6366f1);
+	border-radius: 50%;
+	cursor: pointer;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+	border: none;
+}
+
+input[type="range"].range-slider::-moz-range-thumb:hover {
+	transform: scale(1.1);
+}
+
+/* Helper for options with tooltips */
+.option-with-tooltip {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+}
+
+.option-with-tooltip .toggle-switch {
+	flex-shrink: 0;
+}
+
+.option-with-tooltip .toggle-description {
+	margin-top: 0;
+}
+
+/* Section Collapsible Behavior */
+.settings-section .section-content {
+	display: block;
+}
+
+.settings-section.collapsed .section-content {
+	display: none;
+}
+
+.settings-section .section-header {
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+	cursor: pointer;
+	user-select: none;
+	padding: 16px 20px;
+	background: #f9fafb;
+	border-radius: 8px;
+	margin-bottom: 0;
+	transition: background 0.15s ease;
+}
+
+.settings-section .section-header:hover {
+	background: #f0f0f1;
+}
+
+.settings-section .section-toggle {
+	flex-shrink: 0;
+	font-size: 14px;
+	color: #666;
+	margin-left: auto;
+	transition: transform 0.2s ease;
+}
+
+.settings-section.collapsed .section-toggle {
+	transform: rotate(-90deg);
+}
+
+/* Ensure smooth transitions */
+.settings-section .section-content {
+	transition: all 0.2s ease;
+}
+

@@ -7,24 +7,51 @@ This file provides guidance to Claude Code (claude.ai/code) when working on this
 - **Update** `TODO.md` after completing a sub-task (mark `[x]`) or if project state changes.
 - **Prioritize**: Follow the "Next Up" items in `TODO.md` unless user specifies otherwise.
 
+## Context Management Rules
+- **Conciseness**: Be concise and direct. Provide only the necessary information, code changes, or summaries. 
+Avoid conversational filler.
+- **Tool Output**: Do not repeat entire file contents when providing a fix. Only show the changed lines (diff) or 
+the relevant function.
+- **History**: When you have completed a task or reached a natural checkpoint, summarize the key decisions and 
+discard the verbose back-and-forth.
+- **Noisy Tools**: If a tool (like `git status` or a linter) returns a lot of text, summarize the essential 
+output rather than pasting the whole log.
+
+
 ## Token Saving Rules
 - **Lazy Loading**: Only read files needed for the current task.
 - **Brief Responses**: Concise explanations; avoid resending large files.
 - **Ask**: If a task requires >3 file reads, confirm with user before proceeding.
 
 ## Compact Instructions
-- When compacting, always preserve the current high-level plan and progress.
-- Maintain a list of all modified files and active test commands.
-- Summarize long tool outputs into concise findings instead of keeping raw logs.
-- Do not stop tasks early due to token budget; save state to memory before refreshes.
+When compacting history or running out of context, prioritize in this order:
+1. Current file changes.
+2. Core task objectives.
+3. Git status/Branch context.
+Discard: Original file contents, detailed tool execution logs, and conversational text.
+
+## Response Guidelines
+- Use short, descriptive commit messages.
+- Prefer code diffs over full file re-writes.
+- If an operation is successful, just say "Done" and show the change.
+
+
 
 ## Plugin Development
 
 ### Development Workflow
 - Edit files directly in `wp-configurator-wizard/`.
-- After making changes, create a new ZIP: `zip -r wp-configurator-wizard.zip wp-configurator-wizard -x "*.git*"` (stored in project root).
-- Bump version in two places: plugin header (`wp-configurator-wizard.php`, line 5) and constant `VERSION` (around line 22).
-- Test: use shortcode `[wp_configurator_wizard]` on a WordPress page; check admin UI at Dashboard → Configurator.
+- **Git Workflow**: Do NOT automatically commit or push changes to GitHub unless explicitly instructed by the user. Development can proceed without committing.
+- **When Ready for Release/Commit**:
+  1. Test changes thoroughly on WordPress site
+  2. Bump version in two places:
+     - Plugin header (`wp-configurator-wizard.php`, line 5): `* Version: X.Y.Z`
+     - Constant `VERSION` (around line 22 in same file)
+  3. Package ZIP: `zip -r wp-configurator-wizard.zip wp-configurator-wizard -x "*.git*"`
+  4. Commit: `git add -A && git commit -m "Description"`
+  5. Push: `git push origin main`
+  6. Tag: `git tag -a vX.Y.Z -m "Version X.Y.Z" && git push origin vX.Y.Z`
+- **Testing**: Use shortcode `[wp_configurator_wizard]` on a WordPress page; check admin UI at Dashboard → ATP Configurator.
 - Clear browser cache after CSS/JS changes; check console for errors.
 
 ### Activating/Deactivating
@@ -33,6 +60,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working on this
   - `wp plugin deactivate wp-configurator-wizard`
 
 ### Useful Commands
+- PHP CLI available for linting and testing:
+  - `php -l wp-configurator-wizard.php` (check syntax)
+  - `php -l includes/class-*.php` (lint individual classes)
+  - `php -d display_errors=1 wp-configurator-wizard.php` (debug plugin bootstrap)
 - List PHP files: `find wp-configurator-wizard -name "*.php"`
 - List CSS: `find wp-configurator-wizard -name "*.css"`
 - List JS: `find wp-configurator-wizard -name "*.js"`
@@ -108,7 +139,13 @@ wp-configurator-wizard/
 - Always regenerate ZIP and bump version after updates
 
 ## Current Version
-- **3.4.11** (GPLv3 licensed, with donation support)
+- **3.4.13** (testing version - in active debugging on WordPress site before release)
+
+## Development Workflow Notes
+- **Current State**: Version 3.4.13 is in active development and testing on a live WordPress site.
+- **Do NOT**: Commit, push, or create release ZIP until testing is complete and approved.
+- **Workflow**: All changes are made locally; debugging happens on the test site; documentation updated incrementally.
+- **When Ready**: Follow the "When Ready for Release/Commit" steps below (version bump already done in code, just test and package).
 
 ## Common Gotchas
 - Adding a feature requires a category selected and enabled checkbox.

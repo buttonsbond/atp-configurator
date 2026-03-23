@@ -2,7 +2,7 @@
 
 A modern, modular WordPress plugin for creating interactive cost estimation wizards with drag-and-drop functionality, real-time analytics, and comprehensive quote management.
 
-**Current version: 3.4.11**
+**Current version: 3.4.13** (testing)
 **GitHub Repository**: https://github.com/buttonsbond/atp-configurator
 
 ## Features
@@ -32,6 +32,19 @@ A modern, modular WordPress plugin for creating interactive cost estimation wiza
 - **Fixed**: Donors and Interactions collapsible sections now correctly restore state
 - **Technical**: Moved `loadAdminState`/`saveAdminState` to global scope for cross-module access
 - **Technical**: Unified state management class usage (`.collapsed`) and jQuery data access (`.data('categoryId')`)
+
+### Version 3.4.12 (2025)
+- **Enhanced**: Admin notification emails now use beautiful HTML format (matching client email styling)
+- **Enhanced**: System Status tab split into two separate test buttons - "Send Test Client Email" and "Send Test Admin Email"
+- **Improved**: Email testing workflow for both email types
+
+### Version 3.4.13 (Testing - In Development)
+- **Modernized**: Miscellaneous Settings tab with card-based layout, toggle switches, live preview, collapsible sections, and tooltips
+- **Modernized**: Quote Requests tab with enhanced responsive design and UI improvements
+- **Modernized**: Stats Dashboard with card grouping and visual refinements
+- **Modernized**: System Status tab with modern card-based diagnostic display and color-coded status indicators
+- **Improved**: Overall admin UI consistency and user experience
+- **Status**: Currently in active debugging on live WordPress site before release
 
 ### Version 3.4.0 – 3.4.10 (Earlier 2025)
 - See full history in wp-configurator-wizard.php (plugin header)

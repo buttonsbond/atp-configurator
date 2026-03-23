@@ -192,28 +192,139 @@ trait Quote_Management {
 	private function send_admin_email( $to_email, $request_id, $name, $email, $business, $phone, $items, $totals ) {
 		$subject = sprintf( '[%s] New Quote Request #%d', get_bloginfo( 'name' ), $request_id );
 
-		$message = "A new quote request has been submitted through your configurator wizard.\n\n";
-		$message .= "Request ID: #{$request_id}\n";
-		$message .= "Submitted: " . current_time( 'mysql' ) . "\n\n";
-		$message .= "Client Details:\n";
-		$message .= "Name: {$name}\n";
-		$message .= "Email: {$email}\n";
-		$message .= "Business: {$business}\n";
-		$message .= "Phone: {$phone}\n\n";
-		$message .= "Selected Items:\n";
+		$site_name = get_bloginfo( 'name' );
+		$site_url = home_url();
+
+		// Build beautiful HTML email with inline CSS (matching client email style)
+		$message = '<!DOCTYPE html>';
+		$message .= '<html lang="en">';
+		$message .= '<head>';
+		$message .= '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">';
+		$message .= '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
+		$message .= '<title>' . esc_html( $subject ) . '</title>';
+		$message .= '</head>';
+		$message .= '<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background-color: #f5f7fa; color: #333;">';
+
+		// Email container
+		$message .= '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f5f7fa; padding: 40px 20px;">';
+		$message .= '<tr><td align="center">';
+
+		// Main email card
+		$message .= '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden;">';
+
+		// Header with brand color
+		$message .= '<tr>';
+		$message .= '<td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center;">';
+		$message .= '<h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">' . esc_html( $site_name ) . '</h1>';
+		$message .= '<p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px;">New Quote Request (Admin Notification)</p>';
+		$message .= '</td>';
+		$message .= '</tr>';
+
+		// Content section
+		$message .= '<tr>';
+		$message .= '<td style="padding: 40px 30px;">';
+
+		// Request metadata
+		$message .= '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 30px;">';
+		$message .= '<tr>';
+		$message .= '<td style="padding: 8px 0; font-size: 14px; color: #718096;">Request ID</td>';
+		$message .= '<td style="padding: 8px 0; font-size: 14px; color: #2d3748; text-align: right; font-weight: 600;">#' . intval( $request_id ) . '</td>';
+		$message .= '</tr>';
+		$message .= '<tr>';
+		$message .= '<td style="padding: 8px 0; font-size: 14px; color: #718096;">Submitted</td>';
+		$message .= '<td style="padding: 8px 0; font-size: 14px; color: #2d3748; text-align: right;">' . esc_html( current_time( 'mysql' ) ) . '</td>';
+		$message .= '</tr>';
+		$message .= '</table>';
+
+		// Client details section
+		$message .= '<h2 style="margin: 0 0 15px 0; font-size: 18px; color: #2d3748; font-weight: 600;">Client Details</h2>';
+		$message .= '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 30px; background-color: #f8fafc; border-radius: 8px; overflow: hidden;">';
+
+		$fields = array(
+			'Name' => $name,
+			'Email' => $email,
+			'Business' => $business,
+			'Phone' => $phone,
+		);
+
+		foreach ( $fields as $label => $value ) {
+			$bg = '#ffffff';
+			$message .= '<tr>';
+			$message .= '<td style="background-color: ' . $bg . '; padding: 12px 16px; font-size: 13px; font-weight: 600; color: #718096; width: 120px;">' . esc_html( $label ) . '</td>';
+			$message .= '<td style="background-color: ' . $bg . '; padding: 12px 16px; font-size: 15px; color: #2d3748;">' . esc_html( $value ?: '-' ) . '</td>';
+			$message .= '</tr>';
+		}
+
+		$message .= '</table>';
+
+		// Selected items table
+		$message .= '<h2 style="margin: 0 0 15px 0; font-size: 18px; color: #2d3748; font-weight: 600;">Selected Items</h2>';
+		$message .= '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 30px;">';
+		$message .= '<thead>';
+		$message .= '<tr>';
+		$message .= '<th style="background-color: #edf2f7; padding: 14px 16px; text-align: left; font-size: 13px; font-weight: 600; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; border-top: 2px solid #667eea;">Feature</th>';
+		$message .= '<th style="background-color: #edf2f7; padding: 14px 16px; text-align: left; font-size: 13px; font-weight: 600; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; border-top: 2px solid #667eea;">Billing</th>';
+		$message .= '<th style="background-color: #edf2f7; padding: 14px 16px; text-align: right; font-size: 13px; font-weight: 600; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; border-top: 2px solid #667eea;">Price</th>';
+		$message .= '</tr>';
+		$message .= '</thead>';
+		$message .= '<tbody>';
 
 		foreach ( $items as $item ) {
-			$message .= sprintf( "- %s (%s): %s%s\n", $item['name'], $item['billing_type'], '€', number_format( $item['price'], 2 ) );
+			$price_display = '€' . number_format( $item['price'], 2 );
+			$message .= '<tr>';
+			$message .= '<td style="padding: 14px 16px; border-bottom: 1px solid #e2e8f0; font-size: 15px; color: #2d3748;">' . esc_html( $item['name'] ) . '</td>';
+			$message .= '<td style="padding: 14px 16px; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #718096;">' . esc_html( $item['billing_type'] ) . '</td>';
+			$message .= '<td style="padding: 14px 16px; border-bottom: 1px solid #e2e8f0; text-align: right; font-size: 15px; font-weight: 600; color: #2d3748;">' . $price_display . '</td>';
+			$message .= '</tr>';
 		}
 
-		$message .= "\nTotals:\n";
+		$message .= '</tbody>';
+		$message .= '</table>';
+
+		// Totals summary
+		$message .= '<h2 style="margin: 0 0 15px 0; font-size: 18px; color: #2d3748; font-weight: 600;">Summary</h2>';
+		$message .= '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 30px;">';
+
 		foreach ( $totals as $key => $value ) {
-			$message .= sprintf( "%s: %s%s\n", ucfirst( str_replace( '_', ' ', $key ) ), '€', number_format( $value, 2 ) );
+			$formatted_value = '€' . number_format( $value, 2 );
+			$label = ucfirst( str_replace( '_', ' ', $key ) );
+			$message .= '<tr>';
+			$message .= '<td style="padding: 10px 0; font-size: 15px; color: #4a5568;"><strong>' . esc_html( $label ) . '</strong></td>';
+			$message .= '<td style="padding: 10px 0; text-align: right; font-size: 18px; font-weight: 700; color: #667eea;">' . $formatted_value . '</td>';
+			$message .= '</tr>';
 		}
 
-		$message .= "\nYou can manage this quote request in your WordPress admin: " . admin_url( 'admin.php?page=wp-configurator' ) . "\n";
+		$message .= '</table>';
 
-		$headers = array( 'Content-Type: text/plain; charset=UTF-8' );
+		// Action / admin link
+		$message .= '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">';
+		$message .= '<tr>';
+		$message .= '<td style="background-color: #f7fafc; padding: 25px; border-radius: 8px; text-align: center; border: 1px dashed #cbd5e0;">';
+		$message .= '<p style="margin: 0 0 15px 0; font-size: 15px; color: #4a5568;">Manage this quote request in your WordPress admin.</p>';
+		$message .= '<a href="' . esc_url( admin_url( 'admin.php?page=wp-configurator' ) ) . '" style="display: inline-block; background-color: #667eea; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">Open Quote Manager</a>';
+		$message .= '</td>';
+		$message .= '</tr>';
+		$message .= '</table>';
+
+		$message .= '</td>';
+		$message .= '</tr>';
+
+		// Footer
+		$message .= '<tr>';
+		$message .= '<td style="background-color: #edf2f7; padding: 30px; text-align: center; border-top: 1px solid #e2e8f0;">';
+		$message .= '<p style="margin: 0 0 10px 0; font-size: 14px; color: #718096;">This is an automated notification from</p>';
+		$message .= '<p style="margin: 0; font-size: 16px; font-weight: 600; color: #2d3748;">' . esc_html( $site_name ) . '</p>';
+		$message .= '<p style="margin: 15px 0 0 0; font-size: 12px; color: #a0aec0;">' . esc_html( $site_url ) . '</p>';
+		$message .= '</td>';
+		$message .= '</tr>';
+
+		$message .= '</table>'; // Close main card
+		$message .= '</td></tr>'; // Close center cell and row
+		$message .= '</table>'; // Close outer container
+
+		$message .= '</body></html>';
+
+		$headers = array( 'Content-Type: text/html; charset=UTF-8' );
 
 		$sent = wp_mail( $to_email, $subject, $message, $headers );
 
@@ -489,7 +600,213 @@ trait Quote_Management {
 	}
 
 	/**
-	 * AJAX handler for sending test email
+	 * Send test admin email with dummy data to preview the template
+	 *
+	 * @param string $to_email
+	 * @return int 1 if sent, 0 if failed
+	 */
+	private function send_test_admin_email( $to_email ) {
+		$site_name = get_bloginfo( 'name' );
+		$site_url = home_url();
+		$request_id = 999998; // Dummy ID for test admin email
+
+		$subject = sprintf( '[%s] New Quote Request #%d (TEST ADMIN EMAIL)', $site_name, $request_id );
+
+		// Dummy data for test
+		$name = 'Test Customer';
+		$email = 'customer@example.com';
+		$business = 'Test Business Inc.';
+		$phone = '+1 234 567 8900';
+
+		$dummy_items = array(
+			array(
+				'name'         => 'Basic Website (5 pages)',
+				'billing_type' => 'one-off',
+				'price'        => 50.00,
+				'icon'         => '📄',
+				'category_id'  => 'web-development',
+				'sku'          => 'WEB-001',
+			),
+			array(
+				'name'         => 'E-commerce Store',
+				'billing_type' => 'one-off',
+				'price'        => 299.00,
+				'icon'         => '🛒',
+				'category_id'  => 'ecommerce',
+				'sku'          => 'ECO-001',
+			),
+			array(
+				'name'         => 'SEO Optimization',
+				'billing_type' => 'monthly',
+				'price'        => 99.00,
+				'icon'         => '🔍',
+				'category_id'  => 'marketing',
+				'sku'          => 'SEO-001',
+			),
+			array(
+				'name'         => 'Priority Support',
+				'billing_type' => 'monthly',
+				'price'        => 49.00,
+				'icon'         => '🎧',
+				'category_id'  => 'support',
+				'sku'          => 'SUP-001',
+			),
+		);
+
+		$dummy_totals = array(
+			'one_time_total'      => 349.00,
+			'monthly_equivalent'  => 148.00,
+			'quarterly_equivalent'=> 444.00,
+			'annual_equivalent'   => 1776.00,
+		);
+
+		// Build beautiful HTML email with inline CSS (matching admin notification style)
+		$message = '<!DOCTYPE html>';
+		$message .= '<html lang="en">';
+		$message .= '<head>';
+		$message .= '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">';
+		$message .= '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
+		$message .= '<title>' . esc_html( $subject ) . '</title>';
+		$message .= '</head>';
+		$message .= '<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background-color: #f5f7fa; color: #333;">';
+
+		// Email container
+		$message .= '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f5f7fa; padding: 40px 20px;">';
+		$message .= '<tr><td align="center">';
+
+		// Main email card
+		$message .= '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden;">';
+
+		// Header with brand color
+		$message .= '<tr>';
+		$message .= '<td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center;">';
+		$message .= '<h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">' . esc_html( $site_name ) . '</h1>';
+		$message .= '<p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px;">New Quote Request (TEST ADMIN EMAIL)</p>';
+		$message .= '</td>';
+		$message .= '</tr>';
+
+		// Content section
+		$message .= '<tr>';
+		$message .= '<td style="padding: 40px 30px;">';
+
+		// Notice: Test email
+		$message .= '<div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 0 8px 8px 0;">';
+		$message .= '<p style="margin: 0; font-size: 14px; color: #856404;"><strong>TEST EMAIL:</strong> This is a sample admin notification email with dummy data to verify your SMTP configuration and email formatting.</p>';
+		$message .= '</div>';
+
+		// Request metadata
+		$message .= '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 30px;">';
+		$message .= '<tr>';
+		$message .= '<td style="padding: 8px 0; font-size: 14px; color: #718096;">Request ID</td>';
+		$message .= '<td style="padding: 8px 0; font-size: 14px; color: #2d3748; text-align: right; font-weight: 600;">#' . intval( $request_id ) . '</td>';
+		$message .= '</tr>';
+		$message .= '<tr>';
+		$message .= '<td style="padding: 8px 0; font-size: 14px; color: #718096;">Submitted</td>';
+		$message .= '<td style="padding: 8px 0; font-size: 14px; color: #2d3748; text-align: right;">' . esc_html( current_time( 'mysql' ) ) . '</td>';
+		$message .= '</tr>';
+		$message .= '</table>';
+
+		// Client details section
+		$message .= '<h2 style="margin: 0 0 15px 0; font-size: 18px; color: #2d3748; font-weight: 600;">Client Details</h2>';
+		$message .= '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 30px; background-color: #f8fafc; border-radius: 8px; overflow: hidden;">';
+
+		$fields = array(
+			'Name' => $name,
+			'Email' => $email,
+			'Business' => $business,
+			'Phone' => $phone,
+		);
+
+		foreach ( $fields as $label => $value ) {
+			$bg = '#ffffff';
+			$message .= '<tr>';
+			$message .= '<td style="background-color: ' . $bg . '; padding: 12px 16px; font-size: 13px; font-weight: 600; color: #718096; width: 120px;">' . esc_html( $label ) . '</td>';
+			$message .= '<td style="background-color: ' . $bg . '; padding: 12px 16px; font-size: 15px; color: #2d3748;">' . esc_html( $value ?: '-' ) . '</td>';
+			$message .= '</tr>';
+		}
+
+		$message .= '</table>';
+
+		// Selected items table
+		$message .= '<h2 style="margin: 0 0 15px 0; font-size: 18px; color: #2d3748; font-weight: 600;">Selected Items</h2>';
+		$message .= '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 30px;">';
+		$message .= '<thead>';
+		$message .= '<tr>';
+		$message .= '<th style="background-color: #edf2f7; padding: 14px 16px; text-align: left; font-size: 13px; font-weight: 600; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; border-top: 2px solid #667eea;">Feature</th>';
+		$message .= '<th style="background-color: #edf2f7; padding: 14px 16px; text-align: left; font-size: 13px; font-weight: 600; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; border-top: 2px solid #667eea;">Billing</th>';
+		$message .= '<th style="background-color: #edf2f7; padding: 14px 16px; text-align: right; font-size: 13px; font-weight: 600; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; border-top: 2px solid #667eea;">Price</th>';
+		$message .= '</tr>';
+		$message .= '</thead>';
+		$message .= '<tbody>';
+
+		foreach ( $dummy_items as $item ) {
+			$price_display = '€' . number_format( $item['price'], 2 );
+			$message .= '<tr>';
+			$message .= '<td style="padding: 14px 16px; border-bottom: 1px solid #e2e8f0; font-size: 15px; color: #2d3748;">' . esc_html( $item['name'] ) . '</td>';
+			$message .= '<td style="padding: 14px 16px; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #718096;">' . esc_html( $item['billing_type'] ) . '</td>';
+			$message .= '<td style="padding: 14px 16px; border-bottom: 1px solid #e2e8f0; text-align: right; font-size: 15px; font-weight: 600; color: #2d3748;">' . $price_display . '</td>';
+			$message .= '</tr>';
+		}
+
+		$message .= '</tbody>';
+		$message .= '</table>';
+
+		// Totals summary
+		$message .= '<h2 style="margin: 0 0 15px 0; font-size: 18px; color: #2d3748; font-weight: 600;">Summary</h2>';
+		$message .= '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 30px;">';
+
+		foreach ( $dummy_totals as $key => $value ) {
+			$formatted_value = '€' . number_format( $value, 2 );
+			$label = ucfirst( str_replace( '_', ' ', $key ) );
+			$message .= '<tr>';
+			$message .= '<td style="padding: 10px 0; font-size: 15px; color: #4a5568;"><strong>' . esc_html( $label ) . '</strong></td>';
+			$message .= '<td style="padding: 10px 0; text-align: right; font-size: 18px; font-weight: 700; color: #667eea;">' . $formatted_value . '</td>';
+			$message .= '</tr>';
+		}
+
+		$message .= '</table>';
+
+		// Action / admin link
+		$message .= '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">';
+		$message .= '<tr>';
+		$message .= '<td style="background-color: #f7fafc; padding: 25px; border-radius: 8px; text-align: center; border: 1px dashed #cbd5e0;">';
+		$message .= '<p style="margin: 0 0 15px 0; font-size: 15px; color: #4a5568;">Manage this quote request in your WordPress admin.</p>';
+		$message .= '<a href="' . esc_url( admin_url( 'admin.php?page=wp-configurator' ) ) . '" style="display: inline-block; background-color: #667eea; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">Open Quote Manager</a>';
+		$message .= '</td>';
+		$message .= '</tr>';
+		$message .= '</table>';
+
+		$message .= '</td>';
+		$message .= '</tr>';
+
+		// Footer
+		$message .= '<tr>';
+		$message .= '<td style="background-color: #edf2f7; padding: 30px; text-align: center; border-top: 1px solid #e2e8f0;">';
+		$message .= '<p style="margin: 0 0 10px 0; font-size: 14px; color: #718096;">This is an automated notification from</p>';
+		$message .= '<p style="margin: 0; font-size: 16px; font-weight: 600; color: #2d3748;">' . esc_html( $site_name ) . '</p>';
+		$message .= '<p style="margin: 15px 0 0 0; font-size: 12px; color: #a0aec0;">' . esc_html( $site_url ) . '</p>';
+		$message .= '</td>';
+		$message .= '</tr>';
+
+		$message .= '</table>'; // Close main card
+		$message .= '</td></tr>'; // Close center cell and row
+		$message .= '</table>'; // Close outer container
+
+		$message .= '</body></html>';
+
+		$headers = array( 'Content-Type: text/html; charset=UTF-8' );
+
+		$sent = wp_mail( $to_email, $subject, $message, $headers );
+
+		if ( ! $sent ) {
+			error_log( "Failed to send test admin email to {$to_email}" );
+		}
+
+		return $sent ? 1 : 0;
+	}
+
+	/**
+	 * AJAX handler for sending test email (client format)
 	 */
 	public function ajax_send_test_email() {
 		// Check nonce and capabilities
@@ -514,9 +831,41 @@ trait Quote_Management {
 		$sent = $this->send_test_client_email( $to_email );
 
 		if ( $sent ) {
-			wp_send_json_success( array( 'message' => "Test email sent successfully to {$to_email}. This is a sample client email with dummy data showing the actual email template formatting." ) );
+			wp_send_json_success( array( 'message' => "Test client email sent successfully to {$to_email}. This is a sample client email with dummy data showing the actual email template formatting." ) );
 		} else {
 			wp_send_json_error( array( 'message' => 'Failed to send test email. Check your SMTP configuration (Post SMTP plugin logs) and server error logs.' ) );
+		}
+	}
+
+	/**
+	 * AJAX handler for sending test admin email
+	 */
+	public function ajax_send_test_admin_email() {
+		// Check nonce and capabilities
+		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'wp_configurator_nonce' ) ) {
+			wp_send_json_error( array( 'message' => 'Security check failed' ) );
+		}
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => 'Insufficient permissions' ) );
+		}
+
+		// Get admin email address from settings
+		$options = $this->settings_manager->get_options();
+		$admin_email = $options['settings']['notification_email'] ?? '';
+		$to_email = isset( $_POST['email'] ) ? sanitize_email( $_POST['email'] ) : $admin_email;
+
+		if ( ! $to_email || ! is_email( $to_email ) ) {
+			wp_send_json_error( array( 'message' => 'No admin email address configured. Please set the Admin Notification Email in Miscellaneous settings.' ) );
+		}
+
+		// Send a sample admin email with dummy data to test formatting
+		$sent = $this->send_test_admin_email( $to_email );
+
+		if ( $sent ) {
+			wp_send_json_success( array( 'message' => "Test admin email sent successfully to {$to_email}. This is a sample admin notification email with dummy data." ) );
+		} else {
+			wp_send_json_error( array( 'message' => 'Failed to send test admin email. Check your SMTP configuration (Post SMTP plugin logs) and server error logs.' ) );
 		}
 	}
 
