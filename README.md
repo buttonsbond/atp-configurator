@@ -25,27 +25,6 @@ A modern, modular WordPress plugin for creating interactive cost estimation wiza
 
 ## Changelog
 
-### Version 3.4.11 (2026-03-11)
-- **Fixed**: Navigation tab state persistence now works correctly (scope issue resolved)
-- **Fixed**: Category tab selection now persists across page reloads
-- **Fixed**: Header collapse/expand state persists with proper icon orientation and padding
-- **Fixed**: Donors and Interactions collapsible sections now correctly restore state
-- **Technical**: Moved `loadAdminState`/`saveAdminState` to global scope for cross-module access
-- **Technical**: Unified state management class usage (`.collapsed`) and jQuery data access (`.data('categoryId')`)
-
-### Version 3.4.12 (2026-03-14)
-- **Enhanced**: Admin notification emails now use beautiful HTML format (matching client email styling)
-- **Enhanced**: System Status tab split into two separate test buttons - "Send Test Client Email" and "Send Test Admin Email"
-- **Improved**: Email testing workflow for both email types
-
-### Version 3.4.13 (2026-03-19)
-- **Modernized**: Miscellaneous Settings tab with card-based layout, toggle switches, live preview, collapsible sections
-- **Modernized**: Quote Requests tab with enhanced responsive design and UI improvements
-- **Modernized**: Stats Dashboard with card grouping and visual refinements
-- **Modernized**: System Status tab with modern card-based diagnostic display and color-coded status indicators
-- **Improved**: Overall admin UI consistency and user experience
-- **Status**: Testing release
-
 ### Version 3.4.14 (2026-03-23)
 - **Enhanced**: Miscellaneous Settings with collapsible sections (all 5 main sections now collapse/expand)
 - **Enhanced**: Sections start collapsed by default to reduce page scrolling
@@ -55,6 +34,27 @@ A modern, modular WordPress plugin for creating interactive cost estimation wiza
 - **Simplified**: Advanced Settings structure (removed redundant nested accordion)
 - **Fixed**: `enable_live_preview` setting now properly saved and sanitized
 - **Added**: `enable_live_preview` option to settings defaults
+
+### Version 3.4.13 (2026-03-19)
+- **Modernized**: Miscellaneous Settings tab with card-based layout, toggle switches, live preview, collapsible sections
+- **Modernized**: Quote Requests tab with enhanced responsive design and UI improvements
+- **Modernized**: Stats Dashboard with card grouping and visual refinements
+- **Modernized**: System Status tab with modern card-based diagnostic display and color-coded status indicators
+- **Improved**: Overall admin UI consistency and user experience
+- **Status**: Testing release
+
+### Version 3.4.12 (2026-03-14)
+- **Enhanced**: Admin notification emails now use beautiful HTML format (matching client email styling)
+- **Enhanced**: System Status tab split into two separate test buttons - "Send Test Client Email" and "Send Test Admin Email"
+- **Improved**: Email testing workflow for both email types
+
+### Version 3.4.11 (2026-03-11)
+- **Fixed**: Navigation tab state persistence now works correctly (scope issue resolved)
+- **Fixed**: Category tab selection now persists across page reloads
+- **Fixed**: Header collapse/expand state persists with proper icon orientation and padding
+- **Fixed**: Donors and Interactions collapsible sections now correctly restore state
+- **Technical**: Moved `loadAdminState`/`saveAdminState` to global scope for cross-module access
+- **Technical**: Unified state management class usage (`.collapsed`) and jQuery data access (`.data('categoryId')`)
 
 ### Version 3.4.0 – 3.4.10 (Earlier 2026)
 - See full history in wp-configurator-wizard.php (plugin header)
