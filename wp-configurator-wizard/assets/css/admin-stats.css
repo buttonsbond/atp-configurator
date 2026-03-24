@@ -102,13 +102,16 @@
 	}
 }
 
+/* Stack charts on medium screens (tablets and below) */
+@media screen and (max-width: 992px) {
+	.stats-charts-row {
+		grid-template-columns: 1fr;
+	}
+}
+
 @media screen and (max-width: 768px) {
 	.group-cards {
 		grid-template-columns: repeat(2, 1fr);
-	}
-
-	.stats-charts-row {
-		grid-template-columns: 1fr;
 	}
 }
 
