@@ -126,29 +126,8 @@ final class Stats_Renderer {
 					</div>
 				</div>
 
-				<!-- Engagement -->
-				<h3 class="group-title">Engagement</h3>
-				<div class="group-cards">
-					<div class="stat-card" style="border-top: 3px solid #2271b1;">
-						<div class="stat-value" style="color: #2271b1;"><?php echo number_format( $metrics['total_interactions'] ); ?></div>
-						<div class="stat-label" style="font-weight: 600; color: #2271b1;">Total Interactions</div>
-					</div>
-					<div class="stat-card" style="border-top: 3px solid #2271b1;">
-						<div class="stat-value" style="color: #2271b1;"><?php echo number_format( $metrics['feature_added_count'] ); ?></div>
-						<div class="stat-label" style="font-weight: 600; color: #2271b1;">Features Added</div>
-					</div>
-					<div class="stat-card">
-						<div class="stat-value"><?php echo number_format( $metrics['unique_initial_engagement'] ); ?></div>
-						<div class="stat-label">Initial Engagement</div>
-					</div>
-					<div class="stat-card">
-						<div class="stat-value"><?php echo $metrics['engagement_rate']; ?>%</div>
-						<div class="stat-label">Engagement Rate</div>
-					</div>
-				</div>
-
-				<!-- Conversion Funnel -->
-				<h3 class="group-title">Conversion Funnel</h3>
+				<!-- Conversion & Engagement -->
+				<h3 class="group-title">Conversion & Engagement</h3>
 				<div class="group-cards">
 					<div class="stat-card funnel-start">
 						<div class="stat-value"><?php echo number_format( $metrics['checkout_starts'] ); ?></div>
@@ -170,18 +149,13 @@ final class Stats_Renderer {
 						<div class="stat-value"><?php echo $metrics['quote_to_invoiced_rate']; ?>%</div>
 						<div class="stat-label">Quote→Invoiced</div>
 					</div>
-				</div>
-
-				<!-- Content Performance -->
-				<h3 class="group-title">Content Performance</h3>
-				<div class="group-cards">
 					<div class="stat-card">
-						<div class="stat-value"><?php echo number_format( $metrics['unique_features_used'] ); ?></div>
-						<div class="stat-label">Unique Features Used</div>
+						<div class="stat-value"><?php echo number_format( $metrics['unique_initial_engagement'] ); ?></div>
+						<div class="stat-label">Initial Engagement</div>
 					</div>
 					<div class="stat-card">
-						<div class="stat-value"><?php echo $metrics['avg_items']; ?></div>
-						<div class="stat-label">Avg Items/Quote</div>
+						<div class="stat-value"><?php echo $metrics['engagement_rate']; ?>%</div>
+						<div class="stat-label">Engagement Rate</div>
 					</div>
 				</div>
 
