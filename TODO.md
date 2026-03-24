@@ -1,6 +1,6 @@
 # WP Configurator Wizard - Project Overview
 
-## Current State (v3.4.17-dev - Development)
+## Current State (v3.4.17 - Stable)
 **Live**: https://all-tech-plus.com/wizard
 **Shortcode**: `[wp_configurator_wizard]`
 **Stack**: PHP (WordPress), jQuery, custom CSS; no build step
@@ -49,17 +49,14 @@ Key milestones:
   - Live preview toggle (enable/disable)
   - Simplified Advanced Settings structure
   - Bug fix: `enable_live_preview` setting now properly saved
-- **v3.4.16-dev**: Admin JavaScript Modularization (in progress):
-  - Phase 1: Created `admin-common.js` with shared utilities (saveAdminState, loadAdminState, showToast) + global state container
-  - Phase 2: Extracted emoji picker (`admin-emoji.js`), miscellaneous settings (`admin-settings.js`), tab navigation (`admin-tabs.js`)
-  - Phase 3: Implemented global state sharing (`window.WPConfiguratorAdmin`) for cross-module communication
-  - Phase 4: Extracted import/export functionality to `admin-import-export.js`
-  - Phase 5: Updated all script dependencies in Asset_Manager; removed extracted code from admin.js
-  - **Result**: admin.js reduced from 1599 to ~1117 lines; created 5 focused modules; all functionality preserved
-  - **Status**: ✅ Modularization complete (Phase 6 pending: testing, version bump, packaging)
-
-**Bug Fix (2026-03-24)**:
-- Fixed category tab state not persisting after save. Root cause: restoreState() was in admin-settings.js (only loads on Misc tab). Moved state restoration to admin-tabs.js (always loads) and moved activeCategoryTab restoration to admin.js (runs after its handlers attach). Now Categories & Features tab selection persists correctly across saves.
+- **v3.4.17 (2026-03-24)**: Admin JavaScript Modularization Release
+  - Completed modularization of monolithic admin.js (1599 lines) into 5 focused modules
+  - New files: `admin-common.js` (utilities + global state), `admin-tabs.js` (navigation), `admin-settings.js` (misc settings), `admin-emoji.js` (emoji picker), `admin-import-export.js` (import/export)
+  - Implemented global state container `window.WPConfiguratorAdmin` for cross-module communication
+  - Updated script dependencies in `class-asset-manager.php` for proper load order
+  - **Bug Fix**: Category tab state now persists correctly across page reloads and saves
+  - **Result**: admin.js reduced to ~1117 lines; improved maintainability; zero breaking changes
+  - **Status**: ✅ Stable release (v3.4.17 tagged and deployed)
 
 ---
 
