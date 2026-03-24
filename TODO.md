@@ -1,6 +1,6 @@
 # WP Configurator Wizard - Project Overview
 
-## Current State (v3.4.16-dev - Development)
+## Current State (v3.4.17-dev - Development)
 **Live**: https://all-tech-plus.com/wizard
 **Shortcode**: `[wp_configurator_wizard]`
 **Stack**: PHP (WordPress), jQuery, custom CSS; no build step
