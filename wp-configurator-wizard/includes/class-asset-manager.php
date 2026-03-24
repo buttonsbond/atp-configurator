@@ -146,11 +146,20 @@ final class Asset_Manager {
 			$this->version
 		);
 
-		// Enqueue admin JS
+		// Enqueue admin common utilities (must load before admin.js)
+		wp_enqueue_script(
+			'wp-configurator-admin-common',
+			plugins_url( 'assets/js/admin/admin-common.js', WP_CONFIGURATOR_WIZARD_FILE ),
+			array( 'jquery' ),
+			$this->version,
+			true
+		);
+
+		// Enqueue admin JS (depends on admin-common for utilities)
 		wp_enqueue_script(
 			'wp-configurator-admin',
 			plugins_url( 'assets/js/admin.js', WP_CONFIGURATOR_WIZARD_FILE ),
-			array( 'jquery' ),
+			array( 'jquery', 'wp-configurator-admin-common' ),
 			$this->version,
 			true
 		);

@@ -1,27 +1,6 @@
 // Tab switching
 console.log('✅ admin.js script loaded (top level)');
 
-// State Persistence (localStorage) - Global scope for all handlers
-var STORAGE_KEY = 'wp_configurator_admin_state';
-
-function saveAdminState(state) {
-	try {
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-	} catch (e) {
-		console.warn('Could not save admin state to localStorage:', e);
-	}
-}
-
-function loadAdminState() {
-	try {
-		var saved = localStorage.getItem(STORAGE_KEY);
-		return saved ? JSON.parse(saved) : {};
-	} catch (e) {
-		console.warn('Could not load admin state from localStorage:', e);
-		return {};
-	}
-}
-
 jQuery(function($) {
 	console.log('✅ jQuery ready fired');
 	try {
@@ -932,21 +911,6 @@ jQuery(document).ready(function($) {
 			$container.append(html);
 		});
 	}
-
-	// Make showToast globally available
-	window.showToast = function(message, type) {
-		type = type || 'success';
-		var $toast = $('<div class="wp-configurator-toast ' + type + '">' + message + '</div>');
-		$('body').append($toast);
-		$toast[0].offsetHeight;
-		$toast.addClass('show');
-		setTimeout(function() {
-			$toast.removeClass('show');
-			setTimeout(function() {
-				$toast.remove();
-			}, 300);
-		}, 3000);
-	};
 
 	function openFeatureEditModal(featureIndex) {
 		var feat = features[featureIndex];
