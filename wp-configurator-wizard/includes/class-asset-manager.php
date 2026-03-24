@@ -155,6 +155,15 @@ final class Asset_Manager {
 			true
 		);
 
+		// Enqueue admin emoji picker module
+		wp_enqueue_script(
+			'wp-configurator-admin-emoji',
+			plugins_url( 'assets/js/admin/admin-emoji.js', WP_CONFIGURATOR_WIZARD_FILE ),
+			array( 'jquery' ),
+			$this->version,
+			true
+		);
+
 		// Enqueue admin JS (depends on admin-common for utilities)
 		wp_enqueue_script(
 			'wp-configurator-admin',
