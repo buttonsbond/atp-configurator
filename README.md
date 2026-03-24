@@ -2,7 +2,7 @@
 
 A modern, modular WordPress plugin for creating interactive cost estimation wizards with drag-and-drop functionality, real-time analytics, and comprehensive quote management.
 
-**Current version: 3.4.14** (stable)
+**Current version: 3.4.17** (stable)
 **GitHub Repository**: https://github.com/buttonsbond/atp-configurator
 
 ## Features
@@ -24,6 +24,15 @@ A modern, modular WordPress plugin for creating interactive cost estimation wiza
 - **Category Information Text**: Add optional descriptive text to each category that appears at the top of the category section on the frontend, providing context and guidance to users
 
 ## Changelog
+
+### Version 3.4.17 (2026-03-24)
+- **Refactored**: Complete admin JavaScript modularization
+  - Split `admin.js` from 1599 lines into 5 focused modules: `admin-common.js`, `admin-tabs.js`, `admin-settings.js`, `admin-emoji.js`, `admin-import-export.js`
+  - Implemented global state container `window.WPConfiguratorAdmin` for cross-module communication
+  - Updated script enqueue dependencies in `class-asset-manager.php` for proper load order
+  - Reduced `admin.js` to ~1117 lines while maintaining 100% functionality
+- **Improved**: Code maintainability and future extensibility
+- **Status**: Stable release (no breaking changes)
 
 ### Version 3.4.14 (2026-03-23)
 - **Enhanced**: Miscellaneous Settings with collapsible sections (all 5 main sections now collapse/expand)
