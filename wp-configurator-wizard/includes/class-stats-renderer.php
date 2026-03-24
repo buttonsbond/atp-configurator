@@ -144,7 +144,15 @@ final class Stats_Renderer {
 
 			</div>
 
-			<!-- Charts Row -->
+			<!-- Charts Row 1: Revenue Trend (full width) -->
+			<div class="stats-charts-row revenue-row">
+				<div class="chart-container">
+					<h3>Revenue Trend (<?php echo esc_html( $metrics['date_filter_display'] ); ?>)</h3>
+					<canvas id="revenue-chart"></canvas>
+				</div>
+			</div>
+
+			<!-- Charts Row 2: Quote Requests + Billing Breakdown (side-by-side) -->
 			<div class="stats-charts-row">
 				<div class="chart-container">
 					<h3>Quote Requests (<?php echo esc_html( $metrics['date_filter_display'] ); ?>)</h3>
@@ -153,29 +161,6 @@ final class Stats_Renderer {
 				<div class="chart-container">
 					<h3>Billing Breakdown</h3>
 					<canvas id="billing-chart"></canvas>
-				</div>
-				<div class="chart-container">
-					<h3>Request Status Distribution</h3>
-					<canvas id="status-chart"></canvas>
-				</div>
-			</div>
-
-			<!-- Revenue Trend -->
-			<div class="stats-charts-row">
-				<div class="chart-container" style="grid-column: span 2;">
-					<h3>Revenue Trend (<?php echo esc_html( $metrics['date_filter_display'] ); ?>)</h3>
-					<canvas id="revenue-chart"></canvas>
-				</div>
-			</div>
-
-			<div class="stats-charts-row">
-				<div class="chart-container" style="grid-column: span 2;">
-					<h3>Top 10 Features</h3>
-					<?php if ( empty( $metrics['top_features'] ) ) : ?>
-						<p>No data available yet.</p>
-					<?php else : ?>
-						<canvas id="features-chart"></canvas>
-					<?php endif; ?>
 				</div>
 			</div>
 
@@ -273,59 +258,6 @@ final class Stats_Renderer {
 					});
 				}
 
-				// Quote Request Status Distribution (doughnut chart)
-				var statusCtx = document.getElementById('status-chart');
-				if (statusCtx) {
-					var statusLabels = [];
-					var statusData = [];
-					var statusColors = {
-						'pending': '#f56e28',
-						'quoted': '#2271b1',
-						'confirmed': '#46b450',
-						'invoiced': '#93588c',
-						'cancelled': '#646970',
-						'rejected': '#dc3232'
-					};
-					<?php
-					$status_labels_display = array(
-						'pending' => 'Pending',
-						'quoted' => 'Quoted',
-						'confirmed' => 'Confirmed',
-						'invoiced' => 'Invoiced',
-						'cancelled' => 'Cancelled',
-						'rejected' => 'Rejected'
-					);
-					foreach ( $status_labels_display as $status_key => $label ) :
-					?>
-						statusLabels.push( <?php echo json_encode( $label ); ?> );
-						statusData.push( <?php echo (int) $metrics['status_counts'][ $status_key ] ?? 0; ?> );
-					<?php endforeach; ?>
-
-					var bgColors = [];
-					statusLabels.forEach(function(label, i) {
-						var keys = <?php echo json_encode( array_keys( $status_labels_display ) ); ?>;
-						var key = keys[i];
-						bgColors.push( statusColors[key] || '#ccc' );
-					});
-
-					new Chart(statusCtx, {
-						type: 'doughnut',
-						data: {
-							labels: statusLabels,
-							datasets: [{
-								data: statusData,
-								backgroundColor: bgColors
-							}]
-						},
-						options: {
-							responsive: true,
-							plugins: {
-								legend: { position: 'bottom' }
-							}
-						}
-					});
-				}
-
 				// Revenue trend (line chart)
 				var revenueCtx = document.getElementById('revenue-chart');
 				if (revenueCtx) {
@@ -355,42 +287,6 @@ final class Stats_Renderer {
 											return '€' + value.toLocaleString();
 										}
 									}
-								}
-							}
-						}
-					});
-				}
-
-				// Top features (horizontal bar chart)
-				var featuresCtx = document.getElementById('features-chart');
-				if(featuresCtx) {
-					var featureLabels = [];
-					var featureData = [];
-					<?php foreach ( $metrics['top_features'] as $feat ) : ?>
-						featureLabels.push( <?php echo json_encode( $feat['name'] ); ?> );
-						featureData.push( <?php echo $feat['count']; ?> );
-					<?php endforeach; ?>
-
-					new Chart(featuresCtx, {
-						type: 'bar',
-						data: {
-							labels: featureLabels,
-							datasets: [{
-								label: 'Times Selected',
-								data: featureData,
-								backgroundColor: '#2271b1'
-							}]
-						},
-						options: {
-							indexAxis: 'y',
-							responsive: true,
-							plugins: {
-								legend: { display: false }
-							},
-							scales: {
-								x: {
-									beginAtZero: true,
-									ticks: { stepSize: 1 }
 								}
 							}
 						}
