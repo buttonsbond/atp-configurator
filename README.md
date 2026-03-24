@@ -2,7 +2,7 @@
 
 A modern, modular WordPress plugin for creating interactive cost estimation wizards with drag-and-drop functionality, real-time analytics, and comprehensive quote management.
 
-**Current version: 3.4.17** (stable)
+**Current version: 3.5.0** (stable)
 **GitHub Repository**: https://github.com/buttonsbond/atp-configurator
 
 ## Features
@@ -25,14 +25,23 @@ A modern, modular WordPress plugin for creating interactive cost estimation wiza
 
 ## Changelog
 
-### Version 3.4.17 (2026-03-24)
-- **Refactored**: Complete admin JavaScript modularization
-  - Split `admin.js` from 1599 lines into 5 focused modules: `admin-common.js`, `admin-tabs.js`, `admin-settings.js`, `admin-emoji.js`, `admin-import-export.js`
-  - Implemented global state container `window.WPConfiguratorAdmin` for cross-module communication
-  - Updated script enqueue dependencies in `class-asset-manager.php` for proper load order
-  - Reduced `admin.js` to ~1117 lines while maintaining 100% functionality
-- **Improved**: Code maintainability and future extensibility
-- **Status**: Stable release (no breaking changes)
+### Version 3.5.0 (2026-03-24)
+- **Refactored**: Admin JavaScript modularization complete
+  - Split monolithic `admin.js` (1599 lines) into 5 focused modules
+  - New modules: `admin-common.js` (utilities + global state), `admin-tabs.js`, `admin-settings.js`, `admin-emoji.js`, `admin-import-export.js`
+  - Implemented `window.WPConfiguratorAdmin` global state container for cross-module communication
+  - Updated `class-asset-manager.php` with proper script dependencies
+  - Zero breaking changes; admin.js reduced to ~1117 lines
+- **Redesigned**: Stats Dashboard - cleaner, more focused UX
+  - Grouped cards into 2 logical sections: Revenue Summary + Conversion & Engagement
+  - Reduced from 18 cards to 11; removed less-critical metrics (Total Interactions, Features Added, Content Performance)
+  - Streamlined charts: keep only 3 most important (Revenue Trend, Quote Requests, Billing Breakdown)
+  - Removed doughnut and Top 10 Features charts to reduce clutter
+  - Charts more compact: 180px height, 12px padding (was 300px, 20px)
+  - Responsive layout: charts stack vertically on tablets and smaller screens
+  - Default date filter changed to "All Time" with 30-day cookie persistence
+  - Removed intro description; tighter heading spacing (2px margins)
+- **Improved**: Overall admin interface consistency and performance
 
 ### Version 3.4.14 (2026-03-23)
 - **Enhanced**: Miscellaneous Settings with collapsible sections (all 5 main sections now collapse/expand)

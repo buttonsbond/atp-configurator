@@ -1,6 +1,6 @@
 # WP Configurator Wizard - Project Overview
 
-## Current State (v3.4.17 - Stable)
+## Current State (v3.5.0 - Stable)
 **Live**: https://all-tech-plus.com/wizard
 **Shortcode**: `[wp_configurator_wizard]`
 **Stack**: PHP (WordPress), jQuery, custom CSS; no build step
@@ -49,14 +49,17 @@ Key milestones:
   - Live preview toggle (enable/disable)
   - Simplified Advanced Settings structure
   - Bug fix: `enable_live_preview` setting now properly saved
-- **v3.4.17 (2026-03-24)**: Admin JavaScript Modularization Release
-  - Completed modularization of monolithic admin.js (1599 lines) into 5 focused modules
-  - New files: `admin-common.js` (utilities + global state), `admin-tabs.js` (navigation), `admin-settings.js` (misc settings), `admin-emoji.js` (emoji picker), `admin-import-export.js` (import/export)
-  - Implemented global state container `window.WPConfiguratorAdmin` for cross-module communication
-  - Updated script dependencies in `class-asset-manager.php` for proper load order
-  - **Bug Fix**: Category tab state now persists correctly across page reloads and saves
-  - **Result**: admin.js reduced to ~1117 lines; improved maintainability; zero breaking changes
-  - **Status**: ✅ Stable release (v3.4.17 tagged and deployed)
+- **v3.5.0 (2026-03-24)**: Stats Dashboard Refinement & Admin Modularization
+  - Admin JavaScript modularization (from v3.4.17): Split admin.js into 5 modules, implemented global state, zero breaking changes
+  - Stats Dashboard complete redesign:
+    - Grouped metrics into 2 sections (Revenue Summary, Conversion & Engagement)
+    - Removed 7 less-critical cards (Total Interactions, Features Added, Content Performance)
+    - Streamlined charts to 3 key visualizations (Revenue Trend, Quote Requests, Billing Breakdown)
+    - Removed doughnut and Top 10 Features charts
+    - Made charts 40% more compact (180px height, 12px padding)
+    - Responsive improvements: charts stack on tablets, cards use tighter spacing
+    - Default date filter: All Time; cookie persistence (30 days)
+  - Overall: cleaner, faster, more focused admin analytics experience
 
 ---
 

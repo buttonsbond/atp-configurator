@@ -139,7 +139,7 @@ wp-configurator-wizard/
 - Always regenerate ZIP and bump version after updates
 
 ## Current Version
-- **3.4.17** (stable - GPLv3 licensed)
+- **3.5.0** (stable - GPLv3 licensed)
 
 ## Development Workflow Notes
 - **Current State**: Version 3.4.14 released and stable.
