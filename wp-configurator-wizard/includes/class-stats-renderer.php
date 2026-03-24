@@ -84,23 +84,6 @@ final class Stats_Renderer {
 			<!-- Summary Cards - Grouped (Compact) -->
 			<div class="stats-summary-cards">
 
-				<!-- Requests Overview -->
-				<h3 class="group-title">Requests Overview</h3>
-				<div class="group-cards">
-					<div class="stat-card">
-						<div class="stat-value"><?php echo number_format( $total_requests ); ?></div>
-						<div class="stat-label">Total Quote Requests</div>
-					</div>
-					<div class="stat-card" style="border-top: 3px solid #2271b1;">
-						<div class="stat-value" style="color: #2271b1;"><?php echo number_format( $metrics['total_wizard_views'] ); ?></div>
-						<div class="stat-label" style="font-weight: 600; color: #2271b1;">Wizard Views</div>
-					</div>
-					<div class="stat-card">
-						<div class="stat-value"><?php echo $metrics['view_to_quote_rate']; ?>%</div>
-						<div class="stat-label">View→Quote Rate</div>
-					</div>
-				</div>
-
 				<!-- Revenue Summary -->
 				<h3 class="group-title">Revenue Summary</h3>
 				<div class="group-cards">
