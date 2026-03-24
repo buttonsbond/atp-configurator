@@ -44,10 +44,12 @@ final class Stats_Renderer {
 		$table_name = $this->database_manager->get_quote_requests_table();
 		$interactions_table = $this->database_manager->get_interactions_table();
 
-		// Get date filter from request (default to all_time), fallback to localStorage
+		// Get date filter from request (default to all_time), fallback to cookie
 		$date_filter = 'all_time';
 		if ( isset( $_GET['stats_filter'] ) ) {
 			$date_filter = sanitize_text_field( $_GET['stats_filter'] );
+			// Set cookie to remember preference (30 days)
+			setcookie( 'wp_configurator_stats_filter', $date_filter, time() + 30 * DAY_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN );
 		} elseif ( isset( $_COOKIE['wp_configurator_stats_filter'] ) ) {
 			$date_filter = sanitize_text_field( $_COOKIE['wp_configurator_stats_filter'] );
 		}
@@ -75,7 +77,7 @@ final class Stats_Renderer {
 			<label for="stats-date-filter"><strong><?php esc_html_e( 'Date Range:', 'wp-configurator' ); ?></strong></label>
 			<form method="get" action="" style="display: inline;">
 				<input type="hidden" name="page" value="wp-configurator-settings">
-				<select id="stats-date-filter" name="stats_filter" style="min-width: 150px;">
+				<select id="stats-date-filter" name="stats_filter" onchange="this.form.submit()" style="min-width: 150px;">
 					<option value="today" <?php selected( $date_filter, 'today' ); ?>>Today</option>
 					<option value="yesterday" <?php selected( $date_filter, 'yesterday' ); ?>>Yesterday</option>
 					<option value="last_7_days" <?php selected( $date_filter, 'last_7_days' ); ?>>Last 7 Days</option>
@@ -320,22 +322,6 @@ final class Stats_Renderer {
 				$('#refresh-interactions').on('click', function(e){
 					e.stopPropagation(); // prevent toggle
 					window.location.reload();
-				});
-
-				// Persist stats filter selection in localStorage
-				var $filter = $('#stats-date-filter');
-				var savedFilter = localStorage.getItem('wpConfiguratorStatsFilter');
-				if (savedFilter && !new URLSearchParams(window.location.search).has('stats_filter')) {
-					// If no GET param but we have saved preference, set and apply it
-					$filter.val(savedFilter);
-					// Reload with the saved filter
-					var url = new URL(window.location);
-					url.searchParams.set('stats_filter', savedFilter);
-					window.location.href = url.toString();
-				}
-
-				$filter.on('change', function() {
-					localStorage.setItem('wpConfiguratorStatsFilter', this.value);
 				});
 			});
 		})(jQuery);
