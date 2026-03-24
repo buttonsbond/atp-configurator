@@ -155,6 +155,15 @@ final class Asset_Manager {
 			true
 		);
 
+		// Enqueue admin tabs module
+		wp_enqueue_script(
+			'wp-configurator-admin-tabs',
+			plugins_url( 'assets/js/admin/admin-tabs.js', WP_CONFIGURATOR_WIZARD_FILE ),
+			array( 'jquery' ),
+			$this->version,
+			true
+		);
+
 		// Enqueue admin emoji picker module
 		wp_enqueue_script(
 			'wp-configurator-admin-emoji',
