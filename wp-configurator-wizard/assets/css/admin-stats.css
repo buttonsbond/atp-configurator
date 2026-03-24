@@ -3,12 +3,35 @@
  * Plugin Version: 2.9.28
  */
 
-/* Summary Cards */
+/* Summary Cards - Grouped Layout */
 .stats-summary-cards {
-	display: grid;
-	grid-template-columns: repeat(4, 1fr);
-	gap: 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
 	margin-bottom: 24px;
+}
+
+.stat-card-group {
+	background: #fff;
+	border: 1px solid #ccd0d4;
+	border-radius: 8px;
+	padding: 20px;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.group-title {
+	margin: 0 0 16px 0;
+	font-size: 16px;
+	font-weight: 600;
+	color: #1d2327;
+	border-bottom: 1px solid #eee;
+	padding-bottom: 8px;
+}
+
+.group-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: 16px;
 }
 
 .stat-card {
@@ -63,13 +86,13 @@
 
 /* Responsive adjustments */
 @media screen and (max-width: 1200px) {
-	.stats-summary-cards {
+	.stat-card-group .group-cards {
 		grid-template-columns: repeat(2, 1fr);
 	}
 }
 
 @media screen and (max-width: 768px) {
-	.stats-summary-cards {
+	.stat-card-group .group-cards {
 		grid-template-columns: 1fr;
 	}
 

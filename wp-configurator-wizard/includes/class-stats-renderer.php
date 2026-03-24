@@ -81,84 +81,120 @@ final class Stats_Renderer {
 			</form>
 		</div>
 		<div class="wp-configurator-stats-dashboard">
-			<!-- Summary Cards -->
+			<!-- Summary Cards - Grouped -->
 			<div class="stats-summary-cards">
-				<div class="stat-card">
-					<div class="stat-value"><?php echo number_format( $total_requests ); ?></div>
-					<div class="stat-label">Total Quote Requests</div>
+
+				<!-- Group 1: Requests Overview -->
+				<div class="stat-card-group">
+					<h3 class="group-title">Requests Overview</h3>
+					<div class="group-cards">
+						<div class="stat-card">
+							<div class="stat-value"><?php echo number_format( $total_requests ); ?></div>
+							<div class="stat-label">Total Quote Requests</div>
+						</div>
+						<div class="stat-card" style="border-top: 3px solid #2271b1;">
+							<div class="stat-value" style="color: #2271b1;"><?php echo number_format( $metrics['total_wizard_views'] ); ?></div>
+							<div class="stat-label" style="font-weight: 600; color: #2271b1;">Wizard Views</div>
+						</div>
+						<div class="stat-card">
+							<div class="stat-value"><?php echo $metrics['view_to_quote_rate']; ?>%</div>
+							<div class="stat-label">View→Quote Rate</div>
+						</div>
+					</div>
 				</div>
-				<div class="stat-card">
-					<div class="stat-value">€<?php echo number_format( $metrics['total_value'], 2 ); ?></div>
-					<div class="stat-value" style="font-size: 1em; color: #46b450; margin-top: 4px;">€<?php echo number_format( $metrics['cash_in_bag'], 2 ); ?></div>
-					<div class="stat-label">Quote Value</div>
+
+				<!-- Group 2: Revenue Summary -->
+				<div class="stat-card-group">
+					<h3 class="group-title">Revenue Summary</h3>
+					<div class="group-cards">
+						<div class="stat-card">
+							<div class="stat-value">€<?php echo number_format( $metrics['total_value'], 2 ); ?></div>
+							<div class="stat-value" style="font-size: 1em; color: #46b450;">€<?php echo number_format( $metrics['cash_in_bag'], 2 ); ?></div>
+							<div class="stat-label">Quote Value (Total / Collected)</div>
+						</div>
+						<div class="stat-card">
+							<div class="stat-value">€<?php echo number_format( $metrics['monthly_total'], 2 ); ?></div>
+							<div class="stat-value" style="font-size: 1em; color: #46b450;">€<?php echo number_format( $metrics['invoiced_monthly'], 2 ); ?></div>
+							<div class="stat-label">Monthly Recurring (MRR)</div>
+						</div>
+						<div class="stat-card">
+							<div class="stat-value">€<?php echo number_format( $metrics['quarterly_total'], 2 ); ?></div>
+							<div class="stat-value" style="font-size: 1em; color: #46b450;">€<?php echo number_format( $metrics['invoiced_quarterly'], 2 ); ?></div>
+							<div class="stat-label">Quarterly Recurring (QRR)</div>
+						</div>
+						<div class="stat-card">
+							<div class="stat-value">€<?php echo number_format( $metrics['annual_total'], 2 ); ?></div>
+							<div class="stat-value" style="font-size: 1em; color: #46b450;">€<?php echo number_format( $metrics['invoiced_annual'], 2 ); ?></div>
+							<div class="stat-label">Annual Recurring (ARR)</div>
+						</div>
+					</div>
 				</div>
-				<div class="stat-card">
-					<div class="stat-value">€<?php echo number_format( $metrics['monthly_total'], 2 ); ?></div>
-					<div class="stat-value" style="font-size: 1em; color: #46b450; margin-top: 4px;">€<?php echo number_format( $metrics['invoiced_monthly'], 2 ); ?></div>
-					<div class="stat-label">Monthly Recurring (MRR)</div>
+
+				<!-- Group 3: Engagement -->
+				<div class="stat-card-group">
+					<h3 class="group-title">Engagement</h3>
+					<div class="group-cards">
+						<div class="stat-card" style="border-top: 3px solid #2271b1;">
+							<div class="stat-value" style="color: #2271b1;"><?php echo number_format( $metrics['total_interactions'] ); ?></div>
+							<div class="stat-label" style="font-weight: 600; color: #2271b1;">Total Interactions</div>
+						</div>
+						<div class="stat-card" style="border-top: 3px solid #2271b1;">
+							<div class="stat-value" style="color: #2271b1;"><?php echo number_format( $metrics['feature_added_count'] ); ?></div>
+							<div class="stat-label" style="font-weight: 600; color: #2271b1;">Features Added</div>
+						</div>
+						<div class="stat-card">
+							<div class="stat-value"><?php echo number_format( $metrics['unique_initial_engagement'] ); ?></div>
+							<div class="stat-label">Initial Engagement</div>
+						</div>
+						<div class="stat-card">
+							<div class="stat-value"><?php echo $metrics['engagement_rate']; ?>%</div>
+							<div class="stat-label">Engagement Rate</div>
+						</div>
+					</div>
 				</div>
-				<div class="stat-card">
-					<div class="stat-value">€<?php echo number_format( $metrics['quarterly_total'], 2 ); ?></div>
-					<div class="stat-value" style="font-size: 1em; color: #46b450; margin-top: 4px;">€<?php echo number_format( $metrics['invoiced_quarterly'], 2 ); ?></div>
-					<div class="stat-label">Quarterly Recurring (QRR)</div>
+
+				<!-- Group 4: Conversion Funnel -->
+				<div class="stat-card-group">
+					<h3 class="group-title">Conversion Funnel</h3>
+					<div class="group-cards">
+						<div class="stat-card" style="border-top: 3px solid #f56e28;">
+							<div class="stat-value" style="color: #f56e28;"><?php echo number_format( $metrics['checkout_starts'] ); ?></div>
+							<div class="stat-label" style="font-weight: 600; color: #f56e28;">Checkout Started</div>
+						</div>
+						<div class="stat-card" style="border-top: 3px solid #72aee6;">
+							<div class="stat-value" style="color: #72aee6;"><?php echo number_format( $metrics['quotes_submitted_count'] ); ?></div>
+							<div class="stat-label" style="font-weight: 600; color: #72aee6;">Quotes Submitted</div>
+						</div>
+						<div class="stat-card" style="border-top: 3px solid #dc3232;">
+							<div class="stat-value" style="color: #dc3232;"><?php echo number_format( $metrics['checkout_abandoned'] ); ?></div>
+							<div class="stat-label" style="font-weight: 600; color: #dc3232;">Checkout Abandoned</div>
+						</div>
+						<div class="stat-card">
+							<div class="stat-value"><?php echo $metrics['quote_to_confirmed_rate']; ?>%</div>
+							<div class="stat-label">Quote→Confirmed</div>
+						</div>
+						<div class="stat-card">
+							<div class="stat-value"><?php echo $metrics['quote_to_invoiced_rate']; ?>%</div>
+							<div class="stat-label">Quote→Invoiced</div>
+						</div>
+					</div>
 				</div>
-				<div class="stat-card">
-					<div class="stat-value">€<?php echo number_format( $metrics['annual_total'], 2 ); ?></div>
-					<div class="stat-value" style="font-size: 1em; color: #46b450; margin-top: 4px;">€<?php echo number_format( $metrics['invoiced_annual'], 2 ); ?></div>
-					<div class="stat-label">Annual Recurring (ARR)</div>
+
+				<!-- Group 5: Content Performance -->
+				<div class="stat-card-group">
+					<h3 class="group-title">Content Performance</h3>
+					<div class="group-cards">
+						<div class="stat-card">
+							<div class="stat-value"><?php echo number_format( $metrics['unique_features_used'] ); ?></div>
+							<div class="stat-label">Unique Features Used</div>
+						</div>
+						<div class="stat-card">
+							<div class="stat-value"><?php echo $metrics['avg_items']; ?></div>
+							<div class="stat-label">Avg Items/Quote</div>
+						</div>
+					</div>
 				</div>
-				<div class="stat-card">
-					<div class="stat-value"><?php echo number_format( $metrics['unique_features_used'] ); ?></div>
-					<div class="stat-label">Unique Features Used</div>
-				</div>
-				<div class="stat-card">
-					<div class="stat-value"><?php echo $metrics['quote_to_confirmed_rate']; ?>%</div>
-					<div class="stat-label">Quote→Confirmed</div>
-				</div>
-				<div class="stat-card">
-					<div class="stat-value"><?php echo $metrics['quote_to_invoiced_rate']; ?>%</div>
-					<div class="stat-label">Quote→Invoiced</div>
-				</div>
-				<div class="stat-card" style="border-top: 3px solid #2271b1;">
-					<div class="stat-value" style="color: #2271b1;"><?php echo number_format( $metrics['total_wizard_views'] ); ?></div>
-					<div class="stat-label" style="font-weight: 600; color: #2271b1;">Wizard Views</div>
-				</div>
-				<div class="stat-card" style="border-top: 3px solid #2271b1;">
-					<div class="stat-value" style="color: #2271b1;"><?php echo number_format( $metrics['total_interactions'] ); ?></div>
-					<div class="stat-label" style="font-weight: 600; color: #2271b1;">Total Interactions</div>
-				</div>
-				<div class="stat-card" style="border-top: 3px solid #2271b1;">
-					<div class="stat-value" style="color: #2271b1;"><?php echo number_format( $metrics['feature_added_count'] ); ?></div>
-					<div class="stat-label" style="font-weight: 600; color: #2271b1;">Features Added</div>
-				</div>
-				<div class="stat-card" style="border-top: 3px solid #f56e28;">
-					<div class="stat-value" style="color: #f56e28;"><?php echo number_format( $metrics['checkout_starts'] ); ?></div>
-					<div class="stat-label" style="font-weight: 600; color: #f56e28;">Checkout Started</div>
-				</div>
-				<div class="stat-card" style="border-top: 3px solid #72aee6;">
-					<div class="stat-value" style="color: #72aee6;"><?php echo number_format( $metrics['quotes_submitted_count'] ); ?></div>
-					<div class="stat-label" style="font-weight: 600; color: #72aee6;">Quotes Submitted</div>
-				</div>
-				<div class="stat-card" style="border-top: 3px solid #dc3232;">
-					<div class="stat-value" style="color: #dc3232;"><?php echo number_format( $metrics['checkout_abandoned'] ); ?></div>
-					<div class="stat-label" style="font-weight: 600; color: #dc3232;">Checkout Abandoned</div>
-				</div>
-				<div class="stat-card">
-					<div class="stat-value"><?php echo number_format( $metrics['unique_initial_engagement'] ); ?></div>
-					<div class="stat-label">Initial Engagement</div>
-				</div>
-				<div class="stat-card">
-					<div class="stat-value"><?php echo $metrics['view_to_quote_rate']; ?>%</div>
-					<div class="stat-label">View→Quote Rate</div>
-				</div>
-				<div class="stat-card">
-					<div class="stat-value"><?php echo $metrics['engagement_rate']; ?>%</div>
-					<div class="stat-label">Engagement Rate</div>
-				</div>
-				<div class="stat-card">
-					<div class="stat-value"><?php echo $metrics['avg_items']; ?></div>
-					<div class="stat-label">Avg Items/Quote</div>
-				</div>
+
 			</div>
 
 			<!-- Charts Row -->
