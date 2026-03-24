@@ -12,7 +12,7 @@
 }
 
 .group-title {
-	margin: 4px 0 4px 0;
+	margin: 2px 0 2px 0;
 	font-size: 12px;
 	font-weight: 600;
 	color: #1d2327;
@@ -24,7 +24,7 @@
 .group-cards {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-	gap: 12px;
+	gap: 8px;
 }
 
 .stat-card {

@@ -48,8 +48,6 @@ final class Stats_Renderer {
 		$date_filter = 'all_time';
 		if ( isset( $_GET['stats_filter'] ) ) {
 			$date_filter = sanitize_text_field( $_GET['stats_filter'] );
-			// Set cookie to remember preference (30 days)
-			setcookie( 'wp_configurator_stats_filter', $date_filter, time() + 30 * DAY_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN );
 		} elseif ( isset( $_COOKIE['wp_configurator_stats_filter'] ) ) {
 			$date_filter = sanitize_text_field( $_COOKIE['wp_configurator_stats_filter'] );
 		}
@@ -322,6 +320,14 @@ final class Stats_Renderer {
 				$('#refresh-interactions').on('click', function(e){
 					e.stopPropagation(); // prevent toggle
 					window.location.reload();
+				});
+
+				// Persist stats filter in cookie (30 days)
+				$('#stats-date-filter').on('change', function() {
+					var value = this.value;
+					var expires = new Date();
+					expires.setTime(expires.getTime() + (30*24*60*60*1000));
+					document.cookie = 'wp_configurator_stats_filter=' + value + '; expires=' + expires.toUTCString() + '; path=/';
 				});
 			});
 		})(jQuery);
