@@ -42,3 +42,7 @@ console.log('✅ admin-common.js loaded');
     };
     console.log('✅ showToast exposed globally');
 })();
+
+// Global state container for admin modules
+window.WPConfiguratorAdmin = window.WPConfiguratorAdmin || {};
+console.log('✅ WPConfiguratorAdmin global container initialized');

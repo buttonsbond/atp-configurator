@@ -155,11 +155,11 @@ final class Asset_Manager {
 			true
 		);
 
-		// Enqueue admin tabs module
+		// Enqueue admin tabs module (depends on common for state utilities)
 		wp_enqueue_script(
 			'wp-configurator-admin-tabs',
 			plugins_url( 'assets/js/admin/admin-tabs.js', WP_CONFIGURATOR_WIZARD_FILE ),
-			array( 'jquery' ),
+			array( 'jquery', 'wp-configurator-admin-common' ),
 			$this->version,
 			true
 		);
@@ -173,20 +173,36 @@ final class Asset_Manager {
 			true
 		);
 
-		// Enqueue admin settings module
+		// Enqueue admin settings module (depends on common for state utilities)
 		wp_enqueue_script(
 			'wp-configurator-admin-settings',
 			plugins_url( 'assets/js/admin/admin-settings.js', WP_CONFIGURATOR_WIZARD_FILE ),
-			array( 'jquery' ),
+			array( 'jquery', 'wp-configurator-admin-common' ),
 			$this->version,
 			true
 		);
 
-		// Enqueue admin JS (depends on admin-common for utilities)
+		// Enqueue admin import/export module (depends on common and tabs)
+		wp_enqueue_script(
+			'wp-configurator-admin-import-export',
+			plugins_url( 'assets/js/admin/admin-import-export.js', WP_CONFIGURATOR_WIZARD_FILE ),
+			array( 'jquery', 'wp-configurator-admin-common', 'wp-configurator-admin-tabs' ),
+			$this->version,
+			true
+		);
+
+		// Enqueue admin JS (depends on all modular components)
 		wp_enqueue_script(
 			'wp-configurator-admin',
 			plugins_url( 'assets/js/admin.js', WP_CONFIGURATOR_WIZARD_FILE ),
-			array( 'jquery', 'wp-configurator-admin-common' ),
+			array(
+				'jquery',
+				'wp-configurator-admin-common',
+				'wp-configurator-admin-tabs',
+				'wp-configurator-admin-settings',
+				'wp-configurator-admin-emoji',
+				'wp-configurator-admin-import-export'
+			),
 			$this->version,
 			true
 		);
