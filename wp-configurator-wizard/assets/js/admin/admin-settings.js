@@ -92,52 +92,6 @@ jQuery(document).ready(function($) {
 		location.reload();
 	});
 
-	// ========================================
-	// Restore UI state on page load
-	(function restoreState() {
-		var state = loadAdminState();
-
-		// Restore active tab
-		if (state.activeTab) {
-			var $tab = $('.nav-tab[data-tab="' + state.activeTab + '"]');
-			if ($tab.length) {
-				$('.nav-tab-wrapper .nav-tab').removeClass('nav-tab-active');
-				$tab.addClass('nav-tab-active');
-				$('.wp-configurator-tab-content').removeClass('active');
-				$('#' + state.activeTab).addClass('active');
-			}
-		}
-
-		// Restore header collapsed state
-		if (state.headerCollapsed) {
-			$('.wp-configurator-admin-header').addClass('collapsed');
-		} else {
-			$('.wp-configurator-admin-header').removeClass('collapsed');
-		}
-
-		// Restore donors section state
-		if (state.donorsCollapsed) {
-			$('.wp-configurator-donors-section').addClass('collapsed');
-		} else {
-			$('.wp-configurator-donors-section').removeClass('collapsed');
-		}
-
-		// Restore recent interactions section state
-		if (state.interactionsCollapsed) {
-			$('.wp-configurator-interactions-section').addClass('collapsed');
-		} else {
-			$('.wp-configurator-interactions-section').removeClass('collapsed');
-		}
-
-		// Restore active category tab (trigger click to reuse existing handler)
-		if (state.activeCategoryTab) {
-			var $catTab = $('.category-tab[data-category-id="' + state.activeCategoryTab + '"]');
-			if ($catTab.length) {
-				$catTab.trigger('click');
-			}
-		}
-	})();
-
 	// Capture header collapse/expand
 	$('.wp-configurator-header-top').on('click', function(e) {
 		if ($(e.target).closest('.wp-configurator-donate-btn').length) {

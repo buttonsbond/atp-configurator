@@ -61,6 +61,9 @@ Key milestones:
 - ✅ Step 2.2: Miscellaneous Settings extracted to `admin-settings.js` (154 lines removed)
 - ✅ Step 2.3: Tab navigation extracted to `admin-tabs.js` (22 lines removed)
 
+**Bug Fix (2026-03-24)**:
+- Fixed category tab state not persisting after save. Root cause: restoreState() was in admin-settings.js (only loads on Misc tab). Moved state restoration to admin-tabs.js (always loads) and moved activeCategoryTab restoration to admin.js (runs after its handlers attach). Now Categories & Features tab selection persists correctly across saves.
+
 ---
 
 ### Completed (Highlights)

@@ -1219,5 +1219,16 @@ jQuery(document).ready(function($) {
 			}
 		});
 	});
+	// Restore active category tab on page load (after all handlers attached)
+	(function restoreActiveCategory() {
+		var state = loadAdminState();
+		if (state.activeCategoryTab) {
+			var $catTab = $('.category-tab[data-category-id="' + state.activeCategoryTab + '"]');
+			if ($catTab.length) {
+				console.log('🔄 Restoring active category tab:', state.activeCategoryTab);
+				$catTab.trigger('click');
+			}
+		}
+	})();
 });
 
