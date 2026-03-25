@@ -463,5 +463,55 @@ Key milestones:
 ---
 
 #### Additional Stretch Ideas (Not Yet Prioritized)
-- Further main plugin cleanup (move remaining rendering methods to view classes)
+
+##### Conditional Feature Visibility by Referrer Parameters
+**Goal**: Allow features to be shown/hidden based on URL parameters in the referring URL (e.g., for Facebook promotions, campaign targeting).
+- Add 2 optional fields to feature edit modal:
+  - `show_if_param` (text) - parameter name that must be present in URL to show this feature
+  - `hide_if_param` (text) - parameter name that, if present, hides this feature
+- Frontend logic: On wizard load, check `window.location.search` for these parameters
+- If `show_if_param` is set and parameter NOT found → hide feature tile
+- If `hide_if_param` is set and parameter IS found → hide feature tile
+- Use case: Create special Facebook promo where only users with `?fb_promo=summer` see certain features
+
+##### Feature Product Images
+**Goal**: Allow uploading/selecting a product image for each feature, as an alternative to the emoji icon.
+- Add new field in feature modal: `feature_image` (media uploader)
+- Store image URL/attachment ID in feature data
+- Frontend: If image exists, display `<img>`; otherwise fall back to emoji icon
+- Admin grid: Show thumbnail preview in feature tile
+
+##### Quotes Request Tab UI Improvements
+**Current**: Basic table with many columns, cramped on small screens.
+**Proposed**:
+- Bulk action toolbar that appears when checkboxes selected
+- Better status badges (colored pills) instead of inline dropdowns
+- Quick view modal to see full quote details without scrolling
+- Card layout on mobile/tablet
+- Column sorting (click headers)
+- Search/filter by status or date range
+
+##### System Status Tab UI Improvements
+**Current**: Table-based layout with long instruction blocks.
+**Proposed**:
+- Replace table with card-based check items grouped by category
+- Each card: title, large status icon, description, action area
+- Color-coded left border or background for quick scanning
+- Group checks: Core Components, Caching, Email, Database, Environment
+- Collapsible details for verbose instructions
+- Overall health summary bar at top
+
+##### Multi-Template Frontend Support
+**Goal**: Allow selecting different frontend wizard templates/layouts from settings.
+- Add setting: `frontend_template` (dropdown: 'default', 'compact', 'minimal', etc.)
+- Each template is a separate PHP template file in `templates/frontend/`
+- Main `wizard.php` becomes 'default' template
+- Template selector in Miscellaneous Settings
+- Provide 2-3 layout variations (e.g., side-by-side vs stacked panels, different tile sizes)
+- Future: admin can add custom templates via filter/hook
+
+##### Further Main Plugin Cleanup
+- Move any remaining rendering methods to dedicated view classes
+- Audit `wp-configurator-wizard.php` for dead code or responsibilities that belong elsewhere
+- Ensure single responsibility principle: main plugin should only bootstrap/coordinate, not render
 
