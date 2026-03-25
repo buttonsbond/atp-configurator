@@ -798,6 +798,10 @@
 	font-size: 16px;
 }
 
+.category-tab .tab-icon .category-tab-image {
+	vertical-align: middle;
+}
+
 .category-tab .tab-name {
 	font-weight: 500;
 }
@@ -1310,6 +1314,14 @@
 }
 .tile-icon.has-category-color {
 	background-color: var(--category-color);
+}
+
+/* Feature image styling */
+.feature-tile .tile-icon img.feature-tile-image {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	border-radius: 50%;
 }
 .tile-title {
 	font-weight: 600;
@@ -2045,7 +2057,20 @@ input[type="range"].range-slider::-moz-range-thumb {
 	border: 1px solid #e5e7eb;
 	border-radius: 8px;
 	padding: 20px 24px;
-	margin-bottom: 16px;
+	margin-bottom: 0;
+}
+
+/* Grid for simple settings cards (like Tracking & Privacy) */
+.settings-cards-grid {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 16px;
+}
+
+@media (min-width: 768px) {
+	.settings-cards-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
 }
 
 .settings-card-header {
@@ -2064,6 +2089,178 @@ input[type="range"].range-slider::-moz-range-thumb {
 
 .settings-card-icon {
 	font-size: 18px;
+}
+
+/* System Status cards */
+.system-status-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 12px 14px;
+    position: relative;
+}
+
+/* Left accent border based on status */
+.system-status-card--success { border-left: 4px solid #46b450; }
+.system-status-card--warning { border-left: 4px solid #f56e28; }
+.system-status-card--error { border-left: 4px solid #dc3232; }
+.system-status-card--info { border-left: 4px solid #72aee6; }
+
+.system-status-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.system-status-card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-weight: 600;
+    color: #fff;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.system-status-card-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1d2327;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.system-status-card-body {
+    font-size: 11px;
+    line-height: 1.5;
+    color: #666;
+    margin-bottom: 6px;
+}
+
+.system-status-card-actions {
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px solid #f5f5f5;
+}
+
+.system-status-card-actions .description {
+    margin: 0;
+    background: #f9f9f9;
+    padding: 12px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    font-size: 13px;
+}
+
+/* Group headings */
+.system-status-group {
+    margin-bottom: 20px;
+}
+
+.system-status-group-title {
+    font-size: 10px;
+    font-weight: 600;
+    color: #646970;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* Responsive grid for system status cards */
+.system-status-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+@media (min-width: 768px) {
+    .system-status-cards-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .system-status-cards-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+    }
+}
+
+@media (min-width: 1280px) {
+    .system-status-cards-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 12px;
+    }
+}
+
+/* Health summary bar */
+.system-status-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 8px 12px;
+    background: #f9f9f9;
+    border-radius: 6px;
+    margin-bottom: 14px;
+    border: 1px solid #ddd;
+    align-items: center;
+    font-size: 12px;
+}
+.system-status-summary-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+.system-status-summary-item--success { color: #46b450; }
+.system-status-summary-item--warning { color: #f56e28; }
+.system-status-summary-item--error { color: #dc3232; }
+.system-status-summary-item--info { color: #72aee6; }
+
+/* Existing styles for code blocks and copy buttons (moved from inline) */
+.system-status-pre {
+    background: #f1f1f1;
+    padding: 10px;
+    border-radius: 4px;
+    overflow-x: auto;
+    position: relative;
+    margin: 6px 0;
+    border: 1px solid #ddd;
+}
+.system-status-pre code {
+    font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #333;
+}
+.system-status-copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 4px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.2s;
+}
+.system-status-copy-btn:hover {
+    background: #e6f7ff;
+    border-color: #1e6ba8;
+    color: #1e6ba8;
+}
+.system-status-copy-btn.copied {
+    background: #46b450;
+    color: #fff;
+    border-color: #46b450;
 }
 
 /* Better spacing for field rows */

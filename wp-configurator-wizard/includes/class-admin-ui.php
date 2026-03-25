@@ -41,6 +41,26 @@ final class Admin_UI {
 	public function render_page(): void {
 		$options = $this->settings_manager->get_options();
 
+		// Enrich categories with image URLs for admin display
+		foreach ( $options['categories'] as &$cat ) {
+			if ( ! empty( $cat['category_image_id'] ) ) {
+				$url = wp_get_attachment_image_url( $cat['category_image_id'], 'thumbnail' );
+				$cat['image_url'] = $url ? $url : '';
+			} else {
+				$cat['image_url'] = '';
+			}
+		}
+
+		// Enrich features with image URLs for admin display
+		foreach ( $options['features'] as &$feat ) {
+			if ( ! empty( $feat['feature_image_id'] ) ) {
+				$url = wp_get_attachment_image_url( $feat['feature_image_id'], 'thumbnail' );
+				$feat['image_url'] = $url ? $url : '';
+			} else {
+				$feat['image_url'] = '';
+			}
+		}
+
 		// Make $wp_configurator_wizard_instance available to templates for method calls
 		global $wp_configurator_wizard_instance;
 		$wp_configurator_wizard_instance = $this->plugin;

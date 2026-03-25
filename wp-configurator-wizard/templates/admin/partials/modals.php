@@ -70,6 +70,20 @@
 					</div>
 
 					<div class="form-row">
+						<label><?php esc_html_e( 'Category Image', 'wp-configurator' ); ?></label>
+						<div class="image-upload-wrapper">
+							<button type="button" class="button select-category-image" style="margin-right: 10px;"><?php esc_html_e( 'Choose Image', 'wp-configurator' ); ?></button>
+							<input type="hidden" id="edit-category-image-id" value="">
+							<input type="hidden" id="edit-category-image-url" value="">
+							<div id="category-image-preview" class="image-preview" style="display: none; margin-top: 10px;">
+								<img id="category-image-preview-img" src="" alt="" style="max-width: 80px; max-height: 80px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+								<button type="button" class="button remove-category-image" style="margin-left: 8px; padding: 4px 12px; font-size: 12px; vertical-align: top;"><?php esc_html_e( 'Remove', 'wp-configurator' ); ?></button>
+							</div>
+						</div>
+						<p class="description"><?php esc_html_e( 'Optional: Upload an image to display instead of the emoji icon in category tabs. Recommended size: 32x32px or larger.', 'wp-configurator' ); ?></p>
+					</div>
+
+					<div class="form-row">
 						<label for="edit-category-color"><?php esc_html_e( 'Accent Color', 'wp-configurator' ); ?></label>
 						<div class="color-input-wrapper">
 							<input type="color" id="edit-category-color" value="#6366f1">
@@ -674,6 +688,20 @@
 							<input type="text" id="edit-feature-icon" class="regular-text" placeholder="📦">
 							<button type="button" class="button open-emoji-picker" title="Select Emoji">😀</button>
 						</div>
+					</div>
+
+					<div class="form-row">
+						<label><?php esc_html_e( 'Feature Image', 'wp-configurator' ); ?></label>
+						<div class="image-upload-wrapper">
+							<button type="button" class="button select-feature-image" style="margin-right: 10px;"><?php esc_html_e( 'Choose Image', 'wp-configurator' ); ?></button>
+							<input type="hidden" id="edit-feature-image-id" value="">
+							<input type="hidden" id="edit-feature-image-url" value="">
+							<div id="feature-image-preview" class="image-preview" style="display: none; margin-top: 10px;">
+								<img id="feature-image-preview-img" src="" alt="" style="max-width: 100px; max-height: 100px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+								<button type="button" class="button remove-image" style="margin-left: 8px; padding: 4px 12px; font-size: 12px; vertical-align: top;"><?php esc_html_e( 'Remove', 'wp-configurator' ); ?></button>
+							</div>
+						</div>
+						<p class="description"><?php esc_html_e( 'Optional: Upload an image to display instead of the emoji icon. Recommended size: 64x64px or larger.', 'wp-configurator' ); ?></p>
 					</div>
 
 					<div class="form-row">

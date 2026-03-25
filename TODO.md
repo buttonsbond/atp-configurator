@@ -1,6 +1,6 @@
 # WP Configurator Wizard - Project Overview
 
-## Current State (v3.5.0 - Stable)
+## Current State (v3.5.2 - Stable)
 **Live**: https://all-tech-plus.com/wizard
 **Shortcode**: `[wp_configurator_wizard]`
 **Stack**: PHP (WordPress), jQuery, custom CSS; no build step
@@ -61,6 +61,32 @@ Key milestones:
     - Default date filter: All Time; cookie persistence (30 days)
   - Overall: cleaner, faster, more focused admin analytics experience
 
+- **v3.5.1 (2026-03-25)**: GitHub Release Checker & System Status Finalization
+  - **GitHub Release Checker**: Automatic version comparison with GitHub releases
+    - System Status card: "Up to date" / "New release available" / "Working on Dev. Version"
+    - Admin-wide dismissible banner when update available
+    - "Force Check" button to bypass 12-hour cache for immediate verification
+    - Smart cache invalidation ensuring button always appears
+  - Completed System Status modernization from v3.5.0:
+    - Consistent card-based layout across all checks
+    - Force Check button added to GitHub Update Check card
+    - Fixed admin notice to only show for actual updates (not dev versions)
+  - Technical: Added AJAX endpoint, nonce security, 12-hour transient caching
+
+- **v3.5.2 (2026-03-25)**: Category & Feature Images
+  - **Image Upload for Categories and Features**: Upload/select product images via WordPress media library
+    - New optional image field in Category Edit modal (replaces emoji icon when set)
+    - New optional image field in Feature Edit modal (replaces emoji icon when set)
+    - Frontend: Images display instead of emoji icons, with responsive sizing (24px for categories, variable for features)
+    - Admin: Image previews in modals with remove button; thumbnail display in category tabs and feature grid
+    - Fallback to emoji icons when no image uploaded (zero breaking change)
+    - Uses `category_image_id` and `feature_image_id` fields in options array
+  - Backend: Auto-enrichment of image URLs in Admin_UI and frontend wizard via `wp_get_attachment_image_url()`
+  - Admin UI: Styled image previews with proper sizing and remove functionality
+  - Settings Manager: Sanitization for new image ID fields (text sanitization)
+  - Asset Manager: No changes needed (no new assets)
+  - Database: No schema changes (uses existing options table)
+
 ---
 
 ### Completed (Highlights)
@@ -83,6 +109,7 @@ Key milestones:
 - **Realistic Test Email**: The "Send Test Email" button now sends an actual sample client email with dummy data (sample products, prices, totals) so you can see exactly how the formatted email will look in real inboxes. Includes a notice that it's a test email.
 - **Category Information Field**: Added optional descriptive text to categories that displays at the top of each category section on the frontend wizard, providing context and guidance to users (v3.2.7)
 - **Category info collapsible fix**: Fixed placement so category info text correctly appears inside collapsible sections and hides when collapsed (v3.2.8)
+- **Category & Feature Images**: Upload custom images for categories and features via WordPress media library; replaces emoji icons; zero breaking changes (v3.5.2)
 
 ---
 
@@ -206,93 +233,58 @@ Key milestones:
    - Non-collapsible mode: Decide where to show (maybe below category title) - follow same pattern
 7. **Documentation**: Update README.md to mention new category info field
 
-#### Filter Bot/Crawler User Agents from Interaction Tracking
+#### Filter Bot/Crawler User Agents from Interaction Tracking ✅ **COMPLETED**
 **Goal**: Exclude interactions from known crawlers/bots to improve analytics accuracy.
 
-**Implementation**:
+**Implementation Completed**:
 
-1. **Settings: Add new fields** (`templates/admin/tabs/miscellaneous.php` in "Tracking & Privacy" section):
-   - Checkbox: `exclude_bot_user_agents` (default checked)
-   - Textarea: `bot_user_agents` (default populated with common bot patterns)
-   ```
-   Common settings:
-   - One pattern per line
-   - Case-insensitive substring matching
-   - Pre-populated with: Googlebot, Bingbot, Yahoo! Slurp, DuckDuckBot, Baiduspider, YandexBot, Sogou, Exabot, facebot, IA_Archiver, Twitterbot, LinkedInBot, Slackbot, Discordbot, WhatsApp, Telegram, curl, wget, python-requests, Scrapy
-   ```
+1. **Settings** (`includes/class-settings-manager.php`):
+   - Added `exclude_bot_user_agents` (default: **disabled** - user must opt-in)
+   - Added `bot_user_agents` with 20 pre-configured bot patterns
+   - Sanitization: boolean for toggle, `sanitize_textarea_field()` for patterns
 
-2. **Settings_Manager** (`includes/class-settings-manager.php`):
-   - In `sanitize_settings()` (line 232), add:
-     ```php
-     } elseif ( $key === 'exclude_bot_user_agents' ) {
-         $sanitized['exclude_bot_user_agents'] = ! empty( $value ) ? 1 : 0;
-     } elseif ( $key === 'bot_user_agents' ) {
-         $sanitized['bot_user_agents'] = sanitize_textarea_field( $value );
-     }
-     ```
-   - Add defaults in `get_default_options()` (line 320) under 'settings':
-     ```php
-     'exclude_bot_user_agents' => 1,
-     'bot_user_agents' => "Googlebot\nBingbot\nYahoo! Slurp\nDuckDuckBot\nBaiduspider\nYandexBot\nSogou\nExabot\nfacebot\nIA_Archiver\nTwitterbot\nLinkedInBot\nSlackbot\nDiscordbot\nWhatsApp\nTelegram\ncurl\nwget\npython-requests\nScrapy",
-     ```
+2. **Admin UI** (`templates/admin/tabs/miscellaneous.php` - Tracking & Privacy section):
+   - **Bot & Crawler Filtering** card with:
+     - Toggle switch (unchecked by default)
+     - Textarea for patterns (placeholder shown when empty)
+     - **"Restore defaults"** button to reset patterns
+     - **Auto-fill**: Enabling toggle auto-populates patterns if field is empty
+   - **Layout improvement**: IP Exclusion and Statistics cards now display side-by-side on ≥768px screens
+   - Grid layout with responsive single-column on mobile
 
 3. **Interaction Tracking** (`includes/traits/trait-interaction-tracking.php`):
-   - In `ajax_track_interaction()` method, after the admin IP check (around line 89), add bot detection:
-     ```php
-     // Check if this is a bot (skip tracking if enabled)
-     $options = $this->settings_manager->get_options();
-     $exclude_bots = ! empty( $options['settings']['exclude_bot_user_agents'] );
-     $bot_patterns = ! empty( $options['settings']['bot_user_agents'] ) ? explode( "\n", $options['settings']['bot_user_agents'] ) : array();
+   - Bot check inserted after admin IP exclusion (lines 91-106)
+   - Uses case-insensitive `stripos()` for substring matching against patterns
+   - Silently returns success JSON when bot detected (no DB insert)
+   - WP_DEBUG logging for troubleshooting
 
-     if ( $exclude_bots && ! empty( $bot_patterns ) ) {
-         $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
-         foreach ( $bot_patterns as $pattern ) {
-             $pattern = trim( $pattern );
-             if ( $pattern !== '' && stripos( $user_agent, $pattern ) !== false ) {
-                 // Silently ignore bot interaction
-                 if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-                     error_log( "Interaction excluded due to bot detection: $pattern" );
-                 }
-                 wp_send_json_success( array( 'message' => 'Bot interaction excluded' ) );
-                 return;
-             }
-         }
-     }
-     ```
+4. **Recent Interactions Display** (`templates/admin/partials/recent-interactions-content.php`):
+   - Query modified to include `user_agent` column (lines 10, 15)
+   - Post-query filtering (lines 19-40): removes bot events based on same settings
+   - Keeps admin view clean and consistent with tracking behavior
 
-4. **Recent Interactions Display** (`templates/admin/partials/recent-interactions.php`):
-   - Currently shows all interactions. Modify the query to filter out bots (if desired) to keep admin view clean:
-     - Option A: Always filter bots from admin display (they're not useful for analysis)
-     - Option B: Add a checkbox to toggle bot visibility in Recent Interactions section
-   - Recommended: Filter automatically by default (simpler UX). Add a filter toggle if needed later.
-   - To implement: Join with implicit knowledge of bot patterns or query all and filter in PHP:
-     ```php
-     // After fetching $recent_events, filter if setting enabled
-     $exclude_bots = ! empty( $options['settings']['exclude_bot_user_agents'] );
-     $bot_patterns = ! empty( $options['settings']['bot_user_agents'] ) ? explode( "\n", $options['settings']['bot_user_agents'] ) : array();
+**Default Bot Patterns** (20 total):
+```
+Googlebot, Bingbot, Yahoo! Slurp, DuckDuckBot, Baiduspider, YandexBot, Sogou,
+Exabot, facebot, IA_Archiver, Twitterbot, LinkedInBot, Slackbot, Discordbot,
+WhatsApp, Telegram, curl, wget, python-requests, Scrapy
+```
 
-     if ( $exclude_bots && ! empty( $bot_patterns ) ) {
-         $filtered_events = array();
-         foreach ( $recent_events as $event ) {
-             // Need to fetch user_agent for this event
-             // Modify query to include user_agent column
-             // Or join with table to get full row including user_agent
-         }
-         // Update: modify query on line 25-32 to SELECT * (or include user_agent)
-         // Then filter in PHP loop
-     }
-     ```
-   - Better: Modify DB query to include `user_agent` and filter in PHP (simpler than complex SQL WHERE clauses).
+**UX Flow**:
+- Fresh install: Toggle OFF, patterns field empty (placeholder visible)
+- User enables toggle → patterns auto-fill with defaults
+- User can edit patterns, click "Restore defaults" to reset, or leave as-is
+- Must click "Save Features" to persist changes
+- Bot filtering active immediately on next interactions (no page refresh needed)
 
-5. **JavaScript (optional)**: No changes needed.
+**Files Modified**:
+- `includes/class-settings-manager.php`
+- `templates/admin/tabs/miscellaneous.php`
+- `includes/traits/trait-interaction-tracking.php`
+- `templates/admin/partials/recent-interactions-content.php`
+- `assets/css/admin.css` (grid layout)
 
-6. **Testing**:
-   - Enable/disable bot filtering checkbox
-   - Add custom bot patterns (e.g., "MyCrawler")
-   - Simulate bot user agent (via browser dev tools or curl) and verify interaction not recorded
-   - Verify legitimate user interactions still tracked
-   - Recent Interactions section should not show bot events
-   - Stats tab: Should bot-filtered interactions affect metrics? Currently stats query interactions table directly. Best: keep consistent - stats should also respect bot exclusion. Will be addressed separately if stats enhancement is needed.
+---
 
 #### Modernize Admin UI Layouts (Miscellaneous, Quote Requests, System Status)
 
@@ -368,7 +360,7 @@ Key milestones:
 
 ---
 
-##### 3. System Status Tab
+##### 3. System Status Tab ✅ **COMPLETED** (2026-03-25)
 
 **Current Issues**:
 - Uses table layout (functional but dated)
@@ -386,15 +378,19 @@ Key milestones:
 - Add **expandable details** for verbose instructions (chevron toggle)
 - Better code block presentation: syntax highlighting, one-click copy (already present - enhance style)
 
-**Implementation Steps**:
-1. Redesign `class-system-status-view.php` to output div structure instead of table
-2. Create CSS for status cards: padding, border-left color (dynamic by status), shadow on hover
-3. Move action buttons into dedicated `.status-actions` container within card
-4. Group checks: create categories (e.g., "Core Components", "Caching & Performance", "Email & Webhook", "Environment")
-5. Add collapsible detail sections for long instructions (use `<details>` element or custom JS)
-6. Improve copy-button styling: only show on hover, positioned top-right of code block
-7. Add an overall health summary bar at top (e.g., "3 warnings, 1 error - review below")
-8. Consider adding "Mark as reviewed" dismiss functionality for warnings
+**Implementation Completed**:
+- Replaced table with responsive card grid (1→3→4→5 columns)
+- Compact card design with status-colored left accent borders
+- Grouped checks into 5 sections: Core Components, Caching & Performance, Communications, Environment, Analytics
+- Added health summary bar with counts
+- Added PHP Memory Limit check (recommends 256M+)
+- Preserved all functionality: refresh, test emails, webhook testing, copy buttons
+- Removed redundant intro text and legend (icons self-explanatory)
+
+**Files Modified**:
+- `includes/class-system-status-view.php`
+- `assets/css/admin.css`
+- `templates/admin/tabs/system-status.php`
 
 ---
 
@@ -474,7 +470,7 @@ Key milestones:
 - If `hide_if_param` is set and parameter IS found → hide feature tile
 - Use case: Create special Facebook promo where only users with `?fb_promo=summer` see certain features
 
-##### Feature Product Images
+##### Feature Product Images ✅ COMPLETED (v3.5.2)
 **Goal**: Allow uploading/selecting a product image for each feature, as an alternative to the emoji icon.
 - Add new field in feature modal: `feature_image` (media uploader)
 - Store image URL/attachment ID in feature data

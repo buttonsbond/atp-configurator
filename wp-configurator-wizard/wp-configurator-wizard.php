@@ -2,7 +2,7 @@
 /**
  * Plugin Name: ATP Quote Configurator
  * Description: Comprehensive cost estimation wizard with real-time analytics. Track interactions, manage quote requests, and gain insights with engagement metrics, revenue trends, and feature popularity.
- * Version: 3.5.0
+ * Version: 3.5.2
  * Author: All Tech Plus, Rojales (https://all-tech-plus.com)
  * License: GPL v3 or later
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -29,7 +29,7 @@ class WP_Configurator_Wizard {
 	/**
 	 * Plugin version
 	 */
-	const VERSION = '3.5.0';
+	const VERSION = '3.5.2';
 
 	/**
 	 * Database manager instance
@@ -130,14 +130,16 @@ class WP_Configurator_Wizard {
 		$this->settings_manager = new Settings_Manager( self::VERSION );
 		$this->admin_ui = new Admin_UI( $this->settings_manager, $this );
 		$this->stats_renderer = new Stats_Renderer( $this->settings_manager, $this->database_manager );
-		$this->ajax_handler = new Ajax_Handler( self::VERSION, $this->settings_manager, $this->database_manager );
+		$this->system_status_view = new System_Status_View( $this->settings_manager, self::VERSION );
+		$this->ajax_handler = new Ajax_Handler( self::VERSION, $this->settings_manager, $this->database_manager, $this->system_status_view );
 		$this->asset_manager = new Asset_Manager( self::VERSION, $this->settings_manager );
 		$this->quote_requests_view = new Quote_Requests_View( $this->settings_manager );
-		$this->system_status_view = new System_Status_View( $this->settings_manager, self::VERSION );
 
 		add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'admin_init', array( $this->settings_manager, 'maybe_restore_defaults' ) );
+		add_action( 'admin_notices', array( $this, 'maybe_show_update_notice' ) );
+		add_action( 'wp_ajax_wp_configurator_force_github_check', array( $this, 'force_github_check' ) );
 	}
 
 	/**
@@ -181,6 +183,10 @@ class WP_Configurator_Wizard {
 
 		// Fix any missing IDs in existing data (run once on every init, but only updates if needed)
 		add_action( 'init', array( $this, 'fix_missing_ids' ) );
+
+		// Schedule weekly donors sync cron
+		add_action( 'init', array( $this->system_status_view, 'schedule_donors_sync_cron' ) );
+		add_action( 'wp_configurator_weekly_donors_sync', array( $this->system_status_view, 'cron_sync_donors' ) );
 
 		// Customize TinyMCE for our admin content fields
 		add_filter( 'tiny_mce_before_init', array( $this, 'configure_tinymce' ) );
@@ -557,9 +563,93 @@ class WP_Configurator_Wizard {
 			$options = $this->settings_manager->get_default_options();
 			$this->settings_manager->update_options( $options );
 		}
+
+		// Enrich categories with image URLs for frontend display
+		foreach ( $options['categories'] as &$cat ) {
+			if ( ! empty( $cat['category_image_id'] ) ) {
+				$url = wp_get_attachment_image_url( $cat['category_image_id'], 'medium' );
+				$cat['image_url'] = $url ? $url : '';
+			} else {
+				$cat['image_url'] = '';
+			}
+		}
+
+		// Enrich features with image URLs for frontend display
+		foreach ( $options['features'] as &$feat ) {
+			if ( ! empty( $feat['feature_image_id'] ) ) {
+				$url = wp_get_attachment_image_url( $feat['feature_image_id'], 'medium' );
+				$feat['image_url'] = $url ? $url : '';
+			} else {
+				$feat['image_url'] = '';
+			}
+		}
+
 		ob_start();
 		include plugin_dir_path( __FILE__ ) . 'templates/wizard.php';
 		return ob_get_clean();
+	}
+
+	/**
+	 * Show admin notice if newer GitHub release available
+	 */
+	public function maybe_show_update_notice() {
+		// Only show on our plugin's admin page
+		$screen = get_current_screen();
+		if ( ! $screen || $screen->id !== 'toplevel_page_wp-configurator-settings' ) {
+			return;
+		}
+
+		// Check if user dismissed the notice
+		$user_id = get_current_user_id();
+		$dismissed = get_user_meta( $user_id, 'wp_configurator_update_notice_dismissed', true );
+		if ( $dismissed ) {
+			return;
+		}
+
+		// Get GitHub release check result from transient (same one used in System Status)
+		$transient_key = 'wp_configurator_github_release_check';
+		$github_check = get_transient( $transient_key );
+
+		// If we have a cached result
+		if ( false !== $github_check && is_array( $github_check ) ) {
+			$latest_version = $github_check['latest_version'];
+			$release_url = $github_check['release_url'];
+			$message = $github_check['message'];
+			$is_warning = $github_check['status'] === 'warning';
+
+			// Only show banner for warning status (update available), not for info/success
+			if ( $is_warning ) {
+				?>
+				<div class="notice notice-warning is-dismissible wp-configurator-update-notice">
+					<p><strong><?php esc_html_e( 'New version available:', 'wp-configurator' ); ?></strong> <?php echo esc_html( $message ); ?> <a href="<?php echo esc_url( $release_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'View Release', 'wp-configurator' ); ?></a></p>
+				</div>
+				<?php
+			}
+		}
+	}
+
+	/**
+	 * AJAX handler: Force fresh GitHub release check
+	 */
+	public function force_github_check() {
+		// Verify nonce
+		if ( ! check_ajax_referer( 'wp_configurator_force_github_check_nonce', 'nonce', false ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid nonce.', 'wp-configurator' ) ) );
+		}
+
+		// Check capabilities
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'wp-configurator' ) ) );
+		}
+
+		// Clear the transient
+		delete_transient( 'wp_configurator_github_release_check' );
+
+		// Get fresh check result (this will also cache it again)
+		$result = $this->system_status_view->check_github_release();
+
+		// Return the fresh result
+		wp_send_json_success( $result );
 	}
 
 }

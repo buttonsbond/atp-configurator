@@ -53,11 +53,7 @@ Discard: Original file contents, detailed tool execution logs, and conversationa
   6. Tag: `git tag -a vX.Y.Z -m "Version X.Y.Z" && git push origin vX.Y.Z`
 - **Testing**: Use shortcode `[wp_configurator_wizard]` on a WordPress page; check admin UI at Dashboard → ATP Configurator.
 - Clear browser cache after CSS/JS changes; check console for errors.
-
-### Activating/Deactivating
-- Via WordPress admin → Plugins, or WP-CLI:
-  - `wp plugin activate wp-configurator-wizard`
-  - `wp plugin deactivate wp-configurator-wizard`
+- Always try and keep code modular for easier future maintenance
 
 ### Useful Commands
 - PHP CLI available for linting and testing:
@@ -139,11 +135,11 @@ wp-configurator-wizard/
 - Always regenerate ZIP and bump version after updates
 
 ## Current Version
-- **3.5.0** (stable - GPLv3 licensed)
+- **3.5.2** (stable - GPLv3 licensed)
 
 ## Development Workflow Notes
-- **Current State**: Version 3.4.14 released and stable.
-- **Next**: Continue development for future versions following the standard workflow.
+- **Current State**: Version 3.5.2 released and stable.
+- **Next**: Continue development for v3.5.3 following the standard workflow.
 - **Workflow**: All changes are made locally; debugging happens on the test site; documentation updated incrementally.
 - **When Ready**: Follow the "When Ready for Release/Commit" steps below (version bump already done in code, just test and package).
 

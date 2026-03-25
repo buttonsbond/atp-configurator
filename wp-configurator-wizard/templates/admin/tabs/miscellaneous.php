@@ -327,54 +327,96 @@ $frontend_subtitle = $options['settings']['frontend_subtitle'] ?? 'Drag & drop f
 			</div>
 			<div class="section-content">
 
-				<!-- IP Exclusion Card -->
-				<div class="settings-card">
-					<div class="settings-card-header">
-						<span class="settings-card-icon">🚫</span>
-						<h3 class="settings-card-title"><?php esc_html_e( 'IP Address Exclusion', 'wp-configurator' ); ?></h3>
-					</div>
-					<div class="wp-configurator-field-row">
-						<div class="wp-configurator-field-group">
-							<label for="exclude_admin_ip" class="toggle-label">
-								<div class="toggle-switch">
-									<input type="checkbox" id="exclude_admin_ip" name="wp_configurator_options[settings][exclude_admin_ip]" value="1" <?php checked( $options['settings']['exclude_admin_ip'] ?? 0 ); ?> role="switch" aria-checked="<?php echo ! empty( $options['settings']['exclude_admin_ip'] ) ? 'true' : 'false'; ?>">
-									<span class="toggle-track"></span>
+				<!-- Two-column layout for simple settings -->
+				<div class="settings-cards-grid">
+					<!-- IP Exclusion Card -->
+					<div class="settings-card">
+						<div class="settings-card-header">
+							<span class="settings-card-icon">🚫</span>
+							<h3 class="settings-card-title"><?php esc_html_e( 'IP Address Exclusion', 'wp-configurator' ); ?></h3>
+						</div>
+						<div class="wp-configurator-field-row">
+							<div class="wp-configurator-field-group">
+								<label for="exclude_admin_ip" class="toggle-label">
+									<div class="toggle-switch">
+										<input type="checkbox" id="exclude_admin_ip" name="wp_configurator_options[settings][exclude_admin_ip]" value="1" <?php checked( $options['settings']['exclude_admin_ip'] ?? 0 ); ?> role="switch" aria-checked="<?php echo ! empty( $options['settings']['exclude_admin_ip'] ) ? 'true' : 'false'; ?>">
+										<span class="toggle-track"></span>
+									</div>
+									<span class="toggle-label-text"><?php esc_html_e( 'Exclude admin IP from interaction tracking', 'wp-configurator' ); ?></span>
+								</label>
+								<p class="toggle-description"><?php esc_html_e( 'Prevent your visits from being tracked in analytics. Useful during development and testing.', 'wp-configurator' ); ?></p>
+							</div>
+						</div>
+
+						<div class="wp-configurator-field-row ip-row">
+							<div class="wp-configurator-field-group">
+								<label for="admin_ip_address"><?php esc_html_e( 'Admin IP Address', 'wp-configurator' ); ?></label>
+								<div class="input-with-button">
+									<input type="text" id="admin_ip_address" name="wp_configurator_options[settings][admin_ip_address]" value="<?php echo esc_attr( $options['settings']['admin_ip_address'] ?? '' ); ?>" class="regular-text" placeholder="e.g., 192.168.1.1">
+									<button type="button" id="detect_ip_btn" class="button button-secondary"><?php esc_html_e( 'Detect My IP', 'wp-configurator' ); ?></button>
 								</div>
-								<span class="toggle-label-text"><?php esc_html_e( 'Exclude admin IP from interaction tracking', 'wp-configurator' ); ?></span>
-							</label>
-							<p class="toggle-description"><?php esc_html_e( 'Prevent your visits from being tracked in analytics. Useful during development and testing.', 'wp-configurator' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Your IP address will be excluded from tracking when the option above is enabled.', 'wp-configurator' ); ?></p>
+								<p class="description" style="margin-top: 4px;"><?php esc_html_e( 'Your current IP:', 'wp-configurator' ); ?> <strong id="current_ip"><?php echo esc_html( $_SERVER['REMOTE_ADDR'] ?? 'Unknown' ); ?></strong></p>
+							</div>
 						</div>
 					</div>
 
-					<div class="wp-configurator-field-row ip-row">
-						<div class="wp-configurator-field-group">
-							<label for="admin_ip_address"><?php esc_html_e( 'Admin IP Address', 'wp-configurator' ); ?></label>
-							<div class="input-with-button">
-								<input type="text" id="admin_ip_address" name="wp_configurator_options[settings][admin_ip_address]" value="<?php echo esc_attr( $options['settings']['admin_ip_address'] ?? '' ); ?>" class="regular-text" placeholder="e.g., 192.168.1.1">
-								<button type="button" id="detect_ip_btn" class="button button-secondary"><?php esc_html_e( 'Detect My IP', 'wp-configurator' ); ?></button>
+					<!-- Statistics Settings Card -->
+					<div class="settings-card">
+						<div class="settings-card-header">
+							<span class="settings-card-icon">📊</span>
+							<h3 class="settings-card-title"><?php esc_html_e( 'Statistics', 'wp-configurator' ); ?></h3>
+						</div>
+						<div class="wp-configurator-field-row">
+							<div class="wp-configurator-field-group">
+								<label for="exclude_zero_cost_from_stats" class="toggle-label">
+									<div class="toggle-switch">
+										<input type="checkbox" id="exclude_zero_cost_from_stats" name="wp_configurator_options[settings][exclude_zero_cost_from_stats]" value="1" <?php checked( $options['settings']['exclude_zero_cost_from_stats'] ?? 0 ); ?> role="switch" aria-checked="<?php echo ! empty( $options['settings']['exclude_zero_cost_from_stats'] ) ? 'true' : 'false'; ?>">
+										<span class="toggle-track"></span>
+									</div>
+									<span class="toggle-label-text"><?php esc_html_e( 'Exclude zero-cost items from statistics', 'wp-configurator' ); ?></span>
+								</label>
+								<p class="toggle-description"><?php esc_html_e( 'When enabled, features with a price of €0 will be excluded from statistics (top features, unique features count, revenue totals). This gives a cleaner view of paid features only.', 'wp-configurator' ); ?></p>
 							</div>
-							<p class="description"><?php esc_html_e( 'Your IP address will be excluded from tracking when the option above is enabled.', 'wp-configurator' ); ?></p>
-							<p class="description" style="margin-top: 4px;"><?php esc_html_e( 'Your current IP:', 'wp-configurator' ); ?> <strong id="current_ip"><?php echo esc_html( $_SERVER['REMOTE_ADDR'] ?? 'Unknown' ); ?></strong></p>
 						</div>
 					</div>
 				</div>
 
-				<!-- Statistics Settings Card -->
+				<!-- Bot Filtering Card -->
 				<div class="settings-card">
 					<div class="settings-card-header">
-						<span class="settings-card-icon">📊</span>
-						<h3 class="settings-card-title"><?php esc_html_e( 'Statistics', 'wp-configurator' ); ?></h3>
+						<span class="settings-card-icon">🤖</span>
+						<h3 class="settings-card-title"><?php esc_html_e( 'Bot & Crawler Filtering', 'wp-configurator' ); ?></h3>
 					</div>
 					<div class="wp-configurator-field-row">
 						<div class="wp-configurator-field-group">
-							<label for="exclude_zero_cost_from_stats" class="toggle-label">
+							<label for="exclude_bot_user_agents" class="toggle-label">
 								<div class="toggle-switch">
-									<input type="checkbox" id="exclude_zero_cost_from_stats" name="wp_configurator_options[settings][exclude_zero_cost_from_stats]" value="1" <?php checked( $options['settings']['exclude_zero_cost_from_stats'] ?? 0 ); ?> role="switch" aria-checked="<?php echo ! empty( $options['settings']['exclude_zero_cost_from_stats'] ) ? 'true' : 'false'; ?>">
+									<input type="checkbox" id="exclude_bot_user_agents" name="wp_configurator_options[settings][exclude_bot_user_agents]" value="1" <?php checked( $options['settings']['exclude_bot_user_agents'] ?? 0 ); ?> role="switch" aria-checked="<?php echo ! empty( $options['settings']['exclude_bot_user_agents'] ) ? 'true' : 'false'; ?>">
 									<span class="toggle-track"></span>
 								</div>
-								<span class="toggle-label-text"><?php esc_html_e( 'Exclude zero-cost items from statistics', 'wp-configurator' ); ?></span>
+								<span class="toggle-label-text"><?php esc_html_e( 'Exclude bots & crawlers from interaction tracking', 'wp-configurator' ); ?></span>
 							</label>
-							<p class="toggle-description"><?php esc_html_e( 'When enabled, features with a price of €0 will be excluded from statistics (top features, unique features count, revenue totals). This gives a cleaner view of paid features only.', 'wp-configurator' ); ?></p>
+							<p class="toggle-description"><?php esc_html_e( 'Automatically filter out known bots, crawlers, and automated agents from analytics data. Improves accuracy of engagement metrics.', 'wp-configurator' ); ?></p>
+						</div>
+					</div>
+
+					<div class="wp-configurator-field-row full-width">
+						<div class="wp-configurator-field-group">
+							<label for="bot_user_agents"><?php esc_html_e( 'Bot User Agent Patterns', 'wp-configurator' ); ?></label>
+							<p class="description"><?php esc_html_e( 'Enter one user agent pattern per line. These patterns are matched against visitor user agents. Matching is case-insensitive substring match.', 'wp-configurator' ); ?></p>
+							<?php
+							$default_bot_patterns = "Googlebot\nBingbot\nYahoo! Slurp\nDuckDuckBot\nBaiduspider\nYandexBot\nSogou\nExabot\nfacebot\nIA_Archiver\nTwitterbot\nLinkedInBot\nSlackbot\nDiscordbot\nWhatsApp\nTelegram\ncurl\nwget\npython-requests\nScrapy";
+							$bot_user_agents = $options['settings']['bot_user_agents'] ?? '';
+							// If empty and bot filtering is enabled, show defaults for convenience
+							if ( empty( $bot_user_agents ) && ! empty( $options['settings']['exclude_bot_user_agents'] ) ) {
+								$bot_user_agents = $default_bot_patterns;
+							}
+							?>
+							<textarea id="bot_user_agents" name="wp_configurator_options[settings][bot_user_agents]" rows="6" class="large-text" placeholder="<?php esc_attr_e( 'One pattern per line, e.g., Googlebot', 'wp-configurator' ); ?>"><?php echo esc_textarea( $bot_user_agents ); ?></textarea>
+							<p class="description" style="margin-top: 4px;"><?php esc_html_e( 'Pre-populated with common bots. Add custom patterns as needed. Each line is a separate pattern.', 'wp-configurator' ); ?>
+								<button type="button" class="button button-small restore-bot-patterns" data-defaults="<?php echo esc_attr( $default_bot_patterns ); ?>" style="margin-left: 8px;"><?php esc_html_e( 'Restore defaults', 'wp-configurator' ); ?></button>
+							</p>
 						</div>
 					</div>
 				</div>
@@ -496,5 +538,31 @@ $frontend_subtitle = $options['settings']['frontend_subtitle'] ?? 'Drag & drop f
 			section.classList.toggle('collapsed');
 		}
 	};
+
+	// Restore default bot patterns
+	document.querySelectorAll('.restore-bot-patterns').forEach(function(btn) {
+		btn.addEventListener('click', function() {
+			const textarea = document.getElementById('bot_user_agents');
+			if (textarea && this.dataset.defaults) {
+				textarea.value = this.dataset.defaults;
+				// Trigger input event for any listeners
+				textarea.dispatchEvent(new Event('input', { bubbles: true }));
+			}
+		});
+	});
+
+	// Auto-fill bot patterns when enabling exclusion if field is empty
+	const botToggle = document.getElementById('exclude_bot_user_agents');
+	const botTextarea = document.getElementById('bot_user_agents');
+	if (botToggle && botTextarea) {
+		botToggle.addEventListener('change', function() {
+			if (this.checked && botTextarea.value.trim() === '') {
+				const btn = document.querySelector('.restore-bot-patterns');
+				if (btn && btn.dataset.defaults) {
+					botTextarea.value = btn.dataset.defaults;
+				}
+			}
+		});
+	}
 })();
 </script>

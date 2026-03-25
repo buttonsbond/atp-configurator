@@ -86,7 +86,13 @@
                     <div class="category-section collapsible" data-category-id="<?php echo esc_attr( $category['id'] ); ?>">
                         <div class="category-header">
                             <div class="category-info">
-                                <span class="category-icon"><?php echo esc_html( $category['icon'] ); ?></span>
+                                <span class="category-icon">
+                                    <?php if ( ! empty( $category['category_image_id'] ) && ! empty( $category['image_url'] ) ) : ?>
+                                        <img src="<?php echo esc_url( $category['image_url'] ); ?>" alt="<?php echo esc_attr( $category['name'] ); ?>" class="category-image" style="width: 24px; height: 24px; object-fit: cover; border-radius: 4px; vertical-align: middle; margin-right: 6px;">
+                                    <?php else : ?>
+                                        <?php echo esc_html( $category['icon'] ); ?>
+                                    <?php endif; ?>
+                                </span>
                                 <span class="category-name"><?php echo esc_html( $category['name'] ); ?></span>
                             </div>
                             <?php if ( ! empty( $category['compulsory'] ) ) : ?>
@@ -104,7 +110,12 @@
                             <?php endif; ?>
                 <?php else : ?>
                     <h4 class="section-title">
-                        <?php echo esc_html( $category['icon'] . ' ' . $category['name'] ); ?>
+                        <?php if ( ! empty( $category['category_image_id'] ) && ! empty( $category['image_url'] ) ) : ?>
+                            <img src="<?php echo esc_url( $category['image_url'] ); ?>" alt="<?php echo esc_attr( $category['name'] ); ?>" class="category-image" style="width: 24px; height: 24px; object-fit: cover; border-radius: 4px; vertical-align: middle; margin-right: 6px;">
+                        <?php else : ?>
+                            <?php echo esc_html( $category['icon'] . ' ' ); ?>
+                        <?php endif; ?>
+                        <?php echo esc_html( $category['name'] ); ?>
                         <?php if ( ! empty( $category['compulsory'] ) ) : ?>
                             <span class="compulsory-badge collapsible-title-badge" data-category-id="<?php echo esc_attr( $category['id'] ); ?>" style="font-size: 0.75em; color: #d63638; margin-left: 6px;">(<?php esc_html_e( 'Required', 'wp-configurator' ); ?>)</span>
                         <?php endif; ?>
@@ -124,7 +135,20 @@
                              data-billing="<?php echo esc_attr( $feature['billing_type'] ?? 'one-off' ); ?>"
                              data-icon="<?php echo esc_attr( $feature['icon'] ); ?>"
                              data-sku="<?php echo esc_attr( $feature['sku'] ?? '' ); ?>">
-                            <div class="tile-icon<?php echo !empty($category['color']) ? ' has-category-color' : ''; ?>"<?php echo !empty($category['color']) ? ' style="--category-color: ' . esc_attr($category['color']) . ';"' : ''; ?>><?php echo esc_html( $feature['icon'] ); ?></div>
+                            <?php
+// Compute feature image URL if an image is set
+$feature_image_url = '';
+if ( ! empty( $feature['feature_image_id'] ) ) {
+    $feature_image_url = wp_get_attachment_image_url( $feature['feature_image_id'], 'medium' );
+}
+?>
+<div class="tile-icon<?php echo !empty($category['color']) ? ' has-category-color' : ''; ?>"<?php echo !empty($category['color']) ? ' style="--category-color: ' . esc_attr($category['color']) . ';"' : ''; ?>>
+	<?php if ( $feature_image_url ) : ?>
+		<img src="<?php echo esc_url( $feature_image_url ); ?>" alt="<?php echo esc_attr( $feature['name'] ); ?>" class="tile-image">
+	<?php else : ?>
+		<?php echo esc_html( $feature['icon'] ); ?>
+	<?php endif; ?>
+</div>
                             <div class="tile-title"><?php echo esc_html( $feature['name'] ); ?></div>
                             <div class="tile-price">
                                 +€<?php echo esc_html( number_format( $feature['price'], 0 ) ); ?>

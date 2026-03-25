@@ -81,6 +81,27 @@ final class Asset_Manager {
 
 		// Localize script with data
 		$options = $this->settings_manager->get_options();
+
+		// Add image_url to each feature for frontend display
+		foreach ( $options['features'] as &$feat ) {
+			if ( ! empty( $feat['feature_image_id'] ) ) {
+				$url = wp_get_attachment_image_url( $feat['feature_image_id'], 'medium' );
+				$feat['image_url'] = $url ? $url : '';
+			} else {
+				$feat['image_url'] = '';
+			}
+		}
+
+		// Add image_url to each category for frontend display
+		foreach ( $options['categories'] as &$cat ) {
+			if ( ! empty( $cat['category_image_id'] ) ) {
+				$url = wp_get_attachment_image_url( $cat['category_image_id'], 'medium' );
+				$cat['image_url'] = $url ? $url : '';
+			} else {
+				$cat['image_url'] = '';
+			}
+		}
+
 		wp_localize_script(
 			'wp-configurator-wizard-script',
 			'wpConfigurator',
@@ -120,6 +141,9 @@ final class Asset_Manager {
 			$test_options = $this->settings_manager->get_options();
 			error_log( 'wp-configurator-wizard: options count - categories: ' . count( $test_options['categories'] ?? [] ) . ', features: ' . count( $test_options['features'] ?? [] ) );
 		}
+
+		// Ensure media uploader scripts are available for feature image selection
+		wp_enqueue_media();
 
 		// Enqueue Chart.js from CDN
 		wp_enqueue_script(
@@ -212,12 +236,36 @@ final class Asset_Manager {
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			error_log( 'wp-configurator-wizard: Localizing admin data. Categories count: ' . count( $options['categories'] ?? array() ) . ', Features count: ' . count( $options['features'] ?? array() ) );
 		}
+
+		// Add image_url to each feature for admin display
+		$features_with_images = $options['features'];
+		foreach ( $features_with_images as &$feat ) {
+			if ( ! empty( $feat['feature_image_id'] ) ) {
+				$url = wp_get_attachment_image_url( $feat['feature_image_id'], 'thumbnail' );
+				$feat['image_url'] = $url ? $url : '';
+			} else {
+				$feat['image_url'] = '';
+			}
+		}
+
+		// Add image_url to each category for admin display
+		$categories_with_images = $options['categories'];
+		foreach ( $categories_with_images as &$cat ) {
+			if ( ! empty( $cat['category_image_id'] ) ) {
+				$url = wp_get_attachment_image_url( $cat['category_image_id'], 'thumbnail' );
+				$cat['image_url'] = $url ? $url : '';
+			} else {
+				$cat['image_url'] = '';
+			}
+		}
+
 		$admin_data = array(
 			'categoryIndex' => count( $options['categories'] ?? array() ),
 			'featureIndex'  => count( $options['features'] ?? array() ),
-			'categories'    => $options['categories'],
-			'features'      => $options['features'],
+			'categories'    => $categories_with_images,
+			'features'      => $features_with_images,
 			'exportNonce'   => wp_create_nonce( 'wp_configurator_nonce' ),
+			'forceCheckNonce' => wp_create_nonce( 'wp_configurator_force_github_check_nonce' ),
 			'settings'      => $options['settings'] ?? array(),
 		);
 		wp_localize_script( 'wp-configurator-admin', 'wpConfiguratorAdmin', $admin_data );

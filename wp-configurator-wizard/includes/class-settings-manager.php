@@ -156,13 +156,14 @@ final class Settings_Manager {
 			$id = ! empty( $cat['id'] ) ? sanitize_text_field( $cat['id'] ) : sanitize_title( $cat['name'] );
 
 			$sanitized[] = array(
-				'id'         => $id,
-				'name'       => sanitize_text_field( $cat['name'] ),
-				'icon'       => sanitize_text_field( $cat['icon'] ),
-				'color'      => ! empty( $cat['color'] ) ? sanitize_hex_color( $cat['color'] ) : '',
-				'order'      => intval( $cat['order'] ),
-				'compulsory' => ! empty( $cat['compulsory'] ) ? 1 : 0,
-				'info'       => ! empty( $cat['info'] ) ? sanitize_textarea_field( $cat['info'] ) : '',
+				'id'              => $id,
+				'name'            => sanitize_text_field( $cat['name'] ),
+				'icon'            => sanitize_text_field( $cat['icon'] ),
+				'category_image_id'=> sanitize_text_field( $cat['category_image_id'] ?? '' ),
+				'color'           => ! empty( $cat['color'] ) ? sanitize_hex_color( $cat['color'] ) : '',
+				'order'           => intval( $cat['order'] ),
+				'compulsory'      => ! empty( $cat['compulsory'] ) ? 1 : 0,
+				'info'            => ! empty( $cat['info'] ) ? sanitize_textarea_field( $cat['info'] ) : '',
 			);
 		}
 		return $sanitized;
@@ -204,6 +205,7 @@ final class Settings_Manager {
 				'name'             => sanitize_text_field( $feat['name'] ?? '' ),
 				'description'      => wp_kses_post( $feat['description'] ?? '' ),
 				'icon'             => sanitize_text_field( $feat['icon'] ?? '' ),
+				'feature_image_id' => sanitize_text_field( $feat['feature_image_id'] ?? '' ),
 				'price'            => floatval( $feat['price'] ?? 0 ),
 				'billing_type'     => sanitize_text_field( $feat['billing_type'] ?? 'one-off' ),
 				'order'            => intval( $feat['order'] ?? $index ),
@@ -264,6 +266,10 @@ final class Settings_Manager {
 					$sanitized['custom_styles'] = sanitize_textarea_field( $value );
 				} elseif ( $key === 'enable_live_preview' ) {
 					$sanitized['enable_live_preview'] = ! empty( $value ) ? 1 : 0;
+				} elseif ( $key === 'exclude_bot_user_agents' ) {
+					$sanitized['exclude_bot_user_agents'] = ! empty( $value ) ? 1 : 0;
+				} elseif ( $key === 'bot_user_agents' ) {
+					$sanitized['bot_user_agents'] = sanitize_textarea_field( $value );
 				} else {
 					$sanitized[ $key ] = sanitize_text_field( $value );
 				}
@@ -295,30 +301,30 @@ final class Settings_Manager {
 	public function get_default_options(): array {
 		return array(
 			'categories' => array(
-				array( 'id' => 'page-packages', 'name' => 'Page Packages', 'icon' => '📄', 'order' => 1, 'compulsory' => 1, 'info' => '' ),
-				array( 'id' => 'ecommerce', 'name' => 'E-commerce', 'icon' => '🛒', 'order' => 2, 'compulsory' => 0, 'info' => '' ),
-				array( 'id' => 'design', 'name' => 'Design', 'icon' => '🎨', 'order' => 3, 'compulsory' => 0, 'info' => '' ),
-				array( 'id' => 'seo', 'name' => 'SEO', 'icon' => '🔍', 'order' => 4, 'compulsory' => 0, 'info' => '' ),
-				array( 'id' => 'maintenance', 'name' => 'Maintenance', 'icon' => '🔧', 'order' => 5, 'compulsory' => 0, 'info' => '' ),
+				array( 'id' => 'page-packages', 'name' => 'Page Packages', 'icon' => '📄', 'category_image_id' => '', 'order' => 1, 'compulsory' => 1, 'info' => '' ),
+				array( 'id' => 'ecommerce', 'name' => 'E-commerce', 'icon' => '🛒', 'category_image_id' => '', 'order' => 2, 'compulsory' => 0, 'info' => '' ),
+				array( 'id' => 'design', 'name' => 'Design', 'icon' => '🎨', 'category_image_id' => '', 'order' => 3, 'compulsory' => 0, 'info' => '' ),
+				array( 'id' => 'seo', 'name' => 'SEO', 'icon' => '🔍', 'category_image_id' => '', 'order' => 4, 'compulsory' => 0, 'info' => '' ),
+				array( 'id' => 'maintenance', 'name' => 'Maintenance', 'icon' => '🔧', 'category_image_id' => '', 'order' => 5, 'compulsory' => 0, 'info' => '' ),
 			),
 			'features' => array(
 				// Page Packages (compulsory category) - all one-off
-				array( 'id' => 'pages-basic', 'category_id' => 'page-packages', 'name' => 'Basic (1-5 pages)', 'description' => 'Simple website with up to 5 pages', 'icon' => '📄', 'price' => 50, 'billing_type' => 'one-off', 'order' => 1, 'enabled' => 1, 'incompatible_with' => array() ),
-				array( 'id' => 'pages-standard', 'category_id' => 'page-packages', 'name' => 'Standard (6-15 pages)', 'description' => 'Medium-sized website with up to 15 pages', 'icon' => '📄', 'price' => 100, 'billing_type' => 'one-off', 'order' => 2, 'enabled' => 1, 'incompatible_with' => array() ),
-				array( 'id' => 'pages-premium', 'category_id' => 'page-packages', 'name' => 'Premium (16+ pages)', 'description' => 'Large website with 16 or more pages', 'icon' => '📄', 'price' => 200, 'billing_type' => 'one-off', 'order' => 3, 'enabled' => 1, 'incompatible_with' => array() ),
+				array( 'id' => 'pages-basic', 'category_id' => 'page-packages', 'name' => 'Basic (1-5 pages)', 'description' => 'Simple website with up to 5 pages', 'icon' => '📄', 'feature_image_id' => '', 'price' => 50, 'billing_type' => 'one-off', 'order' => 1, 'enabled' => 1, 'incompatible_with' => array() ),
+				array( 'id' => 'pages-standard', 'category_id' => 'page-packages', 'name' => 'Standard (6-15 pages)', 'description' => 'Medium-sized website with up to 15 pages', 'icon' => '📄', 'feature_image_id' => '', 'price' => 100, 'billing_type' => 'one-off', 'order' => 2, 'enabled' => 1, 'incompatible_with' => array() ),
+				array( 'id' => 'pages-premium', 'category_id' => 'page-packages', 'name' => 'Premium (16+ pages)', 'description' => 'Large website with 16 or more pages', 'icon' => '📄', 'feature_image_id' => '', 'price' => 200, 'billing_type' => 'one-off', 'order' => 3, 'enabled' => 1, 'incompatible_with' => array() ),
 				// E-commerce features
-				array( 'id' => 'ecommerce-basic', 'category_id' => 'ecommerce', 'name' => 'Basic Store', 'description' => 'Simple product listings', 'icon' => '🛍️', 'price' => 150, 'billing_type' => 'one-off', 'order' => 1, 'enabled' => 1, 'incompatible_with' => array() ),
-				array( 'id' => 'ecommerce-advanced', 'category_id' => 'ecommerce', 'name' => 'Advanced Store', 'description' => 'Full e-commerce with inventory', 'icon' => '💳', 'price' => 300, 'billing_type' => 'one-off', 'order' => 2, 'enabled' => 1, 'incompatible_with' => array() ),
+				array( 'id' => 'ecommerce-basic', 'category_id' => 'ecommerce', 'name' => 'Basic Store', 'description' => 'Simple product listings', 'icon' => '🛍️', 'feature_image_id' => '', 'price' => 150, 'billing_type' => 'one-off', 'order' => 1, 'enabled' => 1, 'incompatible_with' => array() ),
+				array( 'id' => 'ecommerce-advanced', 'category_id' => 'ecommerce', 'name' => 'Advanced Store', 'description' => 'Full e-commerce with inventory', 'icon' => '💳', 'feature_image_id' => '', 'price' => 300, 'billing_type' => 'one-off', 'order' => 2, 'enabled' => 1, 'incompatible_with' => array() ),
 				// Design features
-				array( 'id' => 'design-custom', 'category_id' => 'design', 'name' => 'Custom Design', 'description' => 'Unique design tailored to brand', 'icon' => '✏️', 'price' => 250, 'billing_type' => 'one-off', 'order' => 1, 'enabled' => 1, 'incompatible_with' => array() ),
-				array( 'id' => 'design-premium', 'category_id' => 'design', 'name' => 'Premium Design', 'description' => 'High-end custom design', 'icon' => '💎', 'price' => 500, 'billing_type' => 'one-off', 'order' => 2, 'enabled' => 1, 'incompatible_with' => array() ),
+				array( 'id' => 'design-custom', 'category_id' => 'design', 'name' => 'Custom Design', 'description' => 'Unique design tailored to brand', 'icon' => '✏️', 'feature_image_id' => '', 'price' => 250, 'billing_type' => 'one-off', 'order' => 1, 'enabled' => 1, 'incompatible_with' => array() ),
+				array( 'id' => 'design-premium', 'category_id' => 'design', 'name' => 'Premium Design', 'description' => 'High-end custom design', 'icon' => '💎', 'feature_image_id' => '', 'price' => 500, 'billing_type' => 'one-off', 'order' => 2, 'enabled' => 1, 'incompatible_with' => array() ),
 				// SEO features
-				array( 'id' => 'seo-basic', 'category_id' => 'seo', 'name' => 'Basic SEO', 'description' => 'On-page optimization', 'icon' => '📈', 'price' => 100, 'billing_type' => 'one-off', 'order' => 1, 'enabled' => 1, 'incompatible_with' => array() ),
-				array( 'id' => 'seo-advanced', 'category_id' => 'seo', 'name' => 'Advanced SEO', 'description' => 'Technical SEO + content strategy', 'icon' => '🚀', 'price' => 250, 'billing_type' => 'one-off', 'order' => 2, 'enabled' => 1, 'incompatible_with' => array() ),
+				array( 'id' => 'seo-basic', 'category_id' => 'seo', 'name' => 'Basic SEO', 'description' => 'On-page optimization', 'icon' => '📈', 'feature_image_id' => '', 'price' => 100, 'billing_type' => 'one-off', 'order' => 1, 'enabled' => 1, 'incompatible_with' => array() ),
+				array( 'id' => 'seo-advanced', 'category_id' => 'seo', 'name' => 'Advanced SEO', 'description' => 'Technical SEO + content strategy', 'icon' => '🚀', 'feature_image_id' => '', 'price' => 250, 'billing_type' => 'one-off', 'order' => 2, 'enabled' => 1, 'incompatible_with' => array() ),
 				// Maintenance features - these could be recurring in real scenario
-				array( 'id' => 'maintenance-monthly', 'category_id' => 'maintenance', 'name' => 'Monthly Maintenance', 'description' => 'Updates & backups', 'icon' => '📅', 'price' => 50, 'billing_type' => 'monthly', 'order' => 1, 'enabled' => 1, 'incompatible_with' => array() ),
-				array( 'id' => 'maintenance-quarterly', 'category_id' => 'maintenance', 'name' => 'Quarterly Maintenance', 'description' => 'Priority support', 'icon' => '📆', 'price' => 120, 'billing_type' => 'quarterly', 'order' => 2, 'enabled' => 1, 'incompatible_with' => array() ),
-				array( 'id' => 'maintenance-annually', 'category_id' => 'maintenance', 'name' => 'Annual Maintenance', 'description' => 'Full management', 'icon' => '🗓️', 'price' => 400, 'billing_type' => 'annual', 'order' => 3, 'enabled' => 1, 'incompatible_with' => array() ),
+				array( 'id' => 'maintenance-monthly', 'category_id' => 'maintenance', 'name' => 'Monthly Maintenance', 'description' => 'Updates & backups', 'icon' => '📅', 'feature_image_id' => '', 'price' => 50, 'billing_type' => 'monthly', 'order' => 1, 'enabled' => 1, 'incompatible_with' => array() ),
+				array( 'id' => 'maintenance-quarterly', 'category_id' => 'maintenance', 'name' => 'Quarterly Maintenance', 'description' => 'Priority support', 'icon' => '📆', 'feature_image_id' => '', 'price' => 120, 'billing_type' => 'quarterly', 'order' => 2, 'enabled' => 1, 'incompatible_with' => array() ),
+				array( 'id' => 'maintenance-annually', 'category_id' => 'maintenance', 'name' => 'Annual Maintenance', 'description' => 'Full management', 'icon' => '🗓️', 'feature_image_id' => '', 'price' => 400, 'billing_type' => 'annual', 'order' => 3, 'enabled' => 1, 'incompatible_with' => array() ),
 			),
 			'settings' => array(
 				'webhook_url' => '',
@@ -337,6 +343,8 @@ final class Settings_Manager {
 				'custom_styles' => '',
 				'exclude_zero_cost_from_stats' => 0,
 				'enable_live_preview' => 1,
+				'exclude_bot_user_agents' => 0,
+				'bot_user_agents' => "Googlebot\nBingbot\nYahoo! Slurp\nDuckDuckBot\nBaiduspider\nYandexBot\nSogou\nExabot\nfacebot\nIA_Archiver\nTwitterbot\nLinkedInBot\nSlackbot\nDiscordbot\nWhatsApp\nTelegram\ncurl\nwget\npython-requests\nScrapy",
 			),
 		);
 	}

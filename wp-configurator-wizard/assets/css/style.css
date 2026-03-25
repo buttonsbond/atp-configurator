@@ -342,6 +342,14 @@
     background: var(--category-color) !important;
 }
 
+/* Feature image styling */
+.tile-icon img.tile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+}
+
 .tile-title {
     font-weight: 600;
     font-size: 0.875rem;

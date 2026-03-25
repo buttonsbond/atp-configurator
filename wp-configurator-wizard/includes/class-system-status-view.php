@@ -45,101 +45,125 @@ final class System_Status_View {
 		$checks = $this->run_system_checks();
 
 		// Refresh button
-		echo '<div style="margin-bottom: 16px;">';
+		echo '<div style="margin-bottom: 12px;">';
 		echo '<button type="button" class="button button-secondary" id="refresh-system-status">';
 		esc_html_e( 'Refresh Checks', 'wp-configurator' );
 		echo '</button>';
 		echo '<span class="description" style="margin-left: 12px;">Last checked: ' . current_time( 'mysql' ) . '</span>';
 		echo '</div>';
 
-		// Status legend
-		echo '<div style="margin-bottom: 20px; display: flex; gap: 16px; flex-wrap: wrap;">';
-		echo '<div><span class="system-status-icon system-status-success">✓</span> <span class="description">Good</span></div>';
-		echo '<div><span class="system-status-icon system-status-warning">⚠</span> <span class="description">Warning (may affect functionality)</span></div>';
-		echo '<div><span class="system-status-icon system-status-error">✕</span> <span class="description">Error (needs attention)</span></div>';
-		echo '<div><span class="system-status-icon system-status-info">i</span> <span class="description">Info</span></div>';
-		echo '</div>';
+		// Define check groups in logical order
+		$groups = array(
+			'core'       => 'Core Components',
+			'caching'    => 'Caching & Performance',
+			'comms'      => 'Communications',
+			'env'        => 'Environment',
+			'analytics'  => 'Analytics',
+			'donors'     => 'Donors Management',
+		);
 
-		// Checks table
-		echo '<table class="widefat fixed striped" style="border: 1px solid #ccd0d4;">';
-		echo '<thead><tr><th style="width: 150px;">Component</th><th>Status</th><th>Details</th><th style="width: 120px;">Action</th></tr></thead>';
-		echo '<tbody>';
-
-		foreach ( $checks as $check ) {
-			$icon_class = 'system-status-icon system-status-' . esc_attr( $check['status'] );
-			$status_label = ucfirst( $check['status'] );
-			$action_html = isset( $check['action'] ) ? $check['action'] : '';
-
-			echo '<tr>';
-			echo '<td><strong>' . esc_html( $check['label'] ) . '</strong></td>';
-			echo '<td><span class="' . $icon_class . '">' . esc_html( $status_label ) . '</span></td>';
-			echo '<td>' . esc_html( $check['description'] ) . '</td>';
-			echo '<td>' . $action_html . '</td>';
-			echo '</tr>';
+		// Group checks by category
+		$grouped_checks = array_fill_keys( array_keys( $groups ), array() );
+		foreach ( $checks as $key => $check ) {
+			switch ( $key ) {
+				case 'database_tables':
+				case 'plugin_version':
+				case 'github_release':
+				case 'dashboard_widget':
+					$grouped_checks['core'][] = $check;
+					break;
+				case 'caching_plugins':
+				case 'server_cache':
+				case 'js_versioning':
+					$grouped_checks['caching'][] = $check;
+					break;
+				case 'email_config':
+				case 'webhook_config':
+					$grouped_checks['comms'][] = $check;
+					break;
+				case 'php_version':
+				case 'mysql_version':
+				case 'wp_debug':
+					$grouped_checks['env'][] = $check;
+					break;
+				case 'admin_ip_exclusion':
+				case 'remote_http':
+					$grouped_checks['analytics'][] = $check;
+					break;
+				case 'donors_sync':
+					$grouped_checks['donors'][] = $check;
+					break;
+				default:
+					// Fallback: put in core
+					$grouped_checks['core'][] = $check;
+			}
 		}
 
-		echo '</tbody></table>';
+		// Calculate health summary
+		$summary = array( 'success' => 0, 'warning' => 0, 'error' => 0, 'info' => 0 );
+		foreach ( $checks as $check ) {
+			$status = $check['status'];
+			if ( isset( $summary[ $status ] ) ) {
+				$summary[ $status ]++;
+			}
+		}
 
-		// Inline CSS for icons and code blocks
+		// Output health summary bar
+		echo '<div class="system-status-summary">';
+		echo '<strong>Overall Health:</strong> ';
+		echo '<span class="system-status-summary-item system-status-summary-item--success">✓ ' . $summary['success'] . ' passing</span> ';
+		echo '<span class="system-status-summary-item system-status-summary-item--warning">⚠ ' . $summary['warning'] . ' warning</span> ';
+		echo '<span class="system-status-summary-item system-status-summary-item--error">✕ ' . $summary['error'] . ' error</span> ';
+		echo '<span class="system-status-summary-item system-status-summary-item--info">ℹ ' . $summary['info'] . ' info</span>';
+		echo '</div>';
+
+		// Output grouped cards
+		foreach ( $groups as $group_key => $group_label ) {
+			$checks_in_group = $grouped_checks[ $group_key ];
+			if ( empty( $checks_in_group ) ) {
+				continue;
+			}
+
+			// Group heading
+			echo '<div class="system-status-group">';
+			echo '<h3 class="system-status-group-title">' . esc_html( $group_label ) . '</h3>';
+
+			// Cards grid
+			echo '<div class="system-status-cards-grid">';
+
+			foreach ( $checks_in_group as $check ) {
+				$status = $check['status'];
+				$card_class = 'system-status-card system-status-card--' . esc_attr( $status );
+
+				echo '<div class="' . $card_class . '">';
+
+				// Card header with icon and title
+				echo '<div class="system-status-card-header">';
+				echo '<span class="system-status-card-icon system-status-icon system-status-' . esc_attr( $status ) . '">' . $this->get_status_symbol( $status ) . '</span>';
+				echo '<h4 class="system-status-card-title">' . esc_html( $check['label'] ) . '</h4>';
+				echo '</div>';
+
+				// Card body
+				echo '<div class="system-status-card-body">';
+				echo wp_kses_post( $check['description'] );
+				echo '</div>';
+
+				// Card actions (if any)
+				if ( ! empty( $check['action'] ) ) {
+					echo '<div class="system-status-card-actions">';
+					echo $check['action']; // Action HTML is pre-escaped in run_system_checks()
+					echo '</div>';
+				}
+
+				echo '</div>'; // .system-status-card
+			}
+
+			echo '</div>'; // .settings-cards-grid
+			echo '</div>'; // .system-status-group
+		}
+
+		// Inline JavaScript for copy buttons and test functionality
 		?>
-		<style>
-			.system-status-icon {
-				display: inline-block;
-				min-width: 70px;
-				height: 28px;
-				line-height: 28px;
-				text-align: center;
-				border-radius: 4px;
-				font-weight: 600;
-				color: #fff;
-				padding: 0 12px;
-				font-size: 13px;
-				vertical-align: middle;
-			}
-			.system-status-success { background-color: #46b450; }
-			.system-status-warning { background-color: #f56e28; }
-			.system-status-error { background-color: #dc3232; }
-			.system-status-info { background-color: #72aee6; }
-
-			.system-status-pre {
-				background: #f1f1f1;
-				padding: 12px;
-				border-radius: 4px;
-				overflow-x: auto;
-				position: relative;
-				margin: 8px 0;
-				border: 1px solid #ddd;
-			}
-			.system-status-pre code {
-				font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
-				font-size: 12px;
-				line-height: 1.4;
-				color: #333;
-			}
-			.system-status-copy-btn {
-				position: absolute;
-				top: 8px;
-				right: 8px;
-				background: #fff;
-				border: 1px solid #ccc;
-				border-radius: 3px;
-				padding: 4px 10px;
-				font-size: 11px;
-				cursor: pointer;
-				color: #666;
-				transition: all 0.2s;
-			}
-			.system-status-copy-btn:hover {
-				background: #e6f7ff;
-				border-color: #1e6ba8;
-				color: #1e6ba8;
-			}
-			.system-status-copy-btn.copied {
-				background: #46b450;
-				color: #fff;
-				border-color: #46b450;
-			}
-		</style>
 		<script>
 			jQuery(function($) {
 				// Add copy buttons to code snippets in actions
@@ -181,18 +205,23 @@ final class System_Status_View {
 						action: 'send_test_email',
 						email: email,
 						nonce: wpConfiguratorAdmin.exportNonce
-					}, function(response) {
+					})
+					.done(function(response) {
 						button.disabled = false;
 						button.textContent = 'Send Test Client Email';
-						if ( response.success ) {
-							alert( 'Success: ' + response.data.message );
+						console.log('Email test response:', response);
+						if ( response && response.success ) {
+							alert( 'Success: ' + (response.data ? response.data.message : 'Unknown success') );
 						} else {
-							alert( 'Error: ' + response.data.message );
+							var msg = response && response.data && response.data.message ? response.data.message : 'Unknown error';
+							alert( 'Error: ' + msg );
 						}
-					}).fail(function(xhr, status, error) {
+					})
+					.fail(function(xhr, status, error) {
 						button.disabled = false;
 						button.textContent = 'Send Test Client Email';
-						alert( 'AJAX error: ' + error );
+						console.error('AJAX error:', status, error, xhr.responseText);
+						alert( 'AJAX error: ' + error + '\n\nCheck console for details.' );
 					});
 				};
 
@@ -210,18 +239,23 @@ final class System_Status_View {
 						action: 'send_test_admin_email',
 						email: email,
 						nonce: wpConfiguratorAdmin.exportNonce
-					}, function(response) {
+					})
+					.done(function(response) {
 						button.disabled = false;
 						button.textContent = 'Send Test Admin Email';
-						if ( response.success ) {
-							alert( 'Success: ' + response.data.message );
+						console.log('Admin email test response:', response);
+						if ( response && response.success ) {
+							alert( 'Success: ' + (response.data ? response.data.message : 'Unknown success') );
 						} else {
-							alert( 'Error: ' + response.data.message );
+							var msg = response && response.data && response.data.message ? response.data.message : 'Unknown error';
+							alert( 'Error: ' + msg );
 						}
-					}).fail(function(xhr, status, error) {
+					})
+					.fail(function(xhr, status, error) {
 						button.disabled = false;
 						button.textContent = 'Send Test Admin Email';
-						alert( 'AJAX error: ' + error );
+						console.error('AJAX error:', status, error, xhr.responseText);
+						alert( 'AJAX error: ' + error + '\n\nCheck console for details.' );
 					});
 				};
 
@@ -239,27 +273,385 @@ final class System_Status_View {
 						action: 'test_webhook',
 						webhook_url: webhookUrl,
 						nonce: wpConfiguratorAdmin.exportNonce
-					}, function(response) {
+					})
+					.done(function(response) {
 						button.disabled = false;
 						button.textContent = 'Test Webhook';
-						if ( response.success ) {
-							var msg = response.data.message;
-							if ( response.data.response ) {
+						console.log('Webhook test response:', response);
+						if ( response && response.success ) {
+							var msg = response.data ? response.data.message : 'Success';
+							if ( response.data && response.data.response ) {
 								msg += '\n\nResponse body:\n' + response.data.response;
 							}
 							alert( 'Success:\n\n' + msg );
 						} else {
-							alert( 'Error: ' + response.data.message );
+							var msg = response && response.data && response.data.message ? response.data.message : 'Unknown error';
+							alert( 'Error: ' + msg );
 						}
-					}).fail(function(xhr, status, error) {
+					})
+					.fail(function(xhr, status, error) {
 						button.disabled = false;
 						button.textContent = 'Test Webhook';
-						alert( 'AJAX error: ' + error );
+						console.error('AJAX error:', status, error, xhr.responseText);
+						alert( 'AJAX error: ' + error + '\n\nCheck console for details.' );
 					});
+				};
+
+				// Sync Donors from GitHub
+				window.syncDonorsFromGitHub = function() {
+					if ( ! confirm( 'Sync donors list from GitHub? This will replace the current list.' ) ) {
+						return;
+					}
+
+					var button = event.target;
+					button.disabled = true;
+					button.textContent = 'Syncing...';
+
+					jQuery.ajax({
+						url: ajaxurl,
+						type: 'POST',
+						data: {
+							action: 'sync_donors',
+							nonce: wpConfiguratorAdmin.exportNonce
+						},
+						dataType: 'json'
+					})
+					.done(function(response) {
+						button.disabled = false;
+						button.textContent = 'Sync Now';
+						console.log('Sync response raw:', response);
+						if ( response && response.success ) {
+							alert( 'Success: ' + (response.data && response.data.message ? response.data.message : 'Sync completed') );
+							// Reload to update status
+							location.reload();
+						} else {
+							var msg = response && response.data && response.data.message ? response.data.message : 'Unknown error response';
+							alert( 'Error: ' + msg );
+						}
+					})
+					.fail(function(xhr, status, error) {
+						button.disabled = false;
+						button.textContent = 'Sync Now';
+						console.error('AJAX error:', status, error);
+						console.log('Response text:', xhr.responseText);
+						alert( 'AJAX error: ' + error + '\n\nCheck console for details.' );
+					});
+				};
+
+				// Force GitHub Release Check
+				window.forceGithubCheck = function() {
+					var button = event.target;
+					var originalText = button.textContent;
+					button.disabled = true;
+					button.textContent = 'Checking...';
+
+					jQuery.post(ajaxurl, {
+						action: 'wp_configurator_force_github_check',
+						nonce: wpConfiguratorAdmin.forceCheckNonce
+					}, function(response) {
+						button.disabled = false;
+						button.textContent = originalText;
+
+						if ( response && response.success ) {
+							var data = response.data;
+							// Show alert with result
+							alert( 'GitHub Check: ' + data.message + '\n\nCurrent: v' + data.current_version + '\nLatest: v' + data.latest_version );
+
+							// Update the card in place (optional: could reload page)
+							// For simplicity, just reload after short delay
+							setTimeout(function() {
+								location.reload();
+							}, 1000);
+						} else {
+							var msg = response && response.data && response.data.message ? response.data.message : 'Unknown error';
+							alert( 'Error: ' + msg );
+						}
+					})
+					.fail(function(xhr, status, error) {
+						button.disabled = false;
+						button.textContent = originalText;
+						console.error('AJAX error:', status, error, xhr.responseText);
+						alert( 'AJAX error: ' + error + '\n\nCheck console for details.' );
+					});
+
+					return false;
 				};
 			});
 		</script>
 		<?php
+	}
+
+	/**
+	 * Get status symbol for icon
+	 *
+	 * @param string $status Status key
+	 * @return string Unicode symbol
+	 */
+	private function get_status_symbol( $status ) {
+		switch ( $status ) {
+			case 'success': return '✓';
+			case 'warning': return '⚠';
+			case 'error':   return '✕';
+			case 'info':    return 'i';
+			default:        return '?';
+		}
+	}
+
+	/**
+	 * Get donors list from GitHub (or fallback to local file)
+	 *
+	 * @return array List of donor names
+	 */
+	public function get_donors() {
+		// Try option first (synced from GitHub)
+		$donors = get_option( 'wp_configurator_donors_list', null );
+		if ( $donors !== null && is_array( $donors ) ) {
+			return $donors;
+		}
+
+		// Fallback to local file
+		$plugin_dir = plugin_dir_path( WP_CONFIGURATOR_WIZARD_FILE );
+		$donors_file = $plugin_dir . 'donors.txt';
+		if ( file_exists( $donors_file ) && is_readable( $donors_file ) ) {
+			$content = file_get_contents( $donors_file );
+			$donors = array_filter( array_map( 'trim', explode( "\n", $content ) ) );
+			return $donors;
+		}
+
+		return array();
+	}
+
+	/**
+	 * Sync donors from GitHub
+	 *
+	 * @return array Success status and message
+	 */
+	public function sync_donors_from_github() {
+		try {
+			// Note: donors.txt is inside the plugin directory in the repo
+			$url = 'https://raw.githubusercontent.com/buttonsbond/atp-configurator/main/wp-configurator-wizard/donors.txt';
+			$response = wp_remote_get( $url, array(
+				'timeout' => 10,
+				'user-agent' => 'WP-Configurator-Wizard/1.0',
+			) );
+
+			if ( is_wp_error( $response ) ) {
+				return array(
+					'success' => false,
+					'message' => 'Failed to fetch from GitHub: ' . $response->get_error_message(),
+				);
+			}
+
+			$code = wp_remote_retrieve_response_code( $response );
+			if ( $code !== 200 ) {
+				return array(
+					'success' => false,
+					'message' => "GitHub returned HTTP $code",
+				);
+			}
+
+			$body = wp_remote_retrieve_body( $response );
+			if ( empty( $body ) ) {
+				return array(
+					'success' => false,
+					'message' => 'GitHub returned empty content',
+				);
+			}
+
+			// Parse donors (one per line)
+			$donors = array_filter( array_map( 'trim', explode( "\n", $body ) ) );
+
+			// Update option
+			update_option( 'wp_configurator_donors_list', $donors );
+
+			// Record sync timestamp
+			update_option( 'wp_configurator_donors_last_sync', current_time( 'timestamp' ) );
+
+			return array(
+				'success' => true,
+				'message' => sprintf( 'Successfully synced %d donors from GitHub.', count( $donors ) ),
+				'count'   => count( $donors ),
+			);
+		} catch ( Exception $e ) {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( 'Donors sync error: ' . $e->getMessage() );
+			}
+			return array(
+				'success' => false,
+				'message' => 'Sync failed: ' . $e->getMessage(),
+			);
+		}
+	}
+
+	/**
+	 * Get donors sync status
+	 *
+	 * @return array Status info
+	 */
+	public function get_donors_sync_status() {
+		$last_sync = get_option( 'wp_configurator_donors_last_sync', false );
+		$source = get_option( 'wp_configurator_donors_list', null ) !== null ? 'GitHub (synced)' : 'Local file';
+		$status = 'info';
+
+		if ( $last_sync ) {
+			$age = round( ( current_time( 'timestamp' ) - $last_sync ) / 3600 / 24, 1 );
+			if ( $age > 7 ) {
+				$status = 'warning';
+			}
+		}
+
+		return array(
+			'source'  => $source,
+			'last_sync' => $last_sync ? date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $last_sync ) : 'Never',
+			'status'  => $status,
+		);
+	}
+
+	/**
+	 * Schedule weekly cron if not already scheduled
+	 */
+	public function schedule_donors_sync_cron() {
+		if ( ! wp_next_scheduled( 'wp_configurator_weekly_donors_sync' ) ) {
+			wp_schedule_event( time(), 'weekly', 'wp_configurator_weekly_donors_sync' );
+		}
+	}
+
+	/**
+	 * Perform weekly donors sync (cron callback)
+	 */
+	public function cron_sync_donors() {
+		$result = $this->sync_donors_from_github();
+		// Log result for debugging
+		if ( ! $result['success'] ) {
+			error_log( '[WP Configurator] Weekly donors sync failed: ' . $result['message'] );
+		}
+	}
+
+	/**
+	 * Check GitHub for latest release
+	 *
+	 * @return array Status info: up_to_date (bool), latest_version (string), current_version (string), message (string), action (string)
+	 */
+	public function check_github_release() {
+		$current_version = $this->version;
+		$transient_key = 'wp_configurator_github_release_check';
+		$cached = get_transient( $transient_key );
+
+		// Use cached result if fresh (12 hours) AND it contains a non-empty action (i.e., has the Force Check button)
+		// This ensures we invalidate old caches from before the Force Check button was added
+		if ( false !== $cached && is_array( $cached ) && ! empty( $cached['action'] ) ) {
+			return $cached;
+		}
+
+		// Default response for errors
+		$default_response = array(
+			'up_to_date'     => true,
+			'latest_version' => $current_version,
+			'current_version' => $current_version,
+			'message'        => 'Unable to check GitHub releases. Will retry later.',
+			'action'         => '',
+			'status'         => 'info',
+		);
+
+		// Fetch latest release from GitHub
+		$url = 'https://api.github.com/repos/buttonsbond/atp-configurator/releases/latest';
+		$response = wp_remote_get( $url, array(
+			'timeout'     => 10,
+			'user-agent'  => 'WP-Configurator-Wizard/1.0',
+		) );
+
+		if ( is_wp_error( $response ) ) {
+			$default_response['status'] = 'warning';
+			set_transient( $transient_key, $default_response, 12 * HOUR_IN_SECONDS );
+			return $default_response;
+		}
+
+		$code = wp_remote_retrieve_response_code( $response );
+		if ( $code !== 200 ) {
+			$default_response['status'] = 'warning';
+			$default_response['message'] = "GitHub API returned HTTP $code. Unable to check for updates.";
+			set_transient( $transient_key, $default_response, 12 * HOUR_IN_SECONDS );
+			return $default_response;
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+		$data = json_decode( $body, true );
+
+		if ( empty( $data['tag_name'] ) ) {
+			$default_response['status'] = 'warning';
+			$default_response['message'] = 'Invalid response from GitHub. Could not parse release version.';
+			set_transient( $transient_key, $default_response, 12 * HOUR_IN_SECONDS );
+			return $default_response;
+		}
+
+		// Extract version from tag (remove 'v' prefix if present)
+		$latest_version = ltrim( $data['tag_name'], 'v' );
+		$release_url = $data['html_url'] ?? "https://github.com/buttonsbond/atp-configurator/releases/latest";
+
+		// Compare versions
+		$is_dev_version = strpos( $current_version, '-dev' ) !== false;
+		$is_newer = version_compare( $current_version, $latest_version, '>' );
+		$is_equal = version_compare( $current_version, $latest_version, '==' );
+		$is_up_to_date = $is_equal || ( $is_newer && $is_dev_version );
+
+		$result = array(
+			'up_to_date'      => $is_up_to_date,
+			'latest_version'  => $latest_version,
+			'current_version' => $current_version,
+			'release_url'     => $release_url,
+		);
+
+		// Determine status and message based on comparison
+		$force_check_btn = '<button type="button" class="button button-small" onclick="forceGithubCheck()">Force Check</button>';
+
+		if ( $is_newer && ! $is_dev_version ) {
+			// Current version is strictly newer than GitHub's latest, and it's not marked as -dev
+			// This means we're working ahead of releases
+			$result['status']  = 'info';
+			$result['message'] = "Working on Dev. Version (v$current_version)";
+			$result['action']  = $force_check_btn;
+		} elseif ( $is_up_to_date ) {
+			// Current version equals or is older but dev version is acceptable
+			$result['status']  = 'success';
+			$result['message'] = "Plugin is up to date (v$current_version)";
+			$result['action']  = $force_check_btn;
+		} else {
+			// Current version is older than GitHub's latest
+			$result['status']  = 'warning';
+			$result['message'] = "New release v$latest_version available on GitHub";
+			$result['action']  = $force_check_btn . ' <a href="' . esc_url( $release_url ) . '" target="_blank" rel="noopener noreferrer" class="button button-small">View Release</a>';
+		}
+
+		// Cache for 12 hours
+		set_transient( $transient_key, $result, 12 * HOUR_IN_SECONDS );
+
+		return $result;
+	}
+
+	/**
+	 * Convert php.ini memory value to bytes
+	 *
+	 * @param string $value Memory limit string (e.g., "256M", "1G")
+	 * @return int|false Bytes or false on parse failure
+	 */
+	private function memory_to_bytes( $value ) {
+		if ( is_numeric( $value ) ) {
+			return (int) $value;
+		}
+
+		$value = trim( $value );
+		$last_char = strtolower( substr( $value, -1 ) );
+		$num = (int) $value;
+
+		switch ( $last_char ) {
+			case 'g': $num *= 1024;
+			// Intentional fallthrough
+			case 'm': $num *= 1024;
+			// Intentional fallthrough
+			case 'k': $num *= 1024;
+		}
+
+		return $num;
 	}
 
 	/**
@@ -493,6 +885,54 @@ final class System_Status_View {
 				: '',
 		);
 
+		// 5. Remote HTTP Access (cURL/fsockopen)
+		$remote_test_url = 'https://api.github.com/zen'; // lightweight, reliable
+		$test_response = wp_remote_get( $remote_test_url, array( 'timeout' => 5, 'user-agent' => 'WP-Configurator-Wizard/1.0' ) );
+		$remote_ok = ! is_wp_error( $test_response ) && wp_remote_retrieve_response_code( $test_response ) === 200;
+
+		$checks['remote_http'] = array(
+			'status'      => $remote_ok ? 'success' : 'warning',
+			'label'       => 'Remote HTTP Access',
+			'description' => $remote_ok
+				? 'Outbound HTTP requests are working (cURL or fsockopen). Required for GitHub sync and webhook delivery.'
+				: 'Cannot make outbound HTTP requests. GitHub donors sync and webhook tests may fail. Check firewall or host restrictions.',
+			'action'      => '',
+		);
+
+		// 5.5. PHP Memory Limit
+		$memory_limit = ini_get( 'memory_limit' );
+		$memory_bytes = $this->memory_to_bytes( $memory_limit );
+		$memory_mb = $memory_bytes ? round( $memory_bytes / 1048576 ) : 0;
+		$memory_status = 'success';
+		$memory_action = '';
+		$memory_desc = "Current limit: {$memory_mb}M";
+
+		if ( $memory_bytes === false || $memory_mb < 128 ) {
+			$memory_status = 'error';
+			$memory_desc = "Current limit: {$memory_mb}M - Too low for complex configurations.";
+			$memory_action = '<div class="description" style="background: #f9f9f9; padding: 12px; border-radius: 4px; border: 1px solid #ddd;">'
+				. '<p><strong>Recommended:</strong> 256M or higher</p>'
+				. '<p><strong>How to increase:</strong></p>'
+				. '<ol style="margin: 8px 0 0 20px; padding: 0;">'
+				. '<li>Add to wp-config.php: <code>define(\'WP_MEMORY_LIMIT\', \'256M\');</code></li>'
+				. '<li>Or set in php.ini: <code>memory_limit = 256M</code></li>'
+				. '<li>Contact your host if you cannot modify these.</li>'
+				. '</ol></div>';
+		} elseif ( $memory_mb < 256 ) {
+			$memory_status = 'warning';
+			$memory_desc = "Current limit: {$memory_mb}M - May be insufficient for large configurations.";
+			$memory_action = '<div class="description" style="background: #f9f9f9; padding: 12px; border-radius: 4px; border: 1px solid #ddd;">'
+				. '<p><strong>Recommended:</strong> 256M or higher for optimal performance.</p>'
+				. '<p>Increase via <code>wp-config.php</code>: <code>define(\'WP_MEMORY_LIMIT\', \'256M\');</code></p></div>';
+		}
+
+		$checks['memory_limit'] = array(
+			'status'      => $memory_status,
+			'label'       => 'PHP Memory Limit',
+			'description' => $memory_desc,
+			'action'      => $memory_action,
+		);
+
 		// 6. PHP Version
 		$php_version = PHP_VERSION;
 		$php_ok      = version_compare( $php_version, '8.0', '>=' );
@@ -522,13 +962,13 @@ final class System_Status_View {
 			'action'      => '',
 		);
 
-		// 9. Plugin version
-		$plugin_version = $this->version;
-		$checks['plugin_version'] = array(
-			'status'      => 'info',
-			'label'       => 'Plugin Version',
-			'description' => "ATP Quote Configurator v$plugin_version",
-			'action'      => '',
+		// 9. GitHub Release Check
+		$github_check = $this->check_github_release();
+		$checks['github_release'] = array(
+			'status'      => $github_check['status'],
+			'label'       => 'GitHub Update Check',
+			'description' => $github_check['message'],
+			'action'      => $github_check['action'],
 		);
 
 		// 10. Dashboard widget registration (just info)
@@ -605,6 +1045,24 @@ final class System_Status_View {
 			'label'       => 'Webhook',
 			'description' => $webhook_desc,
 			'action'      => '',
+		);
+
+		// 13. Donors Sync
+		$donors_status = 'info';
+		$sync_status = $this->get_donors_sync_status();
+		$donors_desc = 'Donors list source: ' . $sync_status['source'] . '. Last sync: ' . $sync_status['last_sync'];
+
+		if ( $sync_status['status'] === 'warning' ) {
+			$donors_status = 'warning';
+			$donors_desc = 'Donors list has not been synced recently. Source: ' . $sync_status['source'] . '. Last sync: ' . $sync_status['last_sync'];
+		}
+
+		$donors_action = '<button type="button" class="button button-small" onclick="syncDonorsFromGitHub()">Sync Now</button>';
+		$checks['donors_sync'] = array(
+			'status'      => $donors_status,
+			'label'       => 'Donors List',
+			'description' => $donors_desc,
+			'action'      => '<div class="description" style="background: #f9f9f9; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">' . $donors_action . '</div>',
 		);
 
 		return $checks;

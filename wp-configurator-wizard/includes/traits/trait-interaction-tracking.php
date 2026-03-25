@@ -88,6 +88,25 @@ trait Interaction_Tracking {
 			return;
 		}
 
+		// Check if this is a bot (skip tracking if enabled)
+		$exclude_bots = ! empty( $options['settings']['exclude_bot_user_agents'] );
+		$bot_patterns = ! empty( $options['settings']['bot_user_agents'] ) ? explode( "\n", $options['settings']['bot_user_agents'] ) : array();
+
+		if ( $exclude_bots && ! empty( $bot_patterns ) ) {
+			$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+			foreach ( $bot_patterns as $pattern ) {
+				$pattern = trim( $pattern );
+				if ( $pattern !== '' && stripos( $user_agent, $pattern ) !== false ) {
+					// Silently ignore bot interaction
+					if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+						error_log( "Interaction excluded due to bot detection: $pattern" );
+					}
+					wp_send_json_success( array( 'message' => 'Bot interaction excluded' ) );
+					return;
+				}
+			}
+		}
+
 		// Debug: about to insert
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			error_log( 'Attempting insert into ' . $table_name . ' with data: event=' . $event_type . ', feature=' . $feature_id . ', category=' . $category_id );

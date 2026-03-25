@@ -7,13 +7,36 @@
 	// Fetch recent interactions (last 10)
 	if ( ! empty( $date_args ) ) {
 		$recent_events = $wpdb->get_results( $wpdb->prepare(
-			"SELECT event_type, feature_id, category_id, created_at FROM $interactions_table WHERE 1=1 $date_conditions ORDER BY created_at DESC LIMIT 10",
+			"SELECT event_type, feature_id, category_id, created_at, user_agent FROM $interactions_table WHERE 1=1 $date_conditions ORDER BY created_at DESC LIMIT 10",
 			$date_args
 		) );
 	} else {
 		$recent_events = $wpdb->get_results(
-			"SELECT event_type, feature_id, category_id, created_at FROM $interactions_table ORDER BY created_at DESC LIMIT 10"
+			"SELECT event_type, feature_id, category_id, created_at, user_agent FROM $interactions_table ORDER BY created_at DESC LIMIT 10"
 		);
+	}
+
+	// Filter out bot interactions if bot filtering is enabled
+	$exclude_bots = ! empty( $options['settings']['exclude_bot_user_agents'] );
+	$bot_patterns = ! empty( $options['settings']['bot_user_agents'] ) ? explode( "\n", $options['settings']['bot_user_agents'] ) : array();
+
+	if ( $exclude_bots && ! empty( $bot_patterns ) && ! empty( $recent_events ) ) {
+		$filtered_events = array();
+		foreach ( $recent_events as $event ) {
+			$user_agent = $event->user_agent ?? '';
+			$is_bot = false;
+			foreach ( $bot_patterns as $pattern ) {
+				$pattern = trim( $pattern );
+				if ( $pattern !== '' && stripos( $user_agent, $pattern ) !== false ) {
+					$is_bot = true;
+					break;
+				}
+			}
+			if ( ! $is_bot ) {
+				$filtered_events[] = $event;
+			}
+		}
+		$recent_events = $filtered_events;
 	}
 	// Build lookup arrays for names
 	$feature_names = array();

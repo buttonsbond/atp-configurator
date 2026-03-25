@@ -2,7 +2,7 @@
 
 A modern, modular WordPress plugin for creating interactive cost estimation wizards with drag-and-drop functionality, real-time analytics, and comprehensive quote management.
 
-**Current version: 3.5.0** (stable)
+**Current version: 3.5.2** (stable)
 **GitHub Repository**: https://github.com/buttonsbond/atp-configurator
 
 ## Features
@@ -22,8 +22,28 @@ A modern, modular WordPress plugin for creating interactive cost estimation wiza
 - **Statistics Dashboard**: Charts and metrics including engagement rates, revenue trends, and feature popularity
 - **Built-in Emoji Picker**: Visual emoji selector with category tabs (Smileys, Hearts, Weather, Objects, Symbols, Flags) for quick icon selection in admin modals
 - **Category Information Text**: Add optional descriptive text to each category that appears at the top of the category section on the frontend, providing context and guidance to users
+- **Category & Feature Images**: Upload custom images via WordPress media library to replace emoji icons with product photos or custom graphics (optional, zero breaking changes)
 
 ## Changelog
+
+### Version 3.5.2 (2026-03-25)
+- **Added**: Category & Feature Images
+  - Upload custom images via WordPress media library for categories and features
+  - Images replace emoji icons in frontend wizard and admin UI with responsive sizing
+  - Admin modals: image preview with remove button, fallback to emoji when no image
+  - Zero breaking changes: existing installations continue to use emoji icons
+- **Added**: GitHub Release Checker
+  - Automatic version comparison with GitHub releases API (12-hour caching)
+  - System Status card shows "Up to date" / "New release available" / "Working on Dev. Version"
+  - Admin-wide dismissible banner when updates available
+  - "Force Check" button to bypass cache for immediate verification
+- **Added**: Weekly Donors Sync (cron)
+  - Scheduled weekly sync of donor information (e.g., from GitHub Sponsors)
+  - System Status tab displays current donors list
+  - Manual "Sync Now" button for on-demand updates
+- **Enhanced**: System Status tab with consistent card-based layout and improved diagnostics
+- **Technical**: Added AJAX endpoint for GitHub check, nonce security, and transient caching
+- **Fixed**: Order of initialization (system_status_view before ajax_handler) for proper dependency injection
 
 ### Version 3.5.0 (2026-03-24)
 - **Refactored**: Admin JavaScript modularization complete

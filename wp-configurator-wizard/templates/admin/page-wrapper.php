@@ -63,12 +63,10 @@
 			<!-- Collapsible Sections Container -->
 			<div class="wp-configurator-collapsible-sections">
 
-				<!-- Donors Wall (Collapsible) -->
+				<!-- Donors Wall (Collapsible) - Now using synced data from GitHub or local fallback -->
 				<?php
-				$plugin_root = dirname( dirname( dirname( __FILE__ ) ) );
-				$donors_file = $plugin_root . '/donors.txt';
-				if ( file_exists( $donors_file ) ) :
-					$donors_raw = array_filter( array_map( 'trim', file( $donors_file ) ) );
+				$donors_raw = $wp_configurator_wizard_instance->get_system_status_view()->get_donors();
+				if ( ! empty( $donors_raw ) ) :
 					// Parse CSV format: Name,Count,DemoURL (DemoURL optional)
 					$donors = array();
 					$positive_emojis = array('★', '✨', '🎉', '🏆', '🌟', '💫', '🔥', '💎', '👏', '🥇', '🎯', '💝', '🌺', '🦋', '🌈');
