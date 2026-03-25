@@ -463,8 +463,5 @@ Key milestones:
 ---
 
 #### Additional Stretch Ideas (Not Yet Prioritized)
-- Tooltips explaining why a tile is disabled (incompatibility reason)
-- Option to force-add incompatible items with override warning
-- Show incompatibility warnings in admin when editing features
 - Further main plugin cleanup (move remaining rendering methods to view classes)
 
