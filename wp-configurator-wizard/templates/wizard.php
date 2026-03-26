@@ -1,4 +1,144 @@
 <div class="wp-configurator-wizard">
+    <?php
+    // Debug mode: Show complete database dump
+    if (isset($_GET['debug']) && $_GET['debug'] == 1 && current_user_can('manage_options')):
+    ?>
+    <div style="background: #dc3545; color: white; border: 1px solid #dc3545; padding: 15px; margin: 20px 0; border-radius: 4px; font-family: monospace; font-size: 12px;">
+        <strong>⚠️ RAW DATABASE DUMP (Features):</strong>
+        <pre style="background: rgba(0,0,0,0.3); padding: 10px; margin-top: 10px; overflow-x: auto;"><?php
+        echo htmlspecialchars(print_r($options['features'], true));
+        ?></pre>
+    </div>
+    <?php
+    endif;
+    ?>
+    <?php
+    // Debug mode: Show detailed data integrity info when ?debug=1 is in URL
+    if (isset($_GET['debug']) && $_GET['debug'] == 1 && current_user_can('manage_options')):
+        // Get trimmed category IDs for accurate matching (Unicode-aware)
+        $all_cat_ids_raw = array_column($options['categories'], 'id');
+        $all_cat_ids = array_map(function($id) {
+            return is_string($id) ? preg_replace('/^\s+|\s+$/u', '', $id) : $id;
+        }, $all_cat_ids_raw);
+        $orphaned = [];
+        $disabled = [];
+        $enabled_and_valid = [];
+        foreach ($options['features'] as $feat) {
+            if ($feat['enabled']) {
+                $cat_id = isset($feat['category_id']) ? preg_replace('/^\s+|\s+$/u', '', $feat['category_id']) : '';
+                if (!in_array($cat_id, $all_cat_ids, true)) {
+                    $orphaned[] = $feat;
+                    // DEBUG: Show why it's not matching
+                    error_log('ORPHANED: Feature ' . $feat['name'] . ' has category_id="' . $cat_id . '" (len=' . strlen($cat_id) . ') not in: ' . implode(', ', $all_cat_ids));
+                } else {
+                    $enabled_and_valid[] = $feat;
+                }
+            } else {
+                $disabled[] = $feat;
+            }
+        }
+    ?>
+    <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px;">
+        <strong>Debug Mode - Feature Analysis (All Features Shown):</strong>
+        <p><strong>Total features in database:</strong> <?php echo count($options['features']); ?></p>
+        <p><strong>Categories (count: <?php echo count($all_cat_ids); ?>):</strong> <?php
+            $cat_debug = [];
+            foreach ($all_cat_ids as $cid) {
+                $cat_debug[] = $cid . ' (len=' . strlen($cid) . ')';
+            }
+            echo esc_html(implode(', ', $cat_debug));
+        ?></p>
+
+        <h4>1. Enabled & Valid (should appear in wizard):</h4>
+        <?php if (!empty($enabled_and_valid)): ?>
+            <ul>
+                <?php foreach ($enabled_and_valid as $f): ?>
+                <li>Feature "<strong><?php echo esc_html($f['name']); ?></strong>" (ID: <?php echo esc_html($f['id']); ?>) → category_id: <code><?php echo esc_html($f['category_id']); ?></code> | price: €<?php echo esc_html($f['price']); ?> | billing: <?php echo esc_html($f['billing_type']); ?> | order: <?php echo esc_html($f['order']); ?></li>
+                <?php endforeach; ?>
+            </ul>
+        <?php else: ?>
+            <p style="color: #d63638;"><em>No enabled & valid features found!</em></p>
+        <?php endif; ?>
+
+        <h4>2. Orphaned Enabled (have category_id but category doesn't exist):</h4>
+        <?php if (!empty($orphaned)): ?>
+            <ul style="color: #d63638;">
+                <?php foreach ($orphaned as $f): ?>
+                <li>Feature "<strong><?php echo esc_html($f['name']); ?></strong>" (ID: <?php echo esc_html($f['id']); ?>) → invalid category_id: <code><?php echo esc_html($f['category_id']); ?></code> (len=<?php echo strlen($f['category_id']); ?>)</li>
+                <?php endforeach; ?>
+            </ul>
+        <?php else: ?>
+            <p style="color: green;"><em>None</em></p>
+        <?php endif; ?>
+
+        <h4>3. Disabled Features (won't appear in wizard):</h4>
+        <?php if (!empty($disabled)): ?>
+            <ul style="color: #666;">
+                <?php foreach ($disabled as $f): ?>
+                <li>Feature "<em><?php echo esc_html($f['name']); ?></em>" (ID: <?php echo esc_html($f['id']); ?>) → enabled: 0</li>
+                <?php endforeach; ?>
+            </ul>
+        <?php else: ?>
+            <p style="color: green;"><em>None</em></p>
+        <?php endif; ?>
+
+        <h4>4. Category Details (for verification):</h4>
+        <ul>
+            <?php foreach ($options['categories'] as $cat): ?>
+            <li>Category: <strong><?php echo esc_html($cat['name']); ?></strong> (ID: <code><?php echo esc_html($cat['id']); ?></code>) | compulsory: <?php echo $cat['compulsory'] ? 'YES' : 'no'; ?> | order: <?php echo esc_html($cat['order']); ?></li>
+            <?php endforeach; ?>
+        </ul>
+
+        <p><strong>What to check:</strong></p>
+        <ol>
+            <li>Is your missing feature listed in section 1? If not, check section 2 (orphaned) or 3 (disabled).</li>
+            <li>If in section 2, click <strong>Save</strong> on the admin page to trigger automatic repair, or manually fix the category_id.</li>
+            <li>If in section 3, enable the feature in the admin.</li>
+            <li>If listed in section 1 but still not appearing in the grid, verify the category is actually rendered below.</li>
+        </ol>
+    </div>
+    <?php
+    endif;
+    ?>
+
+    <?php
+    // Normalize: Trim all whitespace (including Unicode) from category IDs and feature category_ids
+    foreach ($options['categories'] as &$cat) {
+        if (is_string($cat['id'])) {
+            $cat['id'] = preg_replace('/^\s+|\s+$/u', '', $cat['id']);
+        }
+    }
+    unset($cat);
+    foreach ($options['features'] as &$feat) {
+        if (isset($feat['category_id']) && is_string($feat['category_id'])) {
+            $feat['category_id'] = preg_replace('/^\s+|\s+$/u', '', $feat['category_id']);
+        }
+    }
+    unset($feat);
+
+    // DEBUG: Log after normalization
+    if (isset($_GET['debug']) && $_GET['debug'] == 1) {
+        error_log('After normalization: category IDs = ' . implode(', ', array_column($options['categories'], 'id')));
+        error_log('After normalization: features count = ' . count($options['features']));
+        error_log('Categories after norm (with lengths): ' . json_encode(array_map(function($c) {
+            return $c['name'] . ':' . $c['id'] . '(len=' . strlen($c['id']) . ')';
+        }, $options['categories'])));
+        // Search for the missing feature by name (case-insensitive, partial)
+        $found_any = false;
+        foreach ($options['features'] as $idx => $f) {
+            if (stripos($f['name'], 'up to 4 pages') !== false || stripos($f['name'], '4 pages') !== false) {
+                $found_any = true;
+                error_log("  Found feature[$idx]: {$f['name']}, enabled={$f['enabled']}, cat_id='{$f['category_id']}'");
+            }
+        }
+        if (!$found_any) {
+            error_log('  NO feature with name containing "up to 4 pages" or "4 pages" found!');
+            // Also log all feature names for comparison
+            $all_names = array_column($options['features'], 'name');
+            error_log('  All feature names: ' . implode('; ', $all_names));
+        }
+    }
+    ?>
     <div class="header-section">
         <h1><?php echo esc_html( $options['settings']['frontend_title'] ?? 'Website Configuration Wizard' ); ?></h1>
         <p><?php echo wp_kses_post( $options['settings']['frontend_subtitle'] ?? 'Drag & drop features to build your custom package' ); ?></p>
@@ -59,11 +199,59 @@
                 return $a['order'] <=> $b['order'];
             });
 
+            // Deduplicate categories by ID (keep first occurrence, Unicode-aware whitespace removal)
+            $unique_categories = [];
+            $seen_cat_ids = [];
+            foreach ($options['categories'] as $index => $category) {
+                $cat_id_clean = preg_replace('/^\s+|\s+$/u', '', $category['id']);
+                if (!in_array($cat_id_clean, $seen_cat_ids, true)) {
+                    $options['categories'][$index]['id'] = $cat_id_clean;
+                    $unique_categories[] = $options['categories'][$index];
+                    $seen_cat_ids[] = $cat_id_clean;
+                }
+            }
+            $options['categories'] = $unique_categories;
+
+            // DEBUG: Log category IDs after normalization
+            if (isset($_GET['debug']) && $_GET['debug'] == 1) {
+                error_log('After normalization, category IDs: ' . implode(', ', array_column($options['categories'], 'id')));
+            }
+
+            // Feature normalization already done earlier
+
+            // DEBUG: Check for the specific missing feature (use normalized name)
+            if (isset($_GET['debug']) && $_GET['debug'] == 1) {
+                foreach ($options['features'] as $f) {
+                    if (stripos($f['name'], 'up to 4 pages') !== false) {
+                        error_log('DEBUG: Found "Up to 4 pages" feature - ID: ' . $f['id'] . ', category_id: "' . $f['category_id'] . '", enabled: ' . $f['enabled']);
+                    }
+                }
+            }
+
             foreach ( $options['categories'] as $category ) :
-                // Get features for this category
-                $category_features = array_filter( $options['features'], function( $feat ) use ( $category ) {
-                    return $feat['category_id'] === $category['id'] && $feat['enabled'];
+                // Get features for this category (Unicode-aware trim on both sides)
+                $category_id_clean = preg_replace('/^\s+|\s+$/u', '', $category['id']);
+                $category_features = array_filter( $options['features'], function( $feat ) use ( $category_id_clean ) {
+                    $feat_cat = isset($feat['category_id']) ? preg_replace('/^\s+|\s+$/u', '', $feat['category_id']) : '';
+                    return $feat_cat === $category_id_clean && $feat['enabled'];
                 } );
+
+                // Debug: Log each category rendering
+                if (isset($_GET['debug']) && $_GET['debug'] == 1) {
+                    error_log('CATEGORY: ' . $category['name'] . ' (ID=' . $category_id_clean . ', raw_len=' . strlen($category['id']) . ') has ' . count($category_features) . ' enabled features');
+                    if (count($category_features) > 0) {
+                        error_log('  Features: ' . implode(', ', array_column($category_features, 'name')));
+                    } else {
+                        // Show ALL features for this category (even disabled or mismatched)
+                        $all_for_cat = array_filter($options['features'], function($feat) use ($category_id_clean) {
+                            return trim($feat['category_id'] ?? '') === $category_id_clean;
+                        });
+                        error_log('  ALL features for this category (including disabled): ' . implode(', ', array_column($all_for_cat, 'name')));
+                        foreach ($all_for_cat as $f) {
+                            error_log('    - ' . $f['name'] . ' (enabled=' . $f['enabled'] . ', cat_id="' . trim($f['category_id'] ?? '') . '")');
+                        }
+                    }
+                }
 
                 // Sort features by order (then by name as fallback)
                 usort( $category_features, function( $a, $b ) {
@@ -74,6 +262,17 @@
                     }
                     return $orderA - $orderB;
                 } );
+
+                // Deduplicate features by ID (keep first occurrence after sorting)
+                $unique_features = [];
+                $seen_feat_ids = [];
+                foreach ($category_features as $feature) {
+                    if (!in_array($feature['id'], $seen_feat_ids, true)) {
+                        $unique_features[] = $feature;
+                        $seen_feat_ids[] = $feature['id'] ?? uniqid('', true);
+                    }
+                }
+                $category_features = $unique_features;
 
                 if ( empty( $category_features ) ) {
                     continue;

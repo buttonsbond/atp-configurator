@@ -794,6 +794,12 @@
 	background: #e8f4fd;
 }
 
+/* Wrapper for category tab button and its action buttons (no nested buttons) */
+.category-tab-item {
+	display: inline-flex;
+	align-items: center;
+}
+
 .category-tab .tab-icon {
 	font-size: 16px;
 }
@@ -816,9 +822,9 @@
 	letter-spacing: 0.3px;
 }
 
-.category-tab .tab-edit-btn,
-.category-tab .tab-delete-btn,
-.category-tab .tab-clone-btn {
+.category-tab-item .tab-edit-btn,
+.category-tab-item .tab-delete-btn,
+.category-tab-item .tab-clone-btn {
 	background: transparent;
 	border: none;
 	cursor: pointer;

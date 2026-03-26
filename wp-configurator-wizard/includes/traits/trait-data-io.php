@@ -94,8 +94,15 @@ trait Data_IO {
 
 		// Import categories
 		if ( ! empty( $_POST['import_categories'] ) && ! empty( $import_data['categories'] ) ) {
+			// Prepare categories: ensure original_id is set to id for tracking
+			$import_cats = $import_data['categories'];
+			foreach ($import_cats as &$cat) {
+				if (empty($cat['original_id'])) {
+					$cat['original_id'] = $cat['id'] ?? '';
+				}
+			}
 			// Sanitize and import
-			$sanitized_categories = $this->settings_manager->sanitize_categories( $import_data['categories'] );
+			$sanitized_categories = $this->settings_manager->sanitize_categories( $import_cats );
 			$current_options['categories'] = $sanitized_categories;
 			$changes['categories'] = count( $sanitized_categories );
 		}

@@ -60,6 +60,7 @@ final class System_Status_View {
 			'env'        => 'Environment',
 			'analytics'  => 'Analytics',
 			'donors'     => 'Donors Management',
+			'data'       => 'Data Integrity',
 		);
 
 		// Group checks by category
@@ -92,6 +93,9 @@ final class System_Status_View {
 					break;
 				case 'donors_sync':
 					$grouped_checks['donors'][] = $check;
+					break;
+				case 'data_integrity':
+					$grouped_checks['data'][] = $check;
 					break;
 				default:
 					// Fallback: put in core
@@ -1063,6 +1067,55 @@ final class System_Status_View {
 			'label'       => 'Donors List',
 			'description' => $donors_desc,
 			'action'      => '<div class="description" style="background: #f9f9f9; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">' . $donors_action . '</div>',
+		);
+
+		// 14. Data Integrity Check
+		try {
+			$integrity = $this->settings_manager->check_data_integrity();
+		} catch (Throwable $e) {
+			$integrity = [
+				'status' => 'error',
+				'issues' => ['Fatal error during integrity check: ' . $e->getMessage()],
+				'summary' => [
+					'total_categories' => 0,
+					'total_features' => 0,
+				],
+				'checked_at' => current_time('mysql'),
+			];
+			if (defined('WP_DEBUG') && WP_DEBUG) {
+				error_log('WP Configurator: Integrity check fatal error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+			}
+		}
+
+		$integrity_status = $integrity['status'] === 'ok' ? 'success' : ( $integrity['status'] === 'error' ? 'error' : 'warning' );
+		$integrity_desc = sprintf(
+			'Categories: %d | Features: %d | Issues: %d',
+			$integrity['summary']['total_categories'],
+			$integrity['summary']['total_features'],
+			count($integrity['issues'])
+		);
+		$integrity_action = '';
+		if ($integrity['status'] !== 'ok') {
+			$issues_list = '<ul style="margin: 8px 0; padding-left: 20px;">';
+			foreach (array_slice($integrity['issues'], 0, 10) as $issue) { // Show first 10
+				$issues_list .= '<li>' . esc_html($issue) . '</li>';
+			}
+			if (count($integrity['issues']) > 10) {
+				$issues_list .= '<li>... and ' . (count($integrity['issues']) - 10) . ' more</li>';
+			}
+			$issues_list .= '</ul>';
+			$integrity_desc .= '<br><strong>Issues found:</strong>' . $issues_list;
+		}
+		// Add "Run Repair" button if there are issues (calls repair_data_integrity automatically on save, but provide manual button)
+		if ($integrity['status'] !== 'ok') {
+			$integrity_action = '<button type="button" class="button button-small" onclick="alert(\'Data integrity issues will be automatically repaired when you save changes. To trigger repair now, make any change and save.\');">Auto-Repair on Save</button>';
+		}
+
+		$checks['data_integrity'] = array(
+			'status'      => $integrity_status,
+			'label'       => 'Data Integrity',
+			'description' => $integrity_desc,
+			'action'      => $integrity_action ? '<div class="description" style="background: #f9f9f9; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">' . $integrity_action . '</div>' : '',
 		);
 
 		return $checks;

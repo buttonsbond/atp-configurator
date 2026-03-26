@@ -272,7 +272,7 @@ jQuery(document).ready(function($) {
 	// Edit button handler
 	$('#category-tabs-container').on('click', '.tab-edit-btn', function(e) {
 		e.stopPropagation();
-		var $tab = $(this).closest('.category-tab');
+		var $tab = $(this).siblings('.category-tab');
 		var index = $(this).data('index');
 		editingCategoryIndex = index;
 		editWasActive = $tab.hasClass('active');
@@ -300,7 +300,7 @@ jQuery(document).ready(function($) {
 	// Duplicate category (clone)
 	$('#category-tabs-container').on('click', '.tab-clone-btn', function(e) {
 		e.stopPropagation();
-		var $tab = $(this).closest('.category-tab');
+		var $tab = $(this).siblings('.category-tab');
 		var index = $(this).data('index');
 		var original = categories[index];
 		if (!original) return;
@@ -562,13 +562,19 @@ jQuery(document).ready(function($) {
 	// Delete button handler
 	$('#category-tabs-container').on('click', '.tab-delete-btn', function(e) {
 		e.stopPropagation();
+		var $tab = $(this).siblings('.category-tab');
 		var index = $(this).data('index');
 		var deletedCategory = categories[index];
 		categories.splice(index, 1);
 		var categoryIdToRemove = deletedCategory.id;
-		features = features.filter(function(feat) {
-			return feat.category_id !== categoryIdToRemove;
+		// Orphan features from deleted category (do NOT delete them)
+		// Set category_id to empty string so they can be reassigned on save
+		features.forEach(function(feat) {
+			if (feat.category_id === categoryIdToRemove) {
+				feat.category_id = '';
+			}
 		});
+		// Reindex features (maintain sequential indices)
 		features.forEach(function(feat, i) {
 			feat.index = i;
 		});
@@ -797,6 +803,10 @@ jQuery(document).ready(function($) {
 		if (isNaN(index)) return;
 
 		var category_id = $('#edit-feature-category').val();
+		if (!category_id) {
+			alert('Please select a category.');
+			return;
+		}
 		var name = $('#edit-feature-name').val().trim();
 		if (!name) {
 			alert('Feature name is required.');
@@ -822,6 +832,17 @@ jQuery(document).ready(function($) {
 		});
 
 		var currentId = features[index].id;
+
+		// Generate a unique ID if missing (for new features)
+		if (!currentId) {
+			var baseId = 'feat_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+			var existingIds = features.map(function(f) { return f.id; });
+			while (existingIds.indexOf(baseId) !== -1) {
+				baseId = 'feat_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+			}
+			currentId = baseId;
+		}
+
 		var newIncompatible = incompatible_with.filter(function(id) {
 			return id && id !== currentId;
 		});
@@ -1072,12 +1093,26 @@ jQuery(document).ready(function($) {
 
 	$('#add-feature').off('click').on('click', function() {
 		var catId = activeCategoryId;
-		if (!catId) {
+		// Validate that the active category exists in the categories array
+		var validCategory = categories.some(function(c) { return c.id === catId; });
+		if (!catId || !validCategory) {
 			alert('Please select a category tab first.');
 			return;
 		}
+		// Generate a unique ID for the new feature to prevent duplicates
+		var generateUniqueId = function(prefix) {
+			var id = (prefix || 'feat') + '_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+			// Double-check uniqueness in current array
+			var existingIds = features.map(function(f) { return f.id; });
+			while (existingIds.indexOf(id) !== -1) {
+				id = (prefix || 'feat') + '_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+			}
+			return id;
+		};
+
 		var newFeat = {
 			index: featureIndex,
+			id: generateUniqueId('feat'),
 			category_id: catId,
 			name: '',
 			icon: '',
@@ -1124,40 +1159,42 @@ jQuery(document).ready(function($) {
 		e.stopPropagation();
 	});
 
-	// Tab drag and drop
+	// Tab drag and drop (using wrapper .category-tab-item)
 	$('#category-tabs-container').on('dragstart', '.category-tab', function(e) {
 		var $tab = $(this);
 		if ($(e.target).closest('.tab-edit-btn, .tab-delete-btn').length) {
 			e.preventDefault();
 			return;
 		}
-		$draggedTab = $tab;
+		var $wrapper = $tab.closest('.category-tab-item');
+		$draggedTab = $wrapper; // store wrapper element
 		e.originalEvent.dataTransfer.effectAllowed = 'move';
 		setTimeout(function() {
-			$tab.hide();
+			$wrapper.hide();
 			$categoryPlaceholder.css({
-				'width': $tab.outerWidth(),
-				'height': $tab.outerHeight()
+				'width': $wrapper.outerWidth(),
+				'height': $wrapper.outerHeight()
 			});
 		}, 0);
 	});
 
-	$('#category-tabs-container').on('dragover', '.category-tab', function(e) {
+	$('#category-tabs-container').on('dragover', '.category-tab-item', function(e) {
 		e.preventDefault();
 		if (!$draggedTab) return;
-		var $target = $(this);
-		if ($target.is($draggedTab)) return;
+		var $tab = $(this);
+		var $targetWrapper = $tab.closest('.category-tab-item');
+		if ($targetWrapper.is($draggedTab)) return;
 		var offset = e.originalEvent.offsetX;
-		var width = $target.outerWidth();
+		var width = $targetWrapper.outerWidth();
 		var before = offset < width / 2;
 		if (before) {
-			$target.before($categoryPlaceholder);
+			$targetWrapper.before($categoryPlaceholder);
 		} else {
-			$target.after($categoryPlaceholder);
+			$targetWrapper.after($categoryPlaceholder);
 		}
 	});
 
-	$('#category-tabs-container').on('drop', '.category-tab, .category-tab-placeholder', function(e) {
+	$('#category-tabs-container').on('drop', '.category-tab-item, .category-tab-placeholder', function(e) {
 		e.preventDefault();
 		if ($draggedTab && $categoryPlaceholder.parent().length) {
 			$categoryPlaceholder.replaceWith($draggedTab);
@@ -1186,11 +1223,11 @@ jQuery(document).ready(function($) {
 
 	function renderCategoryTabs() {
 		var $container = $('#category-tabs-container');
-		var activeCategoryId = $container.find('.category-tab.active').data('categoryId');
+		var previousActiveId = $container.find('.category-tab.active').data('categoryId');
 		$container.empty();
 		var firstTab = null;
 		categories.forEach(function(cat, index) {
-			var isActive = (cat.id === activeCategoryId);
+			var isActive = (cat.id === previousActiveId);
 			// Count features in this category
 			var featureCount = features.filter(function(f) { return f.category_id === cat.id; }).length;
 			var color = cat.color || '';
@@ -1203,23 +1240,33 @@ jQuery(document).ready(function($) {
 				iconHtml = cat.icon;
 			}
 
-			var $tab = $('<button type="button" class="category-tab' + (isActive ? ' active' : '') + '" data-category="' + cat.id + '" data-category-id="' + cat.id + '" data-category-index="' + index + '" draggable="true"' + (color ? ' data-color="' + color + '"' : '') + '>' +
+			// Build tab structure: wrapper containing the tab button and separate action buttons (no nested buttons)
+		var $wrapper = $('<div class="category-tab-item">');
+		var $tab = $('<button type="button" class="category-tab' + (isActive ? ' active' : '') + '" data-category="' + cat.id + '" data-category-id="' + cat.id + '" data-category-index="' + index + '" draggable="true"' + (color ? ' data-color="' + color + '"' : '') + '>' +
 				'<span class="tab-icon">' + iconHtml + '</span>' +
 				'<span class="tab-name">' + cat.name + '</span>' +
 				'<span class="tab-count" title="' + featureCount + ' feature' + (featureCount !== 1 ? 's' : '') + '">' + featureCount + '</span>' +
 				(cat.compulsory ? '<span class="tab-badge compulsory-badge" title="Compulsory">★</span>' : '') +
-				'<button type="button" class="tab-clone-btn" title="Duplicate Category" data-index="' + index + '" draggable="false">⧉</button>' +
-				'<button type="button" class="tab-edit-btn" title="Edit Category" data-index="' + index + '" draggable="false">✏️</button>' +
-				'<button type="button" class="tab-delete-btn" title="Delete Category" data-index="' + index + '" draggable="false">🗑️</button>' +
 				'</button>');
-			if (color) {
-				$tab.css('--category-color', color);
-			}
-			$container.append($tab);
-			if (!firstTab) firstTab = $tab;
+		var $actions = $(
+			'<button type="button" class="tab-clone-btn" title="Duplicate Category" data-index="' + index + '" draggable="false">⧉</button>' +
+			'<button type="button" class="tab-edit-btn" title="Edit Category" data-index="' + index + '" draggable="false">✏️</button>' +
+			'<button type="button" class="tab-delete-btn" title="Delete Category" data-index="' + index + '" draggable="false">🗑️</button>'
+		);
+		if (color) {
+			$tab.css('--category-color', color);
+		}
+		$wrapper.append($tab).append($actions);
+		$container.append($wrapper);
+		if (!firstTab) firstTab = $tab;
 		});
 		if (!$container.find('.category-tab.active').length && firstTab) {
 			firstTab.addClass('active');
+		}
+		// Sync global activeCategoryId to the actual active tab after rendering
+		var $newActive = $container.find('.category-tab.active');
+		if ($newActive.length) {
+			activeCategoryId = $newActive.data('categoryId');
 		}
 	}
 
@@ -1249,6 +1296,51 @@ jQuery(document).ready(function($) {
 			if ($catTab.length) {
 				console.log('🔄 Restoring active category tab:', state.activeCategoryTab);
 				$catTab.trigger('click');
+			}
+		}
+	})();
+
+	// Diagnostic: check for data integrity issues (runs on every admin load)
+	(function runDataIntegrityDiagnostics() {
+		// Only run if categories and features are defined
+		if (!categories || !features) return;
+
+		var issues = [];
+
+		// Check duplicate category IDs
+		var catIds = categories.map(function(c) { return c.id; });
+		var duplicateCats = catIds.filter(function(id, index) { return catIds.indexOf(id) !== index; });
+		if (duplicateCats.length) {
+			issues.push('Duplicate category IDs found: ' + [...new Set(duplicateCats)].join(', '));
+		}
+
+		// Check missing feature IDs
+		var missingIds = features.filter(function(f) { return !f.id; });
+		if (missingIds.length) {
+			issues.push(missingIds.length + ' feature(s) missing ID');
+		}
+
+		// Check duplicate feature IDs (excluding empty)
+		var featIds = features.map(function(f) { return f.id; });
+		var duplicateFeats = featIds.filter(function(id, index) { return id && featIds.indexOf(id) !== index; });
+		if (duplicateFeats.length) {
+			issues.push('Duplicate feature IDs found: ' + [...new Set(duplicateFeats)].join(', '));
+		}
+
+		// Check features with missing category_id
+		var orphaned = features.filter(function(f) { return !f.category_id || !catIds.includes(f.category_id); });
+		if (orphaned.length) {
+			issues.push(orphaned.length + ' feature(s) with missing or invalid category_id');
+		}
+
+		if (issues.length) {
+			console.warn('%c⚠️ Data integrity issues detected:', 'color: #d63638; font-weight: bold;', issues);
+			if (window.alert) {
+				alert('Data integrity issues detected. Open browser console for details.');
+			}
+		} else {
+			if (window.console) {
+				console.log('%c✅ Data integrity check: No issues found.', 'color: #10b981;');
 			}
 		}
 	})();

@@ -43,6 +43,11 @@ final class Database_Manager {
 	 * Plugin activation hook - creates all tables
 	 */
 	public static function activate(): void {
+		// Log start of activation
+		if (defined('WP_DEBUG') && WP_DEBUG) {
+			error_log('WP Configurator: Activation started');
+		}
+
 		global $wpdb;
 
 		// Create quote requests table
@@ -70,14 +75,26 @@ final class Database_Manager {
 			KEY created_at (created_at)
 		) $charset_collate;";
 
+		if (defined('WP_DEBUG') && WP_DEBUG) {
+			error_log('WP Configurator: Creating table SQL: ' . $sql);
+		}
+
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-		dbDelta( $sql );
+		$result = dbDelta( $sql );
+
+		if (defined('WP_DEBUG') && WP_DEBUG) {
+			error_log('WP Configurator: dbDelta result: ' . print_r($result, true));
+		}
 
 		// Ensure new columns exist (dbDelta can be unreliable with schema changes)
 		self::ensure_status_columns();
 
 		// Create interactions tracking table
 		self::create_interactions_table();
+
+		if (defined('WP_DEBUG') && WP_DEBUG) {
+			error_log('WP Configurator: Activation completed successfully');
+		}
 	}
 
 	/**

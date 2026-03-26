@@ -126,10 +126,9 @@ final class Asset_Manager {
 	 */
 	public function enqueue_admin_assets( $hook ) {
 		// Only load on our settings page
-		// Temporarily commented for debugging
-		// if ( $hook !== 'toplevel_page_wp-configurator-settings' ) {
-		// 	return;
-		// }
+		if ( $hook !== 'toplevel_page_wp-configurator-settings' ) {
+			return;
+		}
 
 		// Debug: log that we're enqueueing
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
