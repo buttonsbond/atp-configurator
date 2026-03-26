@@ -2,7 +2,7 @@
 
 A modern, modular WordPress plugin for creating interactive cost estimation wizards with drag-and-drop functionality, real-time analytics, and comprehensive quote management.
 
-**Current version: 3.5.2** (stable)
+**Current version: 3.5.2.1** (stable)
 **GitHub Repository**: https://github.com/buttonsbond/atp-configurator
 
 ## Features
@@ -25,6 +25,22 @@ A modern, modular WordPress plugin for creating interactive cost estimation wiza
 - **Category & Feature Images**: Upload custom images via WordPress media library to replace emoji icons with product photos or custom graphics (optional, zero breaking changes)
 
 ## Changelog
+
+### Version 3.5.2.1 (2026-03-26) - Patch Release
+**Important**: This release fixes critical bugs found in v3.5.2. Please update immediately.
+
+- **Fixed**: Category ID changes now properly update associated features
+  - Previously, editing a category ID would orphan its features
+  - Features now correctly follow category ID changes via automatic remapping
+- **Fixed**: Admin category tabs HTML structure
+  - Action buttons (duplicate/edit/delete) now render inline with the tab
+  - Resolved invalid nested button markup that caused visual separation
+- **Fixed**: Debug mode data corruption
+  - Reference variables properly unset to prevent array corruption when `?debug=1` is enabled
+  - Features like "Up to 4 pages" now appear correctly in debug mode
+- **Improved**: Feature orphan detection and automatic repair
+  - More robust data integrity checks in settings manager
+  - Enhanced Unicode-aware whitespace handling
 
 ### Version 3.5.2 (2026-03-25)
 - **Added**: Category & Feature Images
