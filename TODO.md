@@ -1,6 +1,6 @@
 # WP Configurator Wizard - Project Overview
 
-## Current State (v3.5.8 - Stable)
+## Current State (v3.5.9 - Stable)
 **Live**: https://all-tech-plus.com/wizard
 **Shortcode**: `[wp_configurator_wizard]`
 **Stack**: PHP (WordPress), jQuery, custom CSS; no build step
@@ -87,6 +87,11 @@ Key milestones:
   - Asset Manager: No changes needed (no new assets)
   - Database: No schema changes (uses existing options table)
 
+- **v3.5.9 (2026-03-30)**: Bug Fix for Interaction Data Purge
+  - Fixed form not displaying: moved HTML from `description` to `raw_html` field
+  - `wp_kses_post` was stripping form inputs; now bypassed for trusted admin form
+  - Form inputs (date pickers, selects, buttons) now render correctly
+  - Combined with v3.5.8 filter fix, purge tool is now fully functional
 - **v3.5.8 (2026-03-30)**: Bug Fix for Interaction Data Purge
   - Fixed SQL query builder: removed nested $wpdb->prepare() calls
   - Date range and URL parameter filters now work correctly

@@ -2,7 +2,7 @@
 
 A modern, modular WordPress plugin for creating interactive cost estimation wizards with drag-and-drop functionality, real-time analytics, and comprehensive quote management.
 
-**Current version: 3.5.8** (stable)
+**Current version: 3.5.9** (stable)
 **GitHub Repository**: https://github.com/buttonsbond/atp-configurator
 
 ## Features
@@ -25,6 +25,13 @@ A modern, modular WordPress plugin for creating interactive cost estimation wiza
 - **Category & Feature Images**: Upload custom images via WordPress media library to replace emoji icons with product photos or custom graphics (optional, zero breaking changes)
 
 ## Changelog
+
+### Version 3.5.9 (2026-03-30) - Bug Fix
+- **Fixed**: Interaction Data Purge Tool form not displaying
+  - Form HTML was in `description` field and stripped by `wp_kses_post()`
+  - Moved form to `raw_html` field to bypass KSES filtering
+  - Form inputs (date pickers, selects, buttons) now display and work correctly
+- **Fixed**: Combined with v3.5.8 filter logic fix - tool now fully functional
 
 ### Version 3.5.8 (2026-03-30) - Bug Fix
 - **Fixed**: Interaction Data Purge Tool filter logic

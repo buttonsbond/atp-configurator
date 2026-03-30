@@ -152,7 +152,11 @@ final class System_Status_View {
 
 				// Card body
 				echo '<div class="system-status-card-body">';
-				echo wp_kses_post( $check['description'] );
+				if ( isset( $check['raw_html'] ) ) {
+					echo $check['raw_html']; // Output raw HTML for trusted admin content (e.g., forms)
+				} else {
+					echo wp_kses_post( $check['description'] );
+				}
 				echo '</div>';
 
 				// Card actions (if any)
@@ -1422,7 +1426,7 @@ final class System_Status_View {
 		$checks['interaction_purge'] = array(
 			'status'      => 'info',
 			'label'       => 'Interaction Data Purge',
-			'description' => $purge_form,
+			'raw_html'    => $purge_form,
 			'action'      => '',
 		);
 
