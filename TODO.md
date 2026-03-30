@@ -1,6 +1,6 @@
 # WP Configurator Wizard - Project Overview
 
-## Current State (v3.5.5 - Stable)
+## Current State (v3.5.6 - Stable)
 **Live**: https://all-tech-plus.com/wizard
 **Shortcode**: `[wp_configurator_wizard]`
 **Stack**: PHP (WordPress), jQuery, custom CSS; no build step
@@ -86,6 +86,14 @@ Key milestones:
   - Settings Manager: Sanitization for new image ID fields (text sanitization)
   - Asset Manager: No changes needed (no new assets)
   - Database: No schema changes (uses existing options table)
+
+- **v3.5.6 (2026-03-30)**: Interaction Data Purge Tool
+  - New "Interaction Data Purge" card in System Status tab
+  - Filter by date range (optional) and URL parameter type/value (optional)
+  - Preview matches with breakdown by event type
+  - Delete matching interaction events with confirmation
+  - Uses JSON_UNQUOTE(JSON_EXTRACT) for precise URL parameter matching
+  - AJAX endpoints: preview_interaction_purge and execute_interaction_purge
 
 - **v3.5.5 (2026-03-30)**: URL Parameter Tracking & Marketing Attribution
   - Capture UTM parameters (source, medium, campaign) and custom variables (webURL, botID)

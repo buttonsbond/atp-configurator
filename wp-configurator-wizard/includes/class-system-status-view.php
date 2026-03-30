@@ -97,6 +97,9 @@ final class System_Status_View {
 				case 'data_integrity':
 					$grouped_checks['data'][] = $check;
 					break;
+				case 'interaction_purge':
+					$grouped_checks['data'][] = $check;
+					break;
 				default:
 					// Fallback: put in core
 					$grouped_checks['core'][] = $check;
@@ -512,6 +515,159 @@ final class System_Status_View {
 	}
 
 	/**
+	 * Render Interaction Data Purge form
+	 *
+	 * @return string HTML form
+	 */
+	private function render_interaction_purge_form(): string {
+		// Use current date range defaults: last 30 days
+		$to_date = current_time( 'Y-m-d' );
+		$from_date = date_i18n( 'Y-m-d', strtotime( '-30 days' ) );
+
+		// URL parameter types we track
+		$param_types = array(
+			'utm_source'   => 'UTM Source',
+			'utm_medium'   => 'UTM Medium',
+			'utm_campaign' => 'UTM Campaign',
+			'webURL'       => 'Web URL',
+			'botID'        => 'Bot ID',
+		);
+
+		ob_start();
+		?>
+		<div class="interaction-purge-form" style="background: #f9f9f9; padding: 12px; border-radius: 6px; border: 1px solid #ddd;">
+			<p style="margin-top: 0;"><strong>Filter by date range (optional):</strong></p>
+			<div style="display: flex; gap: 12px; margin-bottom: 12px; align-items: center; flex-wrap: wrap;">
+				<label>
+					From: <input type="date" id="purge-date-from" value="<?php echo esc_attr( $from_date ); ?>" style="width: 140px;">
+				</label>
+				<label>
+					To: <input type="date" id="purge-date-to" value="<?php echo esc_attr( $to_date ); ?>" style="width: 140px;">
+				</label>
+			</div>
+
+			<p><strong>Filter by URL Parameter (optional):</strong></p>
+			<div style="display: flex; gap: 12px; margin-bottom: 12px; align-items: center; flex-wrap: wrap;">
+				<label>
+					Parameter:
+					<select id="purge-param-type" style="min-width: 160px;">
+						<option value="">-- Select Parameter --</option>
+						<?php foreach ( $param_types as $key => $label ) : ?>
+							<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?> (<?php echo esc_html( $key ); ?>)</option>
+						<?php endforeach; ?>
+					</select>
+				</label>
+				<label>
+					Value: <input type="text" id="purge-param-value" placeholder="e.g., facebook" style="width: 200px;">
+				</label>
+			</div>
+
+			<button type="button" class="button button-secondary" id="purge-preview-btn">Preview Matches</button>
+
+			<div id="purge-results" style="margin-top: 16px; display: none;">
+				<!-- Preview results will appear here -->
+			</div>
+
+			<div id="purge-error" style="margin-top: 12px; color: #dc3232; display: none;"></div>
+		</div>
+
+		<script>
+		jQuery(function($) {
+			$('#purge-preview-btn').on('click', function() {
+				var from = $('#purge-date-from').val();
+				var to = $('#purge-date-to').val();
+				var paramType = $('#purge-param-type').val();
+				var paramValue = $('#purge-param-value').val();
+
+				$('#purge-results').hide().html('<p>⏳ Loading...</p>').show();
+				$('#purge-error').hide();
+
+				$.ajax({
+					url: ajaxurl,
+					type: 'POST',
+					data: {
+						action: 'preview_interaction_purge',
+						nonce: wpConfiguratorAdmin.exportNonce,
+						date_from: from,
+						date_to: to,
+						param_type: paramType,
+						param_value: paramValue
+					},
+					dataType: 'json'
+				})
+				.done(function(response) {
+					if (response.success) {
+						var data = response.data;
+						var html = '<div style="background: #fff; padding: 12px; border: 1px solid #ccc; border-radius: 4px;">';
+						html += '<p><strong>✅ ' + data.count + ' interaction events matched</strong></p>';
+						if (data.count > 0) {
+							html += '<p>Breakdown by event type:</p><ul style="margin: 8px 0; padding-left: 20px;">';
+							$.each(data.by_event_type, function(event, count) {
+								html += '<li>' + event + ': ' + count + '</li>';
+							});
+							html += '</ul>';
+							html += '<p style="color: #d63638; font-weight: bold;">⚠️ Deleting these records is permanent and cannot be undone.</p>';
+							html += '<button type="button" class="button" id="purge-execute-btn" data-count="' + data.count + '" style="background:#dc3232; border-color:#dc3232; color:#fff; text-decoration:none;">Delete These ' + data.count + ' Events</button>';
+						}
+						html += '</div>';
+						$('#purge-results').html(html);
+
+						// Bind execute button
+						$('#purge-execute-btn').on('click', function() {
+							var count = $(this).data('count');
+							if (!confirm('Delete ' + count + ' interaction events? This cannot be undone.')) {
+								return;
+							}
+
+							$(this).prop('disabled', true).text('Deleting...');
+
+							$.ajax({
+								url: ajaxurl,
+								type: 'POST',
+								data: {
+									action: 'execute_interaction_purge',
+									nonce: wpConfiguratorAdmin.exportNonce,
+									date_from: from,
+									date_to: to,
+									param_type: paramType,
+									param_value: paramValue
+								},
+								dataType: 'json'
+							})
+							.done(function(resp) {
+								if (resp.success) {
+									$('#purge-results').html('<p style="color: green;">✅ Successfully deleted ' + resp.data.deleted_count + ' events.</p>');
+									// Optionally refresh the page stats
+									if (typeof refreshInteractionStats === 'function') {
+										refreshInteractionStats();
+									}
+								} else {
+									$('#purge-results').html('<p style="color: red;">❌ Error: ' + resp.data.message + '</p>');
+									$('#purge-execute-btn').prop('disabled', false).text('Delete These ' + count + ' Events');
+								}
+							})
+							.fail(function() {
+								$('#purge-results').html('<p style="color: red;">❌ Request failed. Please try again.</p>');
+								$('#purge-execute-btn').prop('disabled', false).text('Delete These ' + count + ' Events');
+							});
+						});
+					} else {
+						$('#purge-results').html('<p style="color: #d63638;">❌ ' + response.data.message + '</p>');
+					}
+				})
+				.fail(function() {
+					$('#purge-results').hide();
+					$('#purge-error').text('Request failed. Please try again.').show();
+				});
+			});
+		});
+		</script>
+		<?php
+
+		return ob_get_clean();
+	}
+
+	/**
 	 * Schedule weekly cron if not already scheduled
 	 */
 	public function schedule_donors_sync_cron() {
@@ -529,6 +685,136 @@ final class System_Status_View {
 		if ( ! $result['success'] ) {
 			error_log( '[WP Configurator] Weekly donors sync failed: ' . $result['message'] );
 		}
+	}
+
+	/**
+	 * AJAX preview interaction purge matches
+	 */
+	public function ajax_preview_interaction_purge() {
+		global $wpdb;
+
+		// Verify nonce and capability
+		check_ajax_referer( 'wp_configurator_nonce', 'nonce' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( 'Insufficient permissions', 403 );
+		}
+
+		$date_from   = isset( $_POST['date_from'] ) ? sanitize_text_field( $_POST['date_from'] ) : '';
+		$date_to     = isset( $_POST['date_to'] ) ? sanitize_text_field( $_POST['date_to'] ) : '';
+		$param_type  = isset( $_POST['param_type'] ) ? sanitize_text_field( $_POST['param_type'] ) : '';
+		$param_value = isset( $_POST['param_value'] ) ? sanitize_text_field( $_POST['param_value'] ) : '';
+
+		$table = $wpdb->prefix . 'configurator_interactions';
+		$where = array( '1=1' );
+		$where_params = array();
+
+		// Date range filter
+		if ( $date_from ) {
+			$where[] = 'created_at >= %s';
+			$where_params[] = $date_from . ' 00:00:00';
+		}
+		if ( $date_to ) {
+			$where[] = 'created_at <= %s';
+			$where_params[] = $date_to . ' 23:59:59';
+		}
+
+		// URL parameter filter
+		if ( $param_type && $param_value !== '' ) {
+			$where[] = $wpdb->prepare( "JSON_UNQUOTE(JSON_EXTRACT(metadata, %s)) = %s", '$.url_params.' . $param_type, $param_value );
+		}
+
+		$where_sql = implode( ' AND ', $where );
+
+		// Count total matches
+		$count = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM $table WHERE $where_sql",
+				$where_params
+			)
+		);
+
+		if ( ! $count ) {
+			wp_send_json_success( array(
+				'count' => 0,
+				'by_event_type' => array(),
+			) );
+		}
+
+		// Get breakdown by event_type
+		$breakdown = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT event_type, COUNT(*) as cnt FROM $table WHERE $where_sql GROUP BY event_type ORDER BY cnt DESC",
+				$where_params
+			),
+			ARRAY_A
+		);
+
+		$by_event_type = array();
+		foreach ( $breakdown as $row ) {
+			$by_event_type[ $row['event_type'] ] = (int) $row['cnt'];
+		}
+
+		wp_send_json_success( array(
+			'count'        => (int) $count,
+			'by_event_type' => $by_event_type,
+		) );
+	}
+
+	/**
+	 * AJAX execute interaction purge (delete)
+	 */
+	public function ajax_execute_interaction_purge() {
+		global $wpdb;
+
+		// Verify nonce and capability
+		check_ajax_referer( 'wp_configurator_nonce', 'nonce' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( 'Insufficient permissions', 403 );
+		}
+
+		$date_from   = isset( $_POST['date_from'] ) ? sanitize_text_field( $_POST['date_from'] ) : '';
+		$date_to     = isset( $_POST['date_to'] ) ? sanitize_text_field( $_POST['date_to'] ) : '';
+		$param_type  = isset( $_POST['param_type'] ) ? sanitize_text_field( $_POST['param_type'] ) : '';
+		$param_value = isset( $_POST['param_value'] ) ? sanitize_text_field( $_POST['param_value'] ) : '';
+
+		$table = $wpdb->prefix . 'configurator_interactions';
+		$where = array( '1=1' );
+		$where_params = array();
+
+		// Date range filter
+		if ( $date_from ) {
+			$where[] = 'created_at >= %s';
+			$where_params[] = $date_from . ' 00:00:00';
+		}
+		if ( $date_to ) {
+			$where[] = 'created_at <= %s';
+			$where_params[] = $date_to . ' 23:59:59';
+		}
+
+		// URL parameter filter
+		if ( $param_type && $param_value !== '' ) {
+			$where[] = $wpdb->prepare( "JSON_UNQUOTE(JSON_EXTRACT(metadata, %s)) = %s", '$.url_params.' . $param_type, $param_value );
+		}
+
+		$where_sql = implode( ' AND ', $where );
+
+		// Delete matching records
+		$deleted_count = $wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM $table WHERE $where_sql",
+				$where_params
+			)
+		);
+
+		if ( false === $deleted_count ) {
+			wp_send_json_error( array(
+				'message' => 'Database error occurred. Please check logs.',
+			) );
+		}
+
+		wp_send_json_success( array(
+			'deleted_count' => $deleted_count,
+		) );
 	}
 
 	/**
@@ -1116,6 +1402,15 @@ final class System_Status_View {
 			'label'       => 'Data Integrity',
 			'description' => $integrity_desc,
 			'action'      => $integrity_action ? '<div class="description" style="background: #f9f9f9; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">' . $integrity_action . '</div>' : '',
+		);
+
+		// Interaction Data Purge tool
+		$purge_form = $this->render_interaction_purge_form();
+		$checks['interaction_purge'] = array(
+			'status'      => 'info',
+			'label'       => 'Interaction Data Purge',
+			'description' => $purge_form,
+			'action'      => '',
 		);
 
 		return $checks;
