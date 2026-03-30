@@ -1,6 +1,6 @@
 # WP Configurator Wizard - Project Overview
 
-## Current State (v3.5.7 - Stable)
+## Current State (v3.5.8 - Stable)
 **Live**: https://all-tech-plus.com/wizard
 **Shortcode**: `[wp_configurator_wizard]`
 **Stack**: PHP (WordPress), jQuery, custom CSS; no build step
@@ -87,6 +87,11 @@ Key milestones:
   - Asset Manager: No changes needed (no new assets)
   - Database: No schema changes (uses existing options table)
 
+- **v3.5.8 (2026-03-30)**: Bug Fix for Interaction Data Purge
+  - Fixed SQL query builder: removed nested $wpdb->prepare() calls
+  - Date range and URL parameter filters now work correctly
+  - JSON_UNQUOTE(JSON_EXTRACT) parameters properly added to WHERE clause
+  - This fix makes the purge tool fully functional
 - **v3.5.7 (2026-03-30)**: Bug Fix for Interaction Data Purge
   - Fixed JavaScript rendering issue in Interaction Data Purge tool
   - Moved inline script from card description to global script block
