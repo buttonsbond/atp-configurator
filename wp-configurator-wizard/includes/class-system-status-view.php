@@ -729,7 +729,9 @@ final class System_Status_View {
 
 		// URL parameter filter
 		if ( $param_type && $param_value !== '' ) {
-			$where[] = $wpdb->prepare( "JSON_UNQUOTE(JSON_EXTRACT(metadata, %s)) = %s", '$.url_params.' . $param_type, $param_value );
+			$where[] = "JSON_UNQUOTE(JSON_EXTRACT(metadata, %s)) = %s";
+			$where_params[] = '$.url_params.' . $param_type;
+			$where_params[] = $param_value;
 		}
 
 		$where_sql = implode( ' AND ', $where );
@@ -802,7 +804,9 @@ final class System_Status_View {
 
 		// URL parameter filter
 		if ( $param_type && $param_value !== '' ) {
-			$where[] = $wpdb->prepare( "JSON_UNQUOTE(JSON_EXTRACT(metadata, %s)) = %s", '$.url_params.' . $param_type, $param_value );
+			$where[] = "JSON_UNQUOTE(JSON_EXTRACT(metadata, %s)) = %s";
+			$where_params[] = '$.url_params.' . $param_type;
+			$where_params[] = $param_value;
 		}
 
 		$where_sql = implode( ' AND ', $where );
