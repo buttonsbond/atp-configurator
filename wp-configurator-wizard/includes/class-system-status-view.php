@@ -383,6 +383,107 @@ final class System_Status_View {
 
 					return false;
 				};
+
+				// Interaction Data Purge
+				window.previewInteractionPurge = function() {
+					var from = $('#purge-date-from').val();
+					var to = $('#purge-date-to').val();
+					var paramType = $('#purge-param-type').val();
+					var paramValue = $('#purge-param-value').val();
+
+					$('#purge-results').hide().html('<p>⏳ Loading...</p>').show();
+					$('#purge-error').hide();
+
+					$.ajax({
+						url: ajaxurl,
+						type: 'POST',
+						data: {
+							action: 'preview_interaction_purge',
+							nonce: wpConfiguratorAdmin.exportNonce,
+							date_from: from,
+							date_to: to,
+							param_type: paramType,
+							param_value: paramValue
+						},
+						dataType: 'json'
+					})
+					.done(function(response) {
+						if (response.success) {
+							var data = response.data;
+							var html = '<div style="background: #fff; padding: 12px; border: 1px solid #ccc; border-radius: 4px;">';
+							html += '<p><strong>✅ ' + data.count + ' interaction events matched</strong></p>';
+							if (data.count > 0) {
+								html += '<p>Breakdown by event type:</p><ul style="margin: 8px 0; padding-left: 20px;">';
+								$.each(data.by_event_type, function(event, count) {
+									html += '<li>' + event + ': ' + count + '</li>';
+								});
+								html += '</ul>';
+								html += '<p style="color: #d63638; font-weight: bold;">⚠️ Deleting these records is permanent and cannot be undone.</p>';
+								html += '<button type="button" class="button" id="purge-execute-btn" data-count="' + data.count + '" style="background:#dc3232; border-color:#dc3232; color:#fff; text-decoration:none;">Delete These ' + data.count + ' Events</button>';
+							}
+							html += '</div>';
+							$('#purge-results').html(html);
+
+							// Bind execute button
+							$('#purge-execute-btn').on('click', window.executeInteractionPurge);
+						} else {
+							$('#purge-results').html('<p style="color: #d63638;">❌ ' + response.data.message + '</p>');
+						}
+					})
+					.fail(function() {
+						$('#purge-results').hide();
+						$('#purge-error').text('Request failed. Please try again.').show();
+					});
+
+					return false;
+				};
+
+				window.executeInteractionPurge = function() {
+					var $btn = $('#purge-execute-btn');
+					var count = $btn.data('count');
+					if (!confirm('Delete ' + count + ' interaction events? This cannot be undone.')) {
+						return;
+					}
+
+					$btn.prop('disabled', true).text('Deleting...');
+
+					var from = $('#purge-date-from').val();
+					var to = $('#purge-date-to').val();
+					var paramType = $('#purge-param-type').val();
+					var paramValue = $('#purge-param-value').val();
+
+					$.ajax({
+						url: ajaxurl,
+						type: 'POST',
+						data: {
+							action: 'execute_interaction_purge',
+							nonce: wpConfiguratorAdmin.exportNonce,
+							date_from: from,
+							date_to: to,
+							param_type: paramType,
+							param_value: paramValue
+						},
+						dataType: 'json'
+					})
+					.done(function(resp) {
+						if (resp.success) {
+							$('#purge-results').html('<p style="color: green;">✅ Successfully deleted ' + resp.data.deleted_count + ' events.</p>');
+						} else {
+							$('#purge-results').html('<p style="color: red;">❌ Error: ' + resp.data.message + '</p>');
+							$btn.prop('disabled', false).text('Delete These ' + count + ' Events');
+						}
+					})
+					.fail(function() {
+						$('#purge-results').html('<p style="color: red;">❌ Request failed. Please try again.</p>');
+						$btn.prop('disabled', false).text('Delete These ' + count + ' Events');
+					});
+
+					return false;
+				};
+
+				// Bind preview button
+				$('#purge-preview-btn').on('click', window.previewInteractionPurge);
+
 			});
 		</script>
 		<?php
@@ -570,98 +671,6 @@ final class System_Status_View {
 
 			<div id="purge-error" style="margin-top: 12px; color: #dc3232; display: none;"></div>
 		</div>
-
-		<script>
-		jQuery(function($) {
-			$('#purge-preview-btn').on('click', function() {
-				var from = $('#purge-date-from').val();
-				var to = $('#purge-date-to').val();
-				var paramType = $('#purge-param-type').val();
-				var paramValue = $('#purge-param-value').val();
-
-				$('#purge-results').hide().html('<p>⏳ Loading...</p>').show();
-				$('#purge-error').hide();
-
-				$.ajax({
-					url: ajaxurl,
-					type: 'POST',
-					data: {
-						action: 'preview_interaction_purge',
-						nonce: wpConfiguratorAdmin.exportNonce,
-						date_from: from,
-						date_to: to,
-						param_type: paramType,
-						param_value: paramValue
-					},
-					dataType: 'json'
-				})
-				.done(function(response) {
-					if (response.success) {
-						var data = response.data;
-						var html = '<div style="background: #fff; padding: 12px; border: 1px solid #ccc; border-radius: 4px;">';
-						html += '<p><strong>✅ ' + data.count + ' interaction events matched</strong></p>';
-						if (data.count > 0) {
-							html += '<p>Breakdown by event type:</p><ul style="margin: 8px 0; padding-left: 20px;">';
-							$.each(data.by_event_type, function(event, count) {
-								html += '<li>' + event + ': ' + count + '</li>';
-							});
-							html += '</ul>';
-							html += '<p style="color: #d63638; font-weight: bold;">⚠️ Deleting these records is permanent and cannot be undone.</p>';
-							html += '<button type="button" class="button" id="purge-execute-btn" data-count="' + data.count + '" style="background:#dc3232; border-color:#dc3232; color:#fff; text-decoration:none;">Delete These ' + data.count + ' Events</button>';
-						}
-						html += '</div>';
-						$('#purge-results').html(html);
-
-						// Bind execute button
-						$('#purge-execute-btn').on('click', function() {
-							var count = $(this).data('count');
-							if (!confirm('Delete ' + count + ' interaction events? This cannot be undone.')) {
-								return;
-							}
-
-							$(this).prop('disabled', true).text('Deleting...');
-
-							$.ajax({
-								url: ajaxurl,
-								type: 'POST',
-								data: {
-									action: 'execute_interaction_purge',
-									nonce: wpConfiguratorAdmin.exportNonce,
-									date_from: from,
-									date_to: to,
-									param_type: paramType,
-									param_value: paramValue
-								},
-								dataType: 'json'
-							})
-							.done(function(resp) {
-								if (resp.success) {
-									$('#purge-results').html('<p style="color: green;">✅ Successfully deleted ' + resp.data.deleted_count + ' events.</p>');
-									// Optionally refresh the page stats
-									if (typeof refreshInteractionStats === 'function') {
-										refreshInteractionStats();
-									}
-								} else {
-									$('#purge-results').html('<p style="color: red;">❌ Error: ' + resp.data.message + '</p>');
-									$('#purge-execute-btn').prop('disabled', false).text('Delete These ' + count + ' Events');
-								}
-							})
-							.fail(function() {
-								$('#purge-results').html('<p style="color: red;">❌ Request failed. Please try again.</p>');
-								$('#purge-execute-btn').prop('disabled', false).text('Delete These ' + count + ' Events');
-							});
-						});
-					} else {
-						$('#purge-results').html('<p style="color: #d63638;">❌ ' + response.data.message + '</p>');
-					}
-				})
-				.fail(function() {
-					$('#purge-results').hide();
-					$('#purge-error').text('Request failed. Please try again.').show();
-				});
-			});
-		});
-		</script>
 		<?php
 
 		return ob_get_clean();
