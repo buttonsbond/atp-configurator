@@ -586,54 +586,55 @@ final class Stats_Renderer {
 				}
 
 				// Attribution Analytics: Event Selector + Tabs
-				var attributionData = <?php echo json_encode( $metrics['attribution_stats'] ?? array() ); ?>;
 				var attributionEventSelect = document.getElementById('attribution-event-select');
-				var attributionTabs = document.querySelectorAll('.attr-tab');
-				var chartWrapper = document.getElementById('attribution-chart-wrapper');
-				var listWrapper = document.getElementById('attribution-list-wrapper');
-				var emptyState = document.getElementById('attribution-empty');
-				var totalCountEl = document.getElementById('attr-total-count');
-				var totalValueEl = document.getElementById('attr-total-value');
-				var attributionChart = null;
+				if (attributionEventSelect) {
+					var attributionData = <?php echo json_encode( $metrics['attribution_stats'] ?? array() ); ?>;
+					var attributionTabs = document.querySelectorAll('.attr-tab');
+					var chartWrapper = document.getElementById('attribution-chart-wrapper');
+					var listWrapper = document.getElementById('attribution-list-wrapper');
+					var emptyState = document.getElementById('attribution-empty');
+					var totalCountEl = document.getElementById('attr-total-count');
+					var totalValueEl = document.getElementById('attr-total-value');
+					var attributionChart = null;
 
-				function renderAttribution() {
-					var eventType = attributionEventSelect.value;
-					var activeTab = document.querySelector('.attr-tab.active').dataset.dimension;
-					var dataForEvent = attributionData[eventType] || {};
-					var dataForDim = dataForEvent[activeTab] || {};
+					function renderAttribution() {
+						var eventType = attributionEventSelect.value;
+						var activeTab = document.querySelector('.attr-tab.active').dataset.dimension;
+						var dataForEvent = attributionData[eventType] || {};
+						var dataForDim = dataForEvent[activeTab] || {};
 
-					// Calculate totals
-					var totalCount = 0;
-					var totalValue = 0;
-					Object.values(dataForDim).forEach(function(item) {
-						totalCount += item.count;
-						totalValue += item.value;
-					});
+						// Calculate totals
+						var totalCount = 0;
+						var totalValue = 0;
+						Object.values(dataForDim).forEach(function(item) {
+							totalCount += item.count;
+							totalValue += item.value;
+						});
 
-					totalCountEl.textContent = totalCount.toLocaleString();
-					totalValueEl.textContent = '€' + totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+						totalCountEl.textContent = totalCount.toLocaleString();
+						totalValueEl.textContent = '€' + totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-					// Hide empty state
-					emptyState.style.display = 'none';
-					chartWrapper.style.display = 'none';
-					listWrapper.style.display = 'none';
+						// Hide empty state
+						emptyState.style.display = 'none';
+						chartWrapper.style.display = 'none';
+						listWrapper.style.display = 'none';
 
-					if (Object.keys(dataForDim).length === 0) {
-						emptyState.style.display = 'block';
-						return;
-					}
-
-					// Decide display type: bar chart for source/medium/campaign, list for client/bot
-					if (activeTab === 'source' || activeTab === 'medium' || activeTab === 'campaign') {
-						// Render horizontal bar chart
-						var labels = Object.keys(dataForDim);
-						var counts = Object.values(dataForDim).map(function(item) { return item.count; });
-						var values = Object.values(dataForDim).map(function(item) { return item.value; });
-
-						// Destroy previous chart
-						if (attributionChart) {
-							attributionChart.destroy();
+						if (Object.keys(dataForDim).length === 0) {
+							emptyState.style.display = 'block';
+							return;
 						}
+
+						// Decide display type: bar chart for source/medium/campaign, list for client/bot
+						if (activeTab === 'source' || activeTab === 'medium' || activeTab === 'campaign') {
+							// Render horizontal bar chart
+							var labels = Object.keys(dataForDim);
+							var counts = Object.values(dataForDim).map(function(item) { return item.count; });
+							var values = Object.values(dataForDim).map(function(item) { return item.value; });
+
+							// Destroy previous chart
+							if (attributionChart) {
+								attributionChart.destroy();
+							}
 
 						var ctx = document.getElementById('attribution-chart');
 						if (ctx) {
@@ -716,6 +717,7 @@ final class Stats_Renderer {
 
 				// Initial render
 				renderAttribution();
+				}
 
 				// Activate stats tab if filter present
 				const urlParams = new URLSearchParams(window.location.search);

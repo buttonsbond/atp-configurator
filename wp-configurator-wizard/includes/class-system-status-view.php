@@ -71,38 +71,38 @@ final class System_Status_View {
 				case 'plugin_version':
 				case 'github_release':
 				case 'dashboard_widget':
-					$grouped_checks['core'][] = $check;
+					$grouped_checks['core'][$key] = $check;
 					break;
 				case 'caching_plugins':
 				case 'server_cache':
 				case 'js_versioning':
-					$grouped_checks['caching'][] = $check;
+					$grouped_checks['caching'][$key] = $check;
 					break;
 				case 'email_config':
 				case 'webhook_config':
-					$grouped_checks['comms'][] = $check;
+					$grouped_checks['comms'][$key] = $check;
 					break;
 				case 'php_version':
 				case 'mysql_version':
 				case 'wp_debug':
-					$grouped_checks['env'][] = $check;
+					$grouped_checks['env'][$key] = $check;
 					break;
 				case 'admin_ip_exclusion':
 				case 'remote_http':
-					$grouped_checks['analytics'][] = $check;
+					$grouped_checks['analytics'][$key] = $check;
 					break;
 				case 'donors_sync':
-					$grouped_checks['donors'][] = $check;
+					$grouped_checks['donors'][$key] = $check;
 					break;
 				case 'data_integrity':
-					$grouped_checks['data'][] = $check;
+					$grouped_checks['data'][$key] = $check;
 					break;
 				case 'interaction_purge':
-					$grouped_checks['data'][] = $check;
+					$grouped_checks['data'][$key] = $check;
 					break;
 				default:
 					// Fallback: put in core
-					$grouped_checks['core'][] = $check;
+					$grouped_checks['core'][$key] = $check;
 			}
 		}
 
@@ -138,9 +138,12 @@ final class System_Status_View {
 			// Cards grid
 			echo '<div class="system-status-cards-grid">';
 
-			foreach ( $checks_in_group as $check ) {
+			foreach ( $checks_in_group as $key => $check ) {
 				$status = $check['status'];
 				$card_class = 'system-status-card system-status-card--' . esc_attr( $status );
+				if ( isset( $check['full_width'] ) && $check['full_width'] ) {
+					$card_class .= ' system-status-card--full-width';
+				}
 
 				echo '<div class="' . $card_class . '">';
 
@@ -389,32 +392,68 @@ final class System_Status_View {
 				};
 
 				// Interaction Data Purge
-				window.previewInteractionPurge = function() {
+				var currentPreviewPage = 1;
+				var totalPreviewPages = 1;
+				var currentFilters = {};
+
+				window.previewInteractionPurge = function(page) {
+					page = page || 1;
 					var from = $('#purge-date-from').val();
 					var to = $('#purge-date-to').val();
 					var paramType = $('#purge-param-type').val();
 					var paramValue = $('#purge-param-value').val();
+					var matchType = $('#purge-param-match').val();
+					var perPage = parseInt($('#purge-per-page').val()) || 50;
+
+					// Get selected event types (multi-select)
+					var eventTypes = [];
+					$('#purge-event-types option:selected').each(function() {
+						var val = $(this).val();
+						if (val) {
+							eventTypes.push(val);
+						}
+					});
+
+					// Store current filters for pagination
+					currentFilters = {
+						date_from: from,
+						date_to: to,
+						param_type: paramType,
+						param_value: paramValue,
+						match_type: matchType,
+						event_types: eventTypes,
+						per_page: perPage
+					};
 
 					$('#purge-results').hide().html('<p>⏳ Loading...</p>').show();
 					$('#purge-error').hide();
 
+					var ajaxData = {
+						action: 'preview_interaction_purge',
+						nonce: wpConfiguratorAdmin.exportNonce,
+						date_from: from,
+						date_to: to,
+						param_type: paramType,
+						param_value: paramValue,
+						match_type: matchType,
+						event_types: eventTypes,
+						page: page,
+						per_page: perPage
+					};
+
 					$.ajax({
 						url: ajaxurl,
 						type: 'POST',
-						data: {
-							action: 'preview_interaction_purge',
-							nonce: wpConfiguratorAdmin.exportNonce,
-							date_from: from,
-							date_to: to,
-							param_type: paramType,
-							param_value: paramValue
-						},
+						data: ajaxData,
 						dataType: 'json'
 					})
 					.done(function(response) {
 						if (response.success) {
 							var data = response.data;
-							var html = '<div style="background: #fff; padding: 12px; border: 1px solid #ccc; border-radius: 4px;">';
+							currentPreviewPage = data.page || 1;
+							totalPreviewPages = data.total_pages || 1;
+
+							var html = '<div class="purge-results-inner">';
 							html += '<p><strong>✅ ' + data.count + ' interaction events matched</strong></p>';
 							if (data.count > 0) {
 								html += '<p>Breakdown by event type:</p><ul style="margin: 8px 0; padding-left: 20px;">';
@@ -422,6 +461,39 @@ final class System_Status_View {
 									html += '<li>' + event + ': ' + count + '</li>';
 								});
 								html += '</ul>';
+
+								// Show sample records if available
+								if (data.samples && data.samples.length > 0) {
+									html += '<p class="sample-count">Showing page ' + currentPreviewPage + ' of ' + totalPreviewPages + ' (samples ' + ((currentPreviewPage-1)*perPage + 1) + '-' + Math.min(currentPreviewPage*perPage, data.count) + ' of ' + data.count + '):</p>';
+									html += '<table><thead><tr><th>ID</th><th>Event Type</th><th>Date</th><th>Feature</th><th>URL Params</th></tr></thead><tbody>';
+									$.each(data.samples, function(i, rec) {
+										html += '<tr>';
+										html += '<td>' + rec.id + '</td>';
+										html += '<td>' + rec.event_type + '</td>';
+										html += '<td>' + rec.created_at + '</td>';
+										html += '<td>' + (rec.feature_id || '-') + '</td>';
+										var urlParams = rec.url_params ? JSON.stringify(rec.url_params) : '-';
+										html += '<td>' + urlParams + '</td>';
+										html += '</tr>';
+									});
+									html += '</tbody></table>';
+
+									// Pagination controls
+									html += '<div class="pagination">';
+									if (currentPreviewPage > 1) {
+										html += '<button type="button" class="button" id="purge-prev-page">← Previous</button>';
+									} else {
+										html += '<button type="button" class="button" disabled>← Previous</button>';
+									}
+									html += '<span class="page-info">Page ' + currentPreviewPage + ' of ' + totalPreviewPages + '</span>';
+									if (currentPreviewPage < totalPreviewPages) {
+										html += '<button type="button" class="button" id="purge-next-page">Next →</button>';
+									} else {
+										html += '<button type="button" class="button" disabled>Next →</button>';
+									}
+									html += '</div>';
+								}
+
 								html += '<p style="color: #d63638; font-weight: bold;">⚠️ Deleting these records is permanent and cannot be undone.</p>';
 								html += '<button type="button" class="button" id="purge-execute-btn" data-count="' + data.count + '" style="background:#dc3232; border-color:#dc3232; color:#fff; text-decoration:none;">Delete These ' + data.count + ' Events</button>';
 							}
@@ -430,6 +502,17 @@ final class System_Status_View {
 
 							// Bind execute button
 							$('#purge-execute-btn').on('click', window.executeInteractionPurge);
+							// Bind pagination
+							$('#purge-prev-page').on('click', function() {
+								if (currentPreviewPage > 1) {
+									window.previewInteractionPurge(currentPreviewPage - 1);
+								}
+							});
+							$('#purge-next-page').on('click', function() {
+								if (currentPreviewPage < totalPreviewPages) {
+									window.previewInteractionPurge(currentPreviewPage + 1);
+								}
+							});
 						} else {
 							$('#purge-results').html('<p style="color: #d63638;">❌ ' + response.data.message + '</p>');
 						}
@@ -455,6 +538,16 @@ final class System_Status_View {
 					var to = $('#purge-date-to').val();
 					var paramType = $('#purge-param-type').val();
 					var paramValue = $('#purge-param-value').val();
+					var matchType = $('#purge-param-match').val();
+
+					// Get selected event types (same as preview)
+					var eventTypes = [];
+					$('#purge-event-types option:selected').each(function() {
+						var val = $(this).val();
+						if (val) {
+							eventTypes.push(val);
+						}
+					});
 
 					$.ajax({
 						url: ajaxurl,
@@ -465,13 +558,16 @@ final class System_Status_View {
 							date_from: from,
 							date_to: to,
 							param_type: paramType,
-							param_value: paramValue
+							param_value: paramValue,
+							match_type: matchType,
+							event_types: eventTypes
 						},
 						dataType: 'json'
 					})
 					.done(function(resp) {
 						if (resp.success) {
 							$('#purge-results').html('<p style="color: green;">✅ Successfully deleted ' + resp.data.deleted_count + ' events.</p>');
+							$btn.hide();
 						} else {
 							$('#purge-results').html('<p style="color: red;">❌ Error: ' + resp.data.message + '</p>');
 							$btn.prop('disabled', false).text('Delete These ' + count + ' Events');
@@ -486,7 +582,10 @@ final class System_Status_View {
 				};
 
 				// Bind preview button
-				$('#purge-preview-btn').on('click', window.previewInteractionPurge);
+				$('#purge-preview-btn').on('click', function(e) {
+					e.preventDefault();
+					window.previewInteractionPurge(1);
+				});
 
 			});
 		</script>
@@ -638,38 +737,78 @@ final class System_Status_View {
 			'botID'        => 'Bot ID',
 		);
 
+		// Match types for value filtering
+		$match_types = array(
+			'exact'      => 'Exact match',
+			'contains'   => 'Contains',
+			'starts_with'=> 'Starts with',
+			'ends_with'  => 'Ends with',
+		);
+
+		// All known event types
+		$event_types = array(
+			'wizard_view'           => 'Wizard View',
+			'feature_added'         => 'Feature Added',
+			'initial_engagement'    => 'Initial Engagement',
+			'checkout_start'        => 'Checkout Started',
+			'quote_submitted'       => 'Quote Submitted',
+			'checkout_abandoned'    => 'Checkout Abandoned',
+		);
+
 		ob_start();
 		?>
-		<div class="interaction-purge-form" style="background: #f9f9f9; padding: 12px; border-radius: 6px; border: 1px solid #ddd;">
+		<div class="interaction-purge-form">
 			<p style="margin-top: 0;"><strong>Filter by date range (optional):</strong></p>
-			<div style="display: flex; gap: 12px; margin-bottom: 12px; align-items: center; flex-wrap: wrap;">
-				<label>
-					From: <input type="date" id="purge-date-from" value="<?php echo esc_attr( $from_date ); ?>" style="width: 140px;">
-				</label>
-				<label>
-					To: <input type="date" id="purge-date-to" value="<?php echo esc_attr( $to_date ); ?>" style="width: 140px;">
-				</label>
+			<div class="form-row">
+				<label for="purge-date-from">From:</label>
+				<input type="date" id="purge-date-from" value="<?php echo esc_attr( $from_date ); ?>">
+				<label for="purge-date-to">To:</label>
+				<input type="date" id="purge-date-to" value="<?php echo esc_attr( $to_date ); ?>">
+			</div>
+
+			<p><strong>Filter by Event Type (optional):</strong></p>
+			<div class="form-row">
+				<label for="purge-event-types">Types:</label>
+				<select id="purge-event-types" multiple size="4" style="min-width: 220px;">
+					<option value="">All Event Types</option>
+					<?php foreach ( $event_types as $key => $label ) : ?>
+						<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></option>
+					<?php endforeach; ?>
+				</select>
+				<span class="description" style="font-size: 11px; color: #666;">Hold Ctrl/Cmd to select multiple</span>
 			</div>
 
 			<p><strong>Filter by URL Parameter (optional):</strong></p>
-			<div style="display: flex; gap: 12px; margin-bottom: 12px; align-items: center; flex-wrap: wrap;">
-				<label>
-					Parameter:
-					<select id="purge-param-type" style="min-width: 160px;">
-						<option value="">-- Select Parameter --</option>
-						<?php foreach ( $param_types as $key => $label ) : ?>
-							<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?> (<?php echo esc_html( $key ); ?>)</option>
-						<?php endforeach; ?>
-					</select>
-				</label>
-				<label>
-					Value: <input type="text" id="purge-param-value" placeholder="e.g., facebook" style="width: 200px;">
-				</label>
+			<div class="form-row">
+				<label for="purge-param-type">Parameter:</label>
+				<select id="purge-param-type">
+					<option value="">-- Select Parameter --</option>
+					<?php foreach ( $param_types as $key => $label ) : ?>
+						<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?> (<?php echo esc_html( $key ); ?>)</option>
+					<?php endforeach; ?>
+				</select>
+				<label for="purge-param-value">Value:</label>
+				<input type="text" id="purge-param-value" placeholder="e.g., facebook">
+				<label for="purge-param-match">Match:</label>
+				<select id="purge-param-match">
+					<?php foreach ( $match_types as $key => $label ) : ?>
+						<option value="<?php echo esc_attr( $key ); ?>"<?php selected( $key, 'contains' ); ?>><?php echo esc_html( $label ); ?></option>
+					<?php endforeach; ?>
+				</select>
 			</div>
 
-			<button type="button" class="button button-secondary" id="purge-preview-btn">Preview Matches</button>
+			<div class="form-row">
+				<label for="purge-per-page">Samples per page:</label>
+				<select id="purge-per-page">
+					<option value="50">50</option>
+					<option value="100">100</option>
+					<option value="200">200</option>
+					<option value="500">500</option>
+				</select>
+				<button type="button" class="button button-secondary" id="purge-preview-btn">Preview Matches</button>
+			</div>
 
-			<div id="purge-results" style="margin-top: 16px; display: none;">
+			<div id="purge-results" style="display: none;">
 				<!-- Preview results will appear here -->
 			</div>
 
@@ -716,6 +855,10 @@ final class System_Status_View {
 		$date_to     = isset( $_POST['date_to'] ) ? sanitize_text_field( $_POST['date_to'] ) : '';
 		$param_type  = isset( $_POST['param_type'] ) ? sanitize_text_field( $_POST['param_type'] ) : '';
 		$param_value = isset( $_POST['param_value'] ) ? sanitize_text_field( $_POST['param_value'] ) : '';
+		$match_type  = isset( $_POST['match_type'] ) ? sanitize_text_field( $_POST['match_type'] ) : 'exact';
+		$event_types = isset( $_POST['event_types'] ) && is_array( $_POST['event_types'] ) ? array_map( 'sanitize_text_field', $_POST['event_types'] ) : array();
+		$page        = isset( $_POST['page'] ) ? max( 1, intval( $_POST['page'] ) ) : 1;
+		$per_page    = isset( $_POST['per_page'] ) ? max( 1, min( 500, intval( $_POST['per_page'] ) ) ) : 50;
 
 		$table = $wpdb->prefix . 'configurator_interactions';
 		$where = array( '1=1' );
@@ -731,11 +874,34 @@ final class System_Status_View {
 			$where_params[] = $date_to . ' 23:59:59';
 		}
 
-		// URL parameter filter
+		// Event type filter
+		if ( ! empty( $event_types ) ) {
+			$placeholders = implode( ',', array_fill( 0, count( $event_types ), '%s' ) );
+			$where[] = "event_type IN ($placeholders)";
+			$where_params = array_merge( $where_params, $event_types );
+		}
+
+		// URL parameter filter with match type
 		if ( $param_type && $param_value !== '' ) {
-			$where[] = "JSON_UNQUOTE(JSON_EXTRACT(metadata, %s)) = %s";
-			$where_params[] = '$.url_params.' . $param_type;
-			$where_params[] = $param_value;
+			$param_path = '$.url_params.' . $param_type;
+			switch ( $match_type ) {
+				case 'contains':
+					$pattern = '%' . $param_value . '%';
+					break;
+				case 'starts_with':
+					$pattern = $param_value . '%';
+					break;
+				case 'ends_with':
+					$pattern = '%' . $param_value;
+					break;
+				case 'exact':
+				default:
+					$pattern = $param_value;
+					break;
+			}
+			$where[] = "JSON_UNQUOTE(JSON_EXTRACT(metadata, %s)) LIKE %s";
+			$where_params[] = $param_path;
+			$where_params[] = $pattern;
 		}
 
 		$where_sql = implode( ' AND ', $where );
@@ -752,6 +918,9 @@ final class System_Status_View {
 			wp_send_json_success( array(
 				'count' => 0,
 				'by_event_type' => array(),
+				'samples' => array(),
+				'page' => $page,
+				'total_pages' => 0,
 			) );
 		}
 
@@ -769,9 +938,31 @@ final class System_Status_View {
 			$by_event_type[ $row['event_type'] ] = (int) $row['cnt'];
 		}
 
+		// Get sample records with pagination
+		$total_pages = ceil( $count / $per_page );
+		$offset = ( $page - 1 ) * $per_page;
+		$sample_sql = "SELECT id, event_type, created_at, feature_id, category_id, metadata FROM $table WHERE $where_sql ORDER BY created_at DESC LIMIT %d OFFSET %d";
+		$sample_params = array_merge( $where_params, array( $per_page, $offset ) );
+		$samples = $wpdb->get_results(
+			$wpdb->prepare( $sample_sql, $sample_params ),
+			ARRAY_A
+		);
+
+		// Extract url_params from metadata for each sample
+		foreach ( $samples as &$sample ) {
+			$meta = json_decode( $sample['metadata'], true );
+			$sample['url_params'] = isset( $meta['url_params'] ) ? $meta['url_params'] : null;
+			// Optionally unset the full metadata to reduce payload
+			unset( $sample['metadata'] );
+		}
+
 		wp_send_json_success( array(
 			'count'        => (int) $count,
 			'by_event_type' => $by_event_type,
+			'samples'       => $samples,
+			'page'          => $page,
+			'total_pages'   => $total_pages,
+			'per_page'      => $per_page,
 		) );
 	}
 
@@ -791,6 +982,8 @@ final class System_Status_View {
 		$date_to     = isset( $_POST['date_to'] ) ? sanitize_text_field( $_POST['date_to'] ) : '';
 		$param_type  = isset( $_POST['param_type'] ) ? sanitize_text_field( $_POST['param_type'] ) : '';
 		$param_value = isset( $_POST['param_value'] ) ? sanitize_text_field( $_POST['param_value'] ) : '';
+		$match_type  = isset( $_POST['match_type'] ) ? sanitize_text_field( $_POST['match_type'] ) : 'exact';
+		$event_types = isset( $_POST['event_types'] ) && is_array( $_POST['event_types'] ) ? array_map( 'sanitize_text_field', $_POST['event_types'] ) : array();
 
 		$table = $wpdb->prefix . 'configurator_interactions';
 		$where = array( '1=1' );
@@ -806,11 +999,34 @@ final class System_Status_View {
 			$where_params[] = $date_to . ' 23:59:59';
 		}
 
-		// URL parameter filter
+		// Event type filter
+		if ( ! empty( $event_types ) ) {
+			$placeholders = implode( ',', array_fill( 0, count( $event_types ), '%s' ) );
+			$where[] = "event_type IN ($placeholders)";
+			$where_params = array_merge( $where_params, $event_types );
+		}
+
+		// URL parameter filter with match type
 		if ( $param_type && $param_value !== '' ) {
-			$where[] = "JSON_UNQUOTE(JSON_EXTRACT(metadata, %s)) = %s";
-			$where_params[] = '$.url_params.' . $param_type;
-			$where_params[] = $param_value;
+			$param_path = '$.url_params.' . $param_type;
+			switch ( $match_type ) {
+				case 'contains':
+					$pattern = '%' . $param_value . '%';
+					break;
+				case 'starts_with':
+					$pattern = $param_value . '%';
+					break;
+				case 'ends_with':
+					$pattern = '%' . $param_value;
+					break;
+				case 'exact':
+				default:
+					$pattern = $param_value;
+					break;
+			}
+			$where[] = "JSON_UNQUOTE(JSON_EXTRACT(metadata, %s)) LIKE %s";
+			$where_params[] = $param_path;
+			$where_params[] = $pattern;
 		}
 
 		$where_sql = implode( ' AND ', $where );
@@ -1428,6 +1644,7 @@ final class System_Status_View {
 			'label'       => 'Interaction Data Purge',
 			'raw_html'    => $purge_form,
 			'action'      => '',
+			'full_width'  => true,
 		);
 
 		return $checks;

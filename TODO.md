@@ -87,6 +87,18 @@ Key milestones:
   - Asset Manager: No changes needed (no new assets)
   - Database: No schema changes (uses existing options table)
 
+- **v3.6.0 (2026-03-30)**: Enhanced Interaction Data Purge Tool
+  - **Event Type Filter**: Multi-select dropdown to filter by specific event types (wizard_view, feature_added, initial_engagement, checkout_start, quote_submitted, checkout_abandoned)
+  - **Pagination**: Preview results now paginated (50/100/200/500 per page) with Previous/Next navigation
+  - **Full-Width Card**: Purge tool card now spans entire grid width for better layout
+  - **Improved Form Layout**: Clean CSS-based layout with proper spacing and alignment
+  - **Sample Records Table**: Shows ID, Event Type, Date, Feature, URL Params for verification
+  - **Wildcard Matching**: URL parameter value filter supports exact, contains, starts with, ends with
+  - **Fixed Attribution JS Error**: Wrapped attribution analytics code in null check to prevent errors when no data
+  - All filters combine (date, event type, URL params, match type) for precise targeting
+  - AJAX handlers updated with pagination support (LIMIT/OFFSET)
+  - Better UX: page info, sample range display, disabled state handling
+
 - **v3.5.9 (2026-03-30)**: Bug Fix for Interaction Data Purge
   - Fixed form not displaying: moved HTML from `description` to `raw_html` field
   - `wp_kses_post` was stripping form inputs; now bypassed for trusted admin form
