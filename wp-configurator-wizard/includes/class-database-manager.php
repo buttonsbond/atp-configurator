@@ -70,6 +70,7 @@ final class Database_Manager {
 			client_email_sent tinyint(1) DEFAULT 0,
 			webhook_sent tinyint(1) DEFAULT 0,
 			webhook_response text DEFAULT NULL,
+			metadata longtext DEFAULT NULL,
 			PRIMARY KEY (id),
 			KEY email (email),
 			KEY created_at (created_at)
@@ -99,13 +100,14 @@ final class Database_Manager {
 
 	/**
 	 * Add status tracking columns if they're missing (upgrade path)
+	 * Made public to allow automatic upgrades on admin_init
 	 */
-	private static function ensure_status_columns(): void {
+	public static function ensure_status_columns(): void {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'configurator_quote_requests';
 		$columns = $wpdb->get_col( "SHOW COLUMNS FROM $table_name", 0 );
 		$missing = array();
-		$expected = array( 'admin_email_sent', 'client_email_sent', 'webhook_sent', 'webhook_response' );
+		$expected = array( 'admin_email_sent', 'client_email_sent', 'webhook_sent', 'webhook_response', 'metadata' );
 		foreach ( $expected as $col ) {
 			if ( ! in_array( $col, $columns ) ) {
 				$missing[] = $col;
@@ -113,7 +115,7 @@ final class Database_Manager {
 		}
 		if ( ! empty( $missing ) ) {
 			foreach ( $missing as $col ) {
-				$type = ( $col === 'webhook_response' ) ? 'TEXT DEFAULT NULL' : 'TINYINT(1) DEFAULT 0';
+				$type = ( $col === 'webhook_response' || $col === 'metadata' ) ? 'TEXT DEFAULT NULL' : 'TINYINT(1) DEFAULT 0';
 				$wpdb->query( "ALTER TABLE $table_name ADD COLUMN $col $type" );
 			}
 		}

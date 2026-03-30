@@ -147,6 +147,7 @@ final class Quote_Requests_View {
 								<th>Admin Email</th>
 								<th>Client Email</th>
 								<th>Webhook</th>
+								<th>URL Params</th>
 								<th>Actions</th>
 							</tr>
 						</thead>
@@ -218,6 +219,21 @@ final class Quote_Requests_View {
 											</span>
 										<?php endif; ?>
 									</td>
+									<td data-label="URL Params">
+										<?php
+										$metadata = ! empty( $req->metadata ) ? json_decode( $req->metadata, true ) : array();
+										if ( ! empty( $metadata['url_params'] ) && is_array( $metadata['url_params'] ) ) {
+											echo '<div class="wp-configurator-url-params">';
+											foreach ( $metadata['url_params'] as $key => $value ) {
+												$display_value = esc_html( $key . '=' . $value );
+												echo '<span class="wp-configurator-url-param-badge" title="' . $display_value . '">' . $display_value . '</span> ';
+											}
+											echo '</div>';
+										} else {
+											echo '—';
+										}
+										?>
+									</td>
 									<td data-label="Actions">
 										<input type="checkbox" name="quote_request_ids[]" value="<?php echo esc_attr( $req->id ); ?>" style="margin-right: 8px; vertical-align: middle;">
 										<button type="submit" name="single_delete" value="<?php echo esc_attr( $req->id ); ?>" class="button button-small" onclick="return confirm('Delete this request?');">Delete</button>
@@ -225,7 +241,7 @@ final class Quote_Requests_View {
 									</td>
 								</tr>
 								<tr class="items-row">
-									<td colspan="11" data-label="Items" style="white-space: normal; line-height: 1.4; font-size: 0.9em; padding: 8px 12px; background: #f9f9f9; border-top: 1px solid #eee;">
+									<td colspan="12" data-label="Items" style="white-space: normal; line-height: 1.4; font-size: 0.9em; padding: 8px 12px; background: #f9f9f9; border-top: 1px solid #eee;">
 										<?php echo $items_summary; ?>
 									</td>
 								</tr>
@@ -237,23 +253,24 @@ final class Quote_Requests_View {
 					/* Base table styles - override widefat fixed layout */
 					.wp-list-table { table-layout: auto !important; width: 100%; }
 					.wp-list-table td, .wp-list-table th { padding: 6px 10px; vertical-align: middle; }
-					/* Column widths - 11 columns */
+					/* Column widths - 12 columns */
 					th:nth-child(1), td:nth-child(1) { width: 9%; } /* Date */
 					th:nth-child(2), td:nth-child(2) { width: 10%; } /* Name */
 					th:nth-child(3), td:nth-child(3) { width: 10%; } /* Business */
-					th:nth-child(4), td:nth-child(4) { width: 18%; white-space: normal; line-height: 1.3; } /* Email - longest */
+					th:nth-child(4), td:nth-child(4) { width: 16%; white-space: normal; line-height: 1.3; } /* Email */
 					th:nth-child(5), td:nth-child(5) { width: 8%; } /* Phone */
 					th:nth-child(6), td:nth-child(6) { width: 6%; text-align: right; } /* Total */
 					th:nth-child(7), td:nth-child(7) { width: 6%; } /* Status */
 					th:nth-child(8), td:nth-child(8) { width: 5%; text-align: center; } /* Admin Email */
 					th:nth-child(9), td:nth-child(9) { width: 5%; text-align: center; } /* Client Email */
 					th:nth-child(10), td:nth-child(10) { width: 5%; text-align: center; } /* Webhook */
-					th:nth-child(11), td:nth-child(11) { width: 18%; } /* Actions */
+					th:nth-child(11), td:nth-child(11) { width: 10%; } /* URL Params */
+					th:nth-child(12), td:nth-child(12) { width: 12%; } /* Actions */
 					/* Header wrapping */
 					thead th { white-space: normal; height: auto; padding: 6px 10px; font-weight: 600; }
 					/* Button spacing in Actions column */
-					td:nth-child(11) button { margin: 1px 3px 1px 0; padding: 3px 6px; font-size: 0.85em; }
-					td:nth-child(11) input[type="checkbox"] { margin-right: 6px; vertical-align: middle; }
+					td:nth-child(12) button { margin: 1px 3px 1px 0; padding: 3px 6px; font-size: 0.85em; }
+					td:nth-child(12) input[type="checkbox"] { margin-right: 6px; vertical-align: middle; }
 					/* Status badges */
 					.status-badge {
 						display: inline-block;
@@ -263,6 +280,23 @@ final class Quote_Requests_View {
 						font-weight: 600;
 						text-transform: uppercase;
 						letter-spacing: 0.5px;
+					}
+					/* URL params badges */
+					.wp-configurator-url-params {
+						display: flex;
+						flex-wrap: wrap;
+						gap: 2px;
+					}
+					.wp-configurator-url-param-badge {
+						background: #f0f0f1;
+						color: #2c3338;
+						padding: 2px 6px;
+						border-radius: 3px;
+						font-size: 11px;
+						white-space: nowrap;
+						overflow: hidden;
+						text-overflow: ellipsis;
+						max-width: 100%;
 					}
 					.status-pending { background-color: #f56e28; color: #fff; }
 					.status-quoted { background-color: #2271b1; color: #fff; }

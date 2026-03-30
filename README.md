@@ -2,7 +2,7 @@
 
 A modern, modular WordPress plugin for creating interactive cost estimation wizards with drag-and-drop functionality, real-time analytics, and comprehensive quote management.
 
-**Current version: 3.5.2.1** (stable)
+**Current version: 3.5.5** (stable)
 **GitHub Repository**: https://github.com/buttonsbond/atp-configurator
 
 ## Features
@@ -25,6 +25,19 @@ A modern, modular WordPress plugin for creating interactive cost estimation wiza
 - **Category & Feature Images**: Upload custom images via WordPress media library to replace emoji icons with product photos or custom graphics (optional, zero breaking changes)
 
 ## Changelog
+
+### Version 3.5.5 (2026-03-30)
+- **Added**: URL Parameter Tracking & Marketing Attribution
+  - Capture UTM parameters (source, medium, campaign) and custom variables (webURL, botID) from URL
+  - Store URL parameters with interaction events and quote requests in `metadata` JSON column
+  - New "Marketing Attribution" section in Stats dashboard:
+    - Top Sources (horizontal bar chart) showing quote counts and revenue
+    - Top Campaigns (horizontal bar chart) showing quote counts and revenue
+    - Top Clients (webURL) list showing quotes and revenue
+    - Bot Performance (botID) list showing quotes and revenue
+  - URL parameters displayed as badges in Recent Interactions and Quote Requests admin tables
+  - Automatic database upgrade: `metadata` column added to `wp_configurator_quote_requests` table via `admin_init`
+- **Improved**: Admin UI with new URL parameter badges and enhanced analytics
 
 ### Version 3.5.2.1 (2026-03-26) - Patch Release
 **Important**: This release fixes critical bugs found in v3.5.2. Please update immediately.

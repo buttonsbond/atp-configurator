@@ -1,6 +1,6 @@
 # WP Configurator Wizard - Project Overview
 
-## Current State (v3.5.2 - Stable)
+## Current State (v3.5.5 - Stable)
 **Live**: https://all-tech-plus.com/wizard
 **Shortcode**: `[wp_configurator_wizard]`
 **Stack**: PHP (WordPress), jQuery, custom CSS; no build step
@@ -87,6 +87,13 @@ Key milestones:
   - Asset Manager: No changes needed (no new assets)
   - Database: No schema changes (uses existing options table)
 
+- **v3.5.5 (2026-03-30)**: URL Parameter Tracking & Marketing Attribution
+  - Capture UTM parameters (source, medium, campaign) and custom variables (webURL, botID)
+  - Store with interactions and quote requests in `metadata` JSON column
+  - New Marketing Attribution section in Stats dashboard (sources, campaigns, clients, bots charts)
+  - URL parameters displayed as badges in Recent Interactions and Quote Requests tables
+  - Automatic database upgrade (`metadata` column)
+
 ---
 
 ### Completed (Highlights)
@@ -110,68 +117,239 @@ Key milestones:
 - **Category Information Field**: Added optional descriptive text to categories that displays at the top of each category section on the frontend wizard, providing context and guidance to users (v3.2.7)
 - **Category info collapsible fix**: Fixed placement so category info text correctly appears inside collapsible sections and hides when collapsed (v3.2.8)
 - **Category & Feature Images**: Upload custom images for categories and features via WordPress media library; replaces emoji icons; zero breaking changes (v3.5.2)
+- **URL Parameter Tracking**: Capture UTM parameters (source, medium, campaign) and custom variables (webURL, botID); store in `metadata` JSON column; display as badges in Recent Interactions and Quote Requests tables.
+- **Marketing Attribution Analytics**: New Stats dashboard section with top sources (bar chart), top campaigns (bar chart), top clients (webURL), and bot performance (botID).
 
 ---
 
-### Licensing & Distribution
+### Licensing & Distribution ✅ **COMPLETED**
 
 **Goal**: Apply GPLv2+ license (WordPress-compatible) and add donation/support prompt in admin interface.
 
+**Status**: All implementation steps completed and deployed in v3.5.2.1.
+
+**Completed items**:
+- ✅ GPLv3 license header in plugin file
+- ✅ `donors.txt` created (manual donor list)
+- ✅ `license.txt` with full GPLv3 text
+- ✅ Admin UI: "Donate via PayPal" button + "100% Free & Open Source" badge
+- ✅ Donors wall collapsible section with synced donor data
+- ✅ README.md: License section + Support Development section with PayPal link
+- ✅ Version bump to 3.5.2.1 (includes all licensing features)
+
+**Implementation Details**:
+- Plugin header: `License: GPL v3 or later` (GPLv3+ compatible with WordPress)
+- Admin header: prominent PayPal donate button + open source badge
+- Donors displayed with emoji badges, optional demo links, weekly sync via cron
+- README includes license declaration, donation link, and donor acknowledgment process
+
+---
+
+### Feature: URL Parameter Tracking in Interactions
+
+**Goal**: Capture and store URL parameters (UTM and custom variables) when users interact with the wizard, to enable marketing attribution and traffic source analysis.
+
+**Use Case**: Track where quote requests come from (Facebook ads, email campaigns, CRM links) by capturing UTM parameters and custom variables like `webURL`, `botID` from the referring URL.
+
+**Requested Parameters**:
+- `utm_source` (e.g., "twenty" for CRM, "facebook", "other")
+- `utm_medium` (e.g., "email", "direct", "social")
+- `utm_campaign` (e.g., "outreach", "pa" for paid ads)
+- `webURL` (custom parameter for web origin identifier)
+- `botID` (custom parameter for bot/campaign identifier)
+- Any other URL parameters present should be captured automatically
+
+**Implementation Plan**:
+
+1. **Frontend - Capture URL Parameters** (`assets/js/wizard.js`):
+   - On wizard page load, parse `window.location.search` to extract all URL parameters
+   - Store parameters in a JavaScript object (key-value pairs)
+   - Include this object in every `track_interaction` AJAX request payload
+   - Also include in `submit_quote_request` payload for attribution on conversion
+
+2. **AJAX Handler - Accept & Store Parameters** (`includes/class-ajax-handler.php`):
+   - In `track_interaction()` method: accept new `url_params` argument (sanitize as array)
+   - Merge URL params into the existing `$metadata` array before saving to database
+   - In `submit_quote_request()`: similarly capture URL params and store in `metadata` of quote request
+   - Sanitization: use `sanitize_text_field()` for each parameter value
+
+3. **Interaction Tracking Trait** (`includes/traits/trait-interaction-tracking.php`):
+   - Modify `track_event()` method to expect and handle `url_params` from AJAX request
+   - Merge URL params into the metadata array that gets inserted into `wp_configurator_interactions`
+   - Ensure no conflicts with existing metadata keys (use a sub-key like `url_params` or flatten with prefix)
+
+4. **Database Schema**: No changes needed (existing `metadata` JSON column can store URL params)
+
+5. **Admin UI - Display URL Parameters** (optional but valuable):
+   - In Recent Interactions section (`templates/admin/partials/recent-interactions-content.php`): add a column or tooltip showing captured URL params for each interaction
+   - In Quote Requests table (`templates/admin/tabs/quote-requests.php`): show URL params in quick view modal or as a new column
+   - Keep display subtle (badge or tooltip) to avoid clutter
+
+6. **Settings - Optional URL Param Whitelist/Blacklist** (future enhancement):
+   - Allow admins to specify which URL parameters to capture (whitelist) or ignore (blacklist)
+   - Default: capture all parameters (non-invasive)
+   - Could be added to Miscellaneous Settings as an advanced option
+
+**Implementation Completed** ✅
+
+1. **Frontend** (`assets/js/wizard.js`):
+   - Capture all URL parameters on page load via `URLSearchParams`
+   - Store in `urlParams` object
+   - Automatically merge into `trackInteraction()` metadata as `url_params` sub-array
+   - Include `url_params` in quote submission AJAX payload
+
+2. **Database** (`includes/class-database-manager.php`):
+   - Added `metadata` column (TEXT DEFAULT NULL) to `wp_configurator_quote_requests` table
+   - Updated CREATE TABLE for fresh installs
+   - Updated `ensure_status_columns()` (now public) to add column on existing installs via admin_init
+   - Hooked `ensure_status_columns` to admin_init for automatic upgrades
+
+3. **Interaction Tracking** (`includes/traits/trait-interaction-tracking.php`):
+   - No changes needed - metadata already stored as JSON
+   - URL params arrive merged in metadata via frontend
+
+4. **Quote Submission** (`includes/traits/trait-quote-management.php`):
+   - Accept `url_params` from AJAX request
+   - Sanitize each key/value with `sanitize_text_field()`
+   - Store as JSON in `metadata` column with structure: `{ "url_params": { ... } }`
+   - Updated insert statement and format array
+
+5. **Admin UI**:
+   - **Recent Interactions** (`templates/admin/partials/recent-interactions-content.php`):
+     - Added `metadata` to SELECT query
+     - New "URL Params" column displaying badges for each key=value
+     - CSS styling for badges
+   - **Quote Requests** (`includes/class-quote-requests-view.php`):
+     - Added "URL Params" column (12th column)
+     - Display URL param badges from `metadata->url_params`
+     - Updated column widths CSS
+     - Added badge styling
+
+**Version**: v3.5.5
+
+**Upgrade Notes**:
+- Existing sites: `metadata` column auto-added on next admin page load via admin_init hook
+- No manual database changes required
+- Fully backward compatible
+
+---
+
+### Feature: URL Parameter Analytics in Stats Dashboard
+
+**Goal**: Leverage captured URL parameters (UTM and custom) to provide marketing attribution analytics and client identification in the Stats dashboard.
+
 **Rationale**:
-- WordPress requires GPL-compatible licenses for plugins in the official repository
-- GPLv2+ ensures no closed-source derivatives (copyleft)
-- GPL allows commercial use but in practice, community respects free distribution
-- Donation model aligns with open source ethos and WordPress ecosystem
+- URL parameters contain campaign, source, medium, and custom identifiers (webURL, botID)
+- This data can reveal which marketing channels drive the most qualified leads
+- `webURL` is used to identify which client checked a demo bot (valuable for sales attribution)
+- `botID` can track which specific demo bot/configurator instance generated the lead
+- UTM parameters standard for campaign tracking (source/medium/campaign)
 
-**Implementation Steps**:
+**Use Cases**:
+1. **Campaign Performance**: See which `utm_campaign` drives most quotes/revenue
+2. **Channel Analysis**: Compare `utm_source` (Facebook, CRM, email, etc.)
+3. **Medium Effectiveness**: Track `utm_medium` (email, social, direct, paid)
+4. **Client Identification**: Group by `webURL` to see which clients are most engaged (universally useful)
+5. **Bot Demo Tracking** (optional): Use `botID` to attribute quotes to specific demo bots (site-specific)
 
-1. **Add GPL License Header** (`wp-configurator-wizard.php`):
-   - Update plugin header comment (top of file) to include:
-     ```php
-     * License: GPL v3 or later
-     * License URI: https://www.gnu.org/licenses/gpl-3.0.html
-     ```
-   - Ensure `Text Domain: wp-configurator` is present
+**Implementation Plan**:
 
-2. **Create `donors.txt`** (manual maintenance):
-   - Simple text file with one donor name per line
-   - Place in plugin root for easy editing by admin
-   - Initial sample names provided; admin manually adds/removes
-   - Displayed in admin UI as "badge" list
+1. **Stats Renderer - New Metrics** (`includes/class-stats-renderer.php`):
+   - Add method `get_url_param_stats($date_filter)` that:
+     - Queries `wp_configurator_interactions` and `wp_configurator_quote_requests` tables
+     - Extracts `metadata->url_params` JSON for events/quotes in date range
+     - Aggregates counts and revenue by:
+       - `utm_source`
+       - `utm_medium`
+       - `utm_campaign`
+       - `webURL` (client identifier)
+       - `botID` (demo bot identifier)
+     - Returns associative array: `{ sources: [...], mediums: [...], campaigns: [...], web_urls: [...], bot_ids: [...] }`
+   - Each entry includes: count (events/quotes), total_value, unique_sessions, etc.
 
-3. **Add `license.txt`** file to plugin root:
-   - Update plugin header comment (top of file) to include:
-     ```php
-     * License: GPL v2 or later
-     * License URI: https://www.gnu.org/licenses/gpl-2.0.html
-     ```
-   - Ensure `Text Domain: wp-configurator` is present
+2. **Stats Template - New Section** (`templates/admin/tabs/stats.php`):
+   - Add new collapsible section: "Marketing Attribution"
+   - Or integrate into existing Revenue/Conversion sections as new cards:
+     - **Top Sources by Quote Count** (bar chart)
+     - **Campaign Performance** (table with revenue, conversion rate)
+     - **Client Origins (webURL)** - show which clients generated most quotes
+     - **Demo Bot Attribution** - which botIDs converted best
 
-2. **Add `license.txt`** file to plugin root:
-   - Include full GPLv2 license text
-   - Standard practice for WordPress plugins
+3. **Charts Integration** (`assets/css/admin-stats.css`, Chart.js):
+   - Create horizontal bar charts for source/medium/campaign comparisons
+   - Pie/doughnut chart for source distribution (optional)
+   - Keep consistency with existing chart styling (180px height)
 
-3. **Add "Support Development" notice in Admin UI**:
-   - Location: Admin Configurator page, below the page title/intro (in `templates/admin/page-wrapper.php` or similar)
-   - Design: Subtle notice with "Support this plugin" or "Consider donating" message
-   - Link to donation URL (to be provided - can be PayPal, GitHub Sponsors, etc.)
-   - Optional: "Donate" button or link in the admin footer/sidebar
-   - Keep it tasteful - not intrusive
+4. **User-Configurable Metrics** (optional advanced):
+   - Add setting in Miscellaneous: "Enable URL Parameter Analytics" (toggle)
+   - Allow admin to select which URL params to track/display (multi-select: utm_source, utm_medium, utm_campaign, webURL, botID, custom)
+   - Store selection in settings; stats renderer only includes selected params
 
-4. **Update README.md**:
-   - License declaration: `License: GPLv2 or later`
-   - Add section: "Donations" with link and brief explanation
-   - Clarify that plugin is free and open source, but donations welcome
+5. **Date Filter Support**:
+   - URL param stats should respect the same date filter as other stats (Today/Yesterday/Last 7/Last 30/All Time)
+   - Already have date filtering logic in Stats_Renderer; reuse
 
-5. **Version bump**: After implementation, bump to v3.2.9 (or v3.3.0 if significant)
+6. **Performance Considerations**:
+   - Querying JSON `metadata` column can be slow on large datasets
+   - Consider caching aggregated stats in transients (e.g., 1-hour cache)
+   - Use incremental aggregation if needed (pre-compute daily)
 
-6. **Testing**:
-   - Verify license header appears in plugin file
-   - Check admin UI displays support notice correctly
-   - Ensure donation link works (or placeholder if URL not yet set)
-   - Confirm README updates are visible on wordpress.org (if submitting there later)
+**Technical Notes**:
+- Interactions table may have `wizard_view` events with URL params but no revenue
+- Quote requests table has both URL params and monetary totals
+- MySQL JSON extraction: `JSON_EXTRACT(metadata, '$.url_params.utm_source')` or `->>'$.url_params.utm_source'`
+- Need to handle missing/empty params gracefully
+- Chart.js horizontal bar charts fit existing pattern
 
-**Note**: Donation URL can be added later; for now, implement placeholder or use a generic "support development" message without link, or use a temporary link to a donation page if available.
+**Dependencies**:
+- Requires URL Parameter Tracking feature (completed v3.5.3) to be capturing data
+- Works alongside existing stats; adds new section/cards
+
+**Future Enhancements**:
+- Export attribution data to CSV
+- Funnel visualization: source → add → checkout → quote
+- Integration with webhook: send attribution data to CRM
+- Predictive models: which sources likely to convert
+
+**Implementation Completed** ✅ (v3.5.5)
+
+1. **Stats_Renderer** (`includes/class-stats-renderer.php`):
+   - Added URL parameter extraction from quote requests `metadata` column
+   - Aggregates stats by `utm_source`, `utm_medium`, `utm_campaign`, `webURL`, `botID`
+   - Each metric includes: count (number of quotes), total_value (revenue generated)
+   - Sorted by count descending, limited to top 10 entries each
+   - Added new metrics to return array: `source_stats`, `medium_stats`, `campaign_stats`, `client_stats`, `bot_stats`
+
+2. **Stats Dashboard UI** (same file, `render()` method):
+   - Added new "Marketing Attribution" section (appears only if any stats exist)
+   - Top Sources horizontal bar chart (blue) - shows quote counts per source
+   - Top Campaigns horizontal bar chart (green) - shows quote counts per campaign
+   - Top Clients (webURL) list - shows quotes count + revenue per client
+   - Bot Performance (botID) list - shows quotes count + revenue per bot
+   - Layout: Two rows of 2 chart containers each (responsive, consistent with existing design)
+   - Added CSS for attribution list items (flex layout, ellipsis for long names)
+
+3. **JavaScript (Chart.js integration)**:
+   - Sources chart: horizontal bar, count data, tooltip shows both count and revenue
+   - Campaigns chart: horizontal bar, count data, tooltip shows both count and revenue
+   - Both charts use relevant colors and minimal design
+
+**Files Modified**:
+- `includes/class-stats-renderer.php` (main implementation)
+- `wp-configurator-wizard.php` (version bump)
+
+**Version**: v3.5.5
+
+**Upgrade Notes**:
+- No database changes required (uses existing `metadata` column)
+- Stats automatically include URL param attribution data from quote requests
+- Backward compatible with existing installations
+
+**Future Enhancements**:
+- Add date filter awareness (already works - uses filtered quote requests)
+- Consider caching for performance on large datasets (currently computed on-the-fly)
+- Add chart for sources by revenue (currently by quote count)
+- Option to export attribution data to CSV
 
 ---
 

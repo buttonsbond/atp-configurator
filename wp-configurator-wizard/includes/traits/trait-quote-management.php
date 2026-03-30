@@ -33,6 +33,7 @@ trait Quote_Management {
 		$phone = isset( $_POST['phone'] ) ? sanitize_text_field( $_POST['phone'] ) : '';
 		$selected_items = isset( $_POST['selected_items'] ) ? $_POST['selected_items'] : array();
 		$totals = isset( $_POST['totals'] ) ? $_POST['totals'] : array();
+		$url_params = isset( $_POST['url_params'] ) && is_array( $_POST['url_params'] ) ? $_POST['url_params'] : array();
 
 		// Debug logging
 		error_log( 'Quote request received: name=' . $name . ', email=' . $email . ', selected_items count=' . ( is_array( $selected_items ) ? count( $selected_items ) : 'not array' ) );
@@ -72,6 +73,12 @@ trait Quote_Management {
 			$sanitized_totals[ $key ] = floatval( $value );
 		}
 
+		// Sanitize URL params
+		$sanitized_url_params = array();
+		foreach ( (array) $url_params as $key => $value ) {
+			$sanitized_url_params[ sanitize_text_field( $key ) ] = sanitize_text_field( $value );
+		}
+
 		// Store in database
 		global $wpdb;
 		$table_name = $this->database_manager->get_quote_requests_table();
@@ -98,8 +105,9 @@ trait Quote_Management {
 				'client_email_sent'  => 0,
 				'webhook_sent'       => 0,
 				'webhook_response'   => null,
+				'metadata'           => wp_json_encode( array( 'url_params' => $sanitized_url_params ) ),
 			),
-			array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%d', '%s' )
+			array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%d', '%s', '%s' )
 		);
 
 		if ( $result === false ) {

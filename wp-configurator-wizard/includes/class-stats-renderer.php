@@ -169,7 +169,162 @@ final class Stats_Renderer {
 				</div>
 			</div>
 
+			<!-- Charts Row 3: Marketing Attribution (URL Parameters) with Event Selector & Tabs -->
+			<?php
+			// Determine if any attribution data exists for any event type
+			$has_attribution = false;
+			if ( ! empty( $metrics['attribution_stats'] ) && is_array( $metrics['attribution_stats'] ) ) {
+				foreach ( $metrics['attribution_stats'] as $event_data ) {
+					if ( ! empty( $event_data['source'] ) || ! empty( $event_data['medium'] ) || ! empty( $event_data['campaign'] ) || ! empty( $event_data['client'] ) || ! empty( $event_data['bot'] ) ) {
+						$has_attribution = true;
+						break;
+					}
+				}
+			}
+			?>
+			<?php if ( $has_attribution ) : ?>
+			<div class="stats-charts-row attribution-row">
+				<div class="chart-container full-width" style="grid-column: 1 / -1;">
+					<!-- Event Type Selector + Dimension Tabs -->
+					<div class="attribution-controls">
+						<select id="attribution-event-select" class="attribution-select">
+							<option value="wizard_view">Wizard Views</option>
+							<option value="feature_added">Feature Added</option>
+							<option value="checkout_start">Checkout Started</option>
+							<option value="quote_submitted" selected>Quote Submitted</option>
+						</select>
+						<div class="attribution-tabs" role="tablist">
+							<button class="attr-tab active" data-dimension="source">Sources</button>
+							<button class="attr-tab" data-dimension="medium">Mediums</button>
+							<button class="attr-tab" data-dimension="campaign">Campaigns</button>
+							<button class="attr-tab" data-dimension="client">Clients</button>
+							<button class="attr-tab" data-dimension="bot">Bots</button>
+						</div>
+					</div>
+
+					<!-- Single Chart Display Area -->
+					<div class="attribution-display">
+						<!-- Bar Chart Canvas (for source, medium, campaign) -->
+						<div id="attribution-chart-wrapper" style="display: none; height: 220px;">
+							<canvas id="attribution-chart"></canvas>
+						</div>
+						<!-- List Display (for client, bot) -->
+						<div id="attribution-list-wrapper" class="wp-configurator-attribution-list" style="max-height: 220px; overflow-y: auto; padding: 8px 0;">
+						</div>
+						<!-- Empty State -->
+						<div id="attribution-empty" style="display: none; text-align: center; color: #666; padding: 40px 0;">
+							No data available for the selected event and dimension.
+						</div>
+					</div>
+
+					<!-- Chart Legend/Info -->
+					<div class="attribution-info">
+						<span class="attr-total-count">Total: <strong id="attr-total-count">0</strong></span>
+						<span class="attr-total-value">Revenue: <strong id="attr-total-value">€0</strong></span>
+					</div>
+				</div>
+			</div>
+			<?php endif; ?>
+
 		</div>
+
+		<style type="text/css">
+			/* Attribution Controls */
+			.attribution-controls {
+				display: flex;
+				gap: 12px;
+				margin-bottom: 12px;
+				align-items: center;
+				flex-wrap: wrap;
+			}
+			.attribution-select {
+				padding: 6px 12px;
+				border: 1px solid #ddd;
+				border-radius: 4px;
+				background: #fff;
+				font-size: 13px;
+				min-width: 160px;
+			}
+			.attribution-tabs {
+				display: flex;
+				gap: 4px;
+				flex-wrap: wrap;
+			}
+			.attr-tab {
+				padding: 6px 14px;
+				border: 1px solid #ddd;
+				background: #f9f9f9;
+				border-radius: 4px;
+				cursor: pointer;
+				font-size: 13px;
+				color: #2c3338;
+				transition: all 0.15s;
+			}
+			.attr-tab:hover {
+				background: #f0f0f1;
+			}
+			.attr-tab.active {
+				background: #2271b1;
+				color: #fff;
+				border-color: #2271b1;
+			}
+			.attribution-display {
+				min-height: 200px;
+				position: relative;
+			}
+			.attribution-info {
+				margin-top: 8px;
+				font-size: 12px;
+				color: #666;
+				display: flex;
+				gap: 16px;
+			}
+			.attribution-info strong {
+				color: #2c3338;
+			}
+
+			/* URL Attribution List Styles */
+			.wp-configurator-attribution-list {
+				display: flex;
+				flex-direction: column;
+				gap: 4px;
+				max-height: 180px;
+				overflow-y: auto;
+				padding-right: 8px;
+			}
+			.wp-configurator-attribution-list .attr-item {
+				display: flex;
+				align-items: center;
+				padding: 4px 8px;
+				background: #f9f9f9;
+				border-radius: 3px;
+				font-size: 12px;
+			}
+			.wp-configurator-attribution-list .attr-label {
+				font-weight: 600;
+				color: #2c3338;
+				margin-right: auto;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				max-width: 40%;
+			}
+			.wp-configurator-attribution-list .attr-count {
+				color: #666;
+				margin-right: 12px;
+			}
+			.wp-configurator-attribution-list .attr-value {
+				color: #2271b1;
+				font-weight: 600;
+			}
+			/* Attribution row should have same card height */
+			.attribution-row .chart-container {
+				min-height: 280px;
+			}
+			.attribution-row .chart-container.full-width {
+				min-height: auto;
+			}
+		</style>
 
 		<script type="text/javascript">
 		(function($) {
@@ -263,6 +418,138 @@ final class Stats_Renderer {
 					});
 				}
 
+				// Sources attribution (horizontal bar chart)
+				var sourcesCtx = document.getElementById('sources-chart');
+				if (sourcesCtx) {
+					var sourceData = <?php echo json_encode( $metrics['source_stats'] ); ?>;
+					new Chart(sourcesCtx, {
+						type: 'bar',
+						data: {
+							labels: Object.keys(sourceData),
+							datasets: [{
+								label: 'Quotes',
+								data: Object.values(sourceData).map(function(s) { return s.count; }),
+								backgroundColor: '#2271b1'
+							}]
+						},
+						options: {
+							indexAxis: 'y',
+							responsive: true,
+							plugins: {
+								legend: { display: false },
+								tooltip: {
+									callbacks: {
+										label: function(context) {
+											var item = Object.values(sourceData)[context.dataIndex];
+											return [
+												'Quotes: ' + item.count,
+												'Revenue: €' + item.value.toLocaleString()
+											];
+										}
+									}
+								}
+							},
+							scales: {
+								x: {
+									beginAtZero: true,
+									ticks: { stepSize: 1 }
+								},
+								y: {
+									grid: { display: false }
+								}
+							}
+						}
+					});
+				}
+
+				// Mediums attribution (horizontal bar chart)
+				var mediumsCtx = document.getElementById('mediums-chart');
+				if (mediumsCtx) {
+					var mediumData = <?php echo json_encode( $metrics['medium_stats'] ); ?>;
+					new Chart(mediumsCtx, {
+						type: 'bar',
+						data: {
+							labels: Object.keys(mediumData),
+							datasets: [{
+								label: 'Quotes',
+								data: Object.values(mediumData).map(function(s) { return s.count; }),
+								backgroundColor: '#f56b22'
+							}]
+						},
+						options: {
+							indexAxis: 'y',
+							responsive: true,
+							plugins: {
+								legend: { display: false },
+								tooltip: {
+									callbacks: {
+										label: function(context) {
+											var item = Object.values(mediumData)[context.dataIndex];
+											return [
+												'Quotes: ' + item.count,
+												'Revenue: €' + item.value.toLocaleString()
+											];
+										}
+									}
+								}
+							},
+							scales: {
+								x: {
+									beginAtZero: true,
+									ticks: { stepSize: 1 }
+								},
+								y: {
+									grid: { display: false }
+								}
+							}
+						}
+					});
+				}
+
+				// Campaigns attribution (horizontal bar chart)
+				var campaignsCtx = document.getElementById('campaigns-chart');
+				if (campaignsCtx) {
+					var campaignData = <?php echo json_encode( $metrics['campaign_stats'] ); ?>;
+					new Chart(campaignsCtx, {
+						type: 'bar',
+						data: {
+							labels: Object.keys(campaignData),
+							datasets: [{
+								label: 'Quotes',
+								data: Object.values(campaignData).map(function(s) { return s.count; }),
+								backgroundColor: '#46b450'
+							}]
+						},
+						options: {
+							indexAxis: 'y',
+							responsive: true,
+							plugins: {
+								legend: { display: false },
+								tooltip: {
+									callbacks: {
+										label: function(context) {
+											var item = Object.values(campaignData)[context.dataIndex];
+											return [
+												'Quotes: ' + item.count,
+												'Revenue: €' + item.value.toLocaleString()
+											];
+										}
+									}
+								}
+							},
+							scales: {
+								x: {
+									beginAtZero: true,
+									ticks: { stepSize: 1 }
+								},
+								y: {
+									grid: { display: false }
+								}
+							}
+						}
+					});
+				}
+
 				// Revenue trend (line chart)
 				var revenueCtx = document.getElementById('revenue-chart');
 				if (revenueCtx) {
@@ -297,6 +584,138 @@ final class Stats_Renderer {
 						}
 					});
 				}
+
+				// Attribution Analytics: Event Selector + Tabs
+				var attributionData = <?php echo json_encode( $metrics['attribution_stats'] ?? array() ); ?>;
+				var attributionEventSelect = document.getElementById('attribution-event-select');
+				var attributionTabs = document.querySelectorAll('.attr-tab');
+				var chartWrapper = document.getElementById('attribution-chart-wrapper');
+				var listWrapper = document.getElementById('attribution-list-wrapper');
+				var emptyState = document.getElementById('attribution-empty');
+				var totalCountEl = document.getElementById('attr-total-count');
+				var totalValueEl = document.getElementById('attr-total-value');
+				var attributionChart = null;
+
+				function renderAttribution() {
+					var eventType = attributionEventSelect.value;
+					var activeTab = document.querySelector('.attr-tab.active').dataset.dimension;
+					var dataForEvent = attributionData[eventType] || {};
+					var dataForDim = dataForEvent[activeTab] || {};
+
+					// Calculate totals
+					var totalCount = 0;
+					var totalValue = 0;
+					Object.values(dataForDim).forEach(function(item) {
+						totalCount += item.count;
+						totalValue += item.value;
+					});
+
+					totalCountEl.textContent = totalCount.toLocaleString();
+					totalValueEl.textContent = '€' + totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+					// Hide empty state
+					emptyState.style.display = 'none';
+					chartWrapper.style.display = 'none';
+					listWrapper.style.display = 'none';
+
+					if (Object.keys(dataForDim).length === 0) {
+						emptyState.style.display = 'block';
+						return;
+					}
+
+					// Decide display type: bar chart for source/medium/campaign, list for client/bot
+					if (activeTab === 'source' || activeTab === 'medium' || activeTab === 'campaign') {
+						// Render horizontal bar chart
+						var labels = Object.keys(dataForDim);
+						var counts = Object.values(dataForDim).map(function(item) { return item.count; });
+						var values = Object.values(dataForDim).map(function(item) { return item.value; });
+
+						// Destroy previous chart
+						if (attributionChart) {
+							attributionChart.destroy();
+						}
+
+						var ctx = document.getElementById('attribution-chart');
+						if (ctx) {
+							attributionChart = new Chart(ctx, {
+								type: 'bar',
+								data: {
+									labels: labels,
+									datasets: [{
+										label: 'Quotes',
+										data: counts,
+										backgroundColor: (function() {
+											var colors = {
+												source: '#2271b1',
+												medium: '#f56b22',
+												campaign: '#46b450'
+											};
+											return colors[activeTab] || '#2271b1';
+										})()
+									}]
+								},
+								options: {
+									indexAxis: 'y',
+									responsive: true,
+									plugins: {
+										legend: { display: false },
+										tooltip: {
+											callbacks: {
+												label: function(context) {
+													var idx = context.dataIndex;
+													var item = dataForDim[labels[idx]];
+													return [
+														'Quotes: ' + item.count,
+														'Revenue: €' + item.value.toLocaleString()
+													];
+												}
+											}
+										}
+									},
+									scales: {
+										x: {
+											beginAtZero: true,
+											ticks: { stepSize: 1 }
+										},
+										y: {
+											grid: { display: false }
+										}
+									}
+								}
+							});
+						}
+						chartWrapper.style.display = 'block';
+					} else {
+						// Render list for clients or bots
+						var html = '';
+						Object.entries(dataForDim).forEach(function([label, item]) {
+							html += '<div class="attr-item">' +
+								'<span class="attr-label" title="' + label + '">' + label + '</span>' +
+								'<span class="attr-count">' + item.count + ' quotes</span>' +
+								'<span class="attr-value">€' + item.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '</span>' +
+								'</div>';
+						});
+						listWrapper.innerHTML = html;
+						listWrapper.style.display = 'block';
+					}
+				}
+
+				// Event listener for event selector
+				if (attributionEventSelect) {
+					attributionEventSelect.addEventListener('change', renderAttribution);
+				}
+
+				// Event listeners for tabs
+				attributionTabs.forEach(function(tab) {
+					tab.addEventListener('click', function() {
+						attributionTabs.forEach(t => t.classList.remove('active'));
+						tab.classList.add('active');
+						renderAttribution();
+					});
+				});
+
+				// Initial render
+				renderAttribution();
 
 				// Activate stats tab if filter present
 				const urlParams = new URLSearchParams(window.location.search);
@@ -601,6 +1020,148 @@ final class Stats_Renderer {
 		);
 		$date_filter_display = isset( $date_filter_labels[ $date_filter ] ) ? $date_filter_labels[ $date_filter ] : 'Last 30 Days';
 
+		// URL Parameter Attribution Stats (Multi-Event)
+		// Aggregate url_params by event type: wizard_view, feature_added, checkout_start, quote_submitted
+		$event_types_for_attribution = array( 'wizard_view', 'feature_added', 'checkout_start', 'quote_submitted' );
+		$attribution_stats = array();
+		foreach ( $event_types_for_attribution as $et ) {
+			$attribution_stats[ $et ] = array(
+				'source'  => array(),
+				'medium'  => array(),
+				'campaign' => array(),
+				'client'  => array(),
+				'bot'     => array(),
+			);
+		}
+
+		// 1) Quote submissions: from quote_requests (include revenue)
+		foreach ( $requests as $req ) {
+			$metadata = ! empty( $req->metadata ) ? json_decode( $req->metadata, true ) : array();
+			if ( empty( $metadata['url_params'] ) || ! is_array( $metadata['url_params'] ) ) {
+				continue;
+			}
+			$url_params = $metadata['url_params'];
+			$quote_value = floatval( $req->totals ? ( json_decode( $req->totals, true )['grand_total'] ?? 0 ) : 0 );
+
+			$source = isset( $url_params['utm_source'] ) ? $url_params['utm_source'] : ( isset( $url_params['source'] ) ? $url_params['source'] : null );
+			$medium = isset( $url_params['utm_medium'] ) ? $url_params['utm_medium'] : ( isset( $url_params['medium'] ) ? $url_params['medium'] : null );
+			$campaign = isset( $url_params['utm_campaign'] ) ? $url_params['utm_campaign'] : ( isset( $url_params['campaign'] ) ? $url_params['campaign'] : null );
+			$webURL = isset( $url_params['webURL'] ) ? $url_params['webURL'] : ( isset( $url_params['weburl'] ) ? $url_params['weburl'] : null );
+			$botID = isset( $url_params['botID'] ) ? $url_params['botID'] : ( isset( $url_params['bot_id'] ) ? $url_params['bot_id'] : null );
+
+			if ( $source ) {
+				$source = strtolower( $source );
+				if ( ! isset( $attribution_stats['quote_submitted']['source'][$source] ) ) {
+					$attribution_stats['quote_submitted']['source'][$source] = array( 'count' => 0, 'value' => 0 );
+				}
+				$attribution_stats['quote_submitted']['source'][$source]['count']++;
+				$attribution_stats['quote_submitted']['source'][$source]['value'] += $quote_value;
+			}
+			if ( $medium ) {
+				$medium = strtolower( $medium );
+				if ( ! isset( $attribution_stats['quote_submitted']['medium'][$medium] ) ) {
+					$attribution_stats['quote_submitted']['medium'][$medium] = array( 'count' => 0, 'value' => 0 );
+				}
+				$attribution_stats['quote_submitted']['medium'][$medium]['count']++;
+				$attribution_stats['quote_submitted']['medium'][$medium]['value'] += $quote_value;
+			}
+			if ( $campaign ) {
+				$campaign = strtolower( $campaign );
+				if ( ! isset( $attribution_stats['quote_submitted']['campaign'][$campaign] ) ) {
+					$attribution_stats['quote_submitted']['campaign'][$campaign] = array( 'count' => 0, 'value' => 0 );
+				}
+				$attribution_stats['quote_submitted']['campaign'][$campaign]['count']++;
+				$attribution_stats['quote_submitted']['campaign'][$campaign]['value'] += $quote_value;
+			}
+			if ( $webURL ) {
+				if ( ! isset( $attribution_stats['quote_submitted']['client'][$webURL] ) ) {
+					$attribution_stats['quote_submitted']['client'][$webURL] = array( 'count' => 0, 'value' => 0 );
+				}
+				$attribution_stats['quote_submitted']['client'][$webURL]['count']++;
+				$attribution_stats['quote_submitted']['client'][$webURL]['value'] += $quote_value;
+			}
+			if ( $botID ) {
+				$botID = strtolower( $botID );
+				if ( ! isset( $attribution_stats['quote_submitted']['bot'][$botID] ) ) {
+					$attribution_stats['quote_submitted']['bot'][$botID] = array( 'count' => 0, 'value' => 0 );
+				}
+				$attribution_stats['quote_submitted']['bot'][$botID]['count']++;
+				$attribution_stats['quote_submitted']['bot'][$botID]['value'] += $quote_value;
+			}
+		}
+
+		// 2) Interactions (wizard_view, feature_added, checkout_start): count only, no revenue
+		$interaction_event_types = array( 'wizard_view', 'feature_added', 'checkout_start' );
+		foreach ( $interaction_event_types as $event_type ) {
+			$sql = $wpdb->prepare(
+				"SELECT metadata FROM $interactions_table WHERE event_type = %s $date_conditions",
+				array_merge( array( $event_type ), $date_args )
+			);
+			$rows = $wpdb->get_results( $sql );
+			foreach ( $rows as $row ) {
+				$metadata = ! empty( $row->metadata ) ? json_decode( $row->metadata, true ) : array();
+				if ( empty( $metadata['url_params'] ) || ! is_array( $metadata['url_params'] ) ) {
+					continue;
+				}
+				$url_params = $metadata['url_params'];
+				$source = isset( $url_params['utm_source'] ) ? $url_params['utm_source'] : ( isset( $url_params['source'] ) ? $url_params['source'] : null );
+				$medium = isset( $url_params['utm_medium'] ) ? $url_params['utm_medium'] : ( isset( $url_params['medium'] ) ? $url_params['medium'] : null );
+				$campaign = isset( $url_params['utm_campaign'] ) ? $url_params['utm_campaign'] : ( isset( $url_params['campaign'] ) ? $url_params['campaign'] : null );
+				$webURL = isset( $url_params['webURL'] ) ? $url_params['webURL'] : ( isset( $url_params['weburl'] ) ? $url_params['weburl'] : null );
+				$botID = isset( $url_params['botID'] ) ? $url_params['botID'] : ( isset( $url_params['bot_id'] ) ? $url_params['bot_id'] : null );
+
+				if ( $source ) {
+					$source = strtolower( $source );
+					if ( ! isset( $attribution_stats[ $event_type ]['source'][$source] ) ) {
+						$attribution_stats[ $event_type ]['source'][$source] = array( 'count' => 0, 'value' => 0 );
+					}
+					$attribution_stats[ $event_type ]['source'][$source]['count']++;
+				}
+				if ( $medium ) {
+					$medium = strtolower( $medium );
+					if ( ! isset( $attribution_stats[ $event_type ]['medium'][$medium] ) ) {
+						$attribution_stats[ $event_type ]['medium'][$medium] = array( 'count' => 0, 'value' => 0 );
+					}
+					$attribution_stats[ $event_type ]['medium'][$medium]['count']++;
+				}
+				if ( $campaign ) {
+					$campaign = strtolower( $campaign );
+					if ( ! isset( $attribution_stats[ $event_type ]['campaign'][$campaign] ) ) {
+						$attribution_stats[ $event_type ]['campaign'][$campaign] = array( 'count' => 0, 'value' => 0 );
+					}
+					$attribution_stats[ $event_type ]['campaign'][$campaign]['count']++;
+				}
+				if ( $webURL ) {
+					if ( ! isset( $attribution_stats[ $event_type ]['client'][$webURL] ) ) {
+						$attribution_stats[ $event_type ]['client'][$webURL] = array( 'count' => 0, 'value' => 0 );
+					}
+					$attribution_stats[ $event_type ]['client'][$webURL]['count']++;
+				}
+				if ( $botID ) {
+					$botID = strtolower( $botID );
+					if ( ! isset( $attribution_stats[ $event_type ]['bot'][$botID] ) ) {
+						$attribution_stats[ $event_type ]['bot'][$botID] = array( 'count' => 0, 'value' => 0 );
+					}
+					$attribution_stats[ $event_type ]['bot'][$botID]['count']++;
+				}
+			}
+		}
+
+		// Sort and limit to top 10 for each event + dimension
+		foreach ( $event_types_for_attribution as $et ) {
+			foreach ( array( 'source', 'medium', 'campaign', 'client', 'bot' ) as $dim ) {
+				arsort( $attribution_stats[ $et ][ $dim ] );
+				$attribution_stats[ $et ][ $dim ] = array_slice( $attribution_stats[ $et ][ $dim ], 0, 10, true );
+			}
+		}
+
+		// For backward compatibility, expose quote_submitted stats as top-level variables
+		$source_stats  = $attribution_stats['quote_submitted']['source']  ?? array();
+		$medium_stats  = $attribution_stats['quote_submitted']['medium']  ?? array();
+		$campaign_stats = $attribution_stats['quote_submitted']['campaign'] ?? array();
+		$client_stats  = $attribution_stats['quote_submitted']['client']  ?? array();
+		$bot_stats     = $attribution_stats['quote_submitted']['bot']     ?? array();
+
 		return array(
 			'total_requests'          => $total_requests,
 			'total_value'             => $total_value,
@@ -632,6 +1193,14 @@ final class Stats_Renderer {
 			'revenue_data'            => $revenue_data,
 			'status_counts'           => $status_counts,
 			'date_filter_display'     => $date_filter_display,
+			// New multi-event attribution stats
+			'attribution_stats'       => $attribution_stats,
+			// Backward compatibility: quote_submitted stats also at top level
+			'source_stats'            => $source_stats,
+			'medium_stats'            => $medium_stats,
+			'campaign_stats'          => $campaign_stats,
+			'client_stats'            => $client_stats,
+			'bot_stats'               => $bot_stats,
 		);
 	}
 }

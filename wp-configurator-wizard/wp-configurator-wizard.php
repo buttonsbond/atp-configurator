@@ -2,7 +2,7 @@
 /**
  * Plugin Name: ATP Quote Configurator
  * Description: Comprehensive cost estimation wizard with real-time analytics. Track interactions, manage quote requests, and gain insights with engagement metrics, revenue trends, and feature popularity.
- * Version: 3.5.2.1
+ * Version: 3.5.5
  * Author: All Tech Plus, Rojales (https://all-tech-plus.com)
  * License: GPL v3 or later
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -29,7 +29,7 @@ class WP_Configurator_Wizard {
 	/**
 	 * Plugin version
 	 */
-	const VERSION = '3.5.2.1';
+	const VERSION = '3.5.5';
 
 	/**
 	 * Database manager instance
@@ -180,6 +180,9 @@ class WP_Configurator_Wizard {
 
 		// Ensure interactions table exists (proactive check on admin pages)
 		add_action( 'admin_init', array( $this->database_manager, 'ensure_interactions_table_exists' ) );
+
+		// Ensure quote requests table has all columns (upgrade path for metadata, etc.)
+		add_action( 'admin_init', array( 'Database_Manager', 'ensure_status_columns' ) );
 
 		// Fix any missing IDs in existing data (run once on every init, but only updates if needed)
 		add_action( 'init', array( $this, 'fix_missing_ids' ) );

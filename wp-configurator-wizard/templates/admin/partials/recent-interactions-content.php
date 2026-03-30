@@ -4,15 +4,15 @@
 	$date_conditions = '';
 	$date_args = array();
 
-	// Fetch recent interactions (last 10)
+	// Fetch recent interactions (last 10) including metadata
 	if ( ! empty( $date_args ) ) {
 		$recent_events = $wpdb->get_results( $wpdb->prepare(
-			"SELECT event_type, feature_id, category_id, created_at, user_agent FROM $interactions_table WHERE 1=1 $date_conditions ORDER BY created_at DESC LIMIT 10",
+			"SELECT event_type, feature_id, category_id, created_at, user_agent, metadata FROM $interactions_table WHERE 1=1 $date_conditions ORDER BY created_at DESC LIMIT 10",
 			$date_args
 		) );
 	} else {
 		$recent_events = $wpdb->get_results(
-			"SELECT event_type, feature_id, category_id, created_at, user_agent FROM $interactions_table ORDER BY created_at DESC LIMIT 10"
+			"SELECT event_type, feature_id, category_id, created_at, user_agent, metadata FROM $interactions_table ORDER BY created_at DESC LIMIT 10"
 		);
 	}
 
@@ -52,17 +52,35 @@
 		}
 	}
 	?>
+	<style type="text/css">
+		.wp-configurator-url-params {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 2px;
+		}
+		.wp-configurator-url-param-badge {
+			background: #f0f0f1;
+			color: #2c3338;
+			padding: 2px 6px;
+			border-radius: 3px;
+			font-size: 11px;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+	</style>
 	<table class="widefat fixed striped" style="font-size: 13px; margin-bottom: 24px;">
 		<thead>
 			<tr>
 				<th>Event Type</th>
 				<th>Feature/Category</th>
 				<th>Time</th>
+				<th>URL Params</th>
 			</tr>
 		</thead>
 		<tbody>
 			<?php if ( empty( $recent_events ) ) : ?>
-				<tr><td colspan="3"><?php esc_html_e( 'No interactions recorded yet.', 'wp-configurator' ); ?></td></tr>
+				<tr><td colspan="4"><?php esc_html_e( 'No interactions recorded yet.', 'wp-configurator' ); ?></td></tr>
 			<?php else : ?>
 				<?php foreach ( $recent_events as $event ) : ?>
 					<tr>
@@ -84,6 +102,21 @@
 							?>
 						</td>
 						<td><?php echo esc_html( $event->created_at ); ?></td>
+						<td>
+							<?php
+							$metadata = ! empty( $event->metadata ) ? json_decode( $event->metadata, true ) : array();
+							if ( ! empty( $metadata['url_params'] ) && is_array( $metadata['url_params'] ) ) {
+								echo '<div class="wp-configurator-url-params">';
+								foreach ( $metadata['url_params'] as $key => $value ) {
+									$display_value = esc_html( $key . '=' . $value );
+									echo '<span class="wp-configurator-url-param-badge" title="' . $display_value . '">' . $display_value . '</span> ';
+								}
+								echo '</div>';
+							} else {
+								echo '—';
+							}
+							?>
+						</td>
 					</tr>
 				<?php endforeach; ?>
 			<?php endif; ?>

@@ -14,10 +14,25 @@ jQuery(document).ready(function($) {
     // Flag to track if checkout was completed
     var checkoutCompleted = false;
 
+    // Capture URL parameters on page load for attribution tracking
+    var urlParams = {};
+    if (window.location.search) {
+        var searchParams = new URLSearchParams(window.location.search);
+        searchParams.forEach(function(value, key) {
+            urlParams[key] = value;
+        });
+    }
+
     // Track interaction function
     function trackInteraction(eventType, featureId, categoryId, metadata) {
         if (typeof wpConfigurator === 'undefined' || !wpConfigurator.ajax_url) {
             return; // Can't track without AJAX URL
+        }
+
+        // Merge URL params into metadata if any exist
+        var mergedMetadata = metadata || {};
+        if (Object.keys(urlParams).length > 0) {
+            mergedMetadata.url_params = urlParams;
         }
 
         // Add cache-busting parameter to prevent Varnish/Wordfence caching
@@ -31,7 +46,7 @@ jQuery(document).ready(function($) {
             feature_id: featureId || '',
             category_id: categoryId || '',
             session_id: sessionId,
-            metadata: metadata || {}
+            metadata: mergedMetadata
         }, function(response) {
             // Silent fail - tracking is best effort
             if (!response || !response.success) {
@@ -496,7 +511,8 @@ jQuery(document).ready(function($) {
                 email: data.email,
                 phone: data.phone,
                 selected_items: data.selected_items,
-                totals: data.totals
+                totals: data.totals,
+                url_params: urlParams
             },
             success: function(response) {
                 if (response.success) {
