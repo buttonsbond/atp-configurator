@@ -24,7 +24,7 @@
 				</h1>
 			</div>
 			<div class="wp-configurator-header-actions">
-				<a href="https://www.paypal.com/paypalme/alltechplus" target="_blank" rel="noopener noreferrer" class="button button-primary wp-configurator-donate-btn">
+				<a href="https://www.paypal.com/donate/?hosted_button_id=RKB3Q44JC4P2U" target="_blank" rel="noopener noreferrer" class="button button-primary wp-configurator-donate-btn">
 					<?php esc_html_e( 'Donate via PayPal', 'wp-configurator' ); ?>
 				</a>
 			</div>
