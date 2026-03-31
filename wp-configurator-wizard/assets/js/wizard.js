@@ -23,6 +23,10 @@ jQuery(document).ready(function($) {
         });
     }
 
+    // Capture page context: current page URL and referring URL
+    var pageUrl = window.location.href;
+    var referrerUrl = document.referrer || '';
+
     // Track interaction function
     function trackInteraction(eventType, featureId, categoryId, metadata) {
         if (typeof wpConfigurator === 'undefined' || !wpConfigurator.ajax_url) {
@@ -34,6 +38,9 @@ jQuery(document).ready(function($) {
         if (Object.keys(urlParams).length > 0) {
             mergedMetadata.url_params = urlParams;
         }
+        // Add page context
+        mergedMetadata.page_url = pageUrl;
+        mergedMetadata.referrer_url = referrerUrl;
 
         // Add cache-busting parameter to prevent Varnish/Wordfence caching
         var cacheBuster = Date.now();
@@ -512,7 +519,9 @@ jQuery(document).ready(function($) {
                 phone: data.phone,
                 selected_items: data.selected_items,
                 totals: data.totals,
-                url_params: urlParams
+                url_params: urlParams,
+                page_url: pageUrl,
+                referrer_url: referrerUrl
             },
             success: function(response) {
                 if (response.success) {

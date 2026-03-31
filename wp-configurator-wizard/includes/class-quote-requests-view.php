@@ -222,6 +222,7 @@ final class Quote_Requests_View {
 									<td data-label="URL Params">
 										<?php
 										$metadata = ! empty( $req->metadata ) ? json_decode( $req->metadata, true ) : array();
+										// Show URL params as badges
 										if ( ! empty( $metadata['url_params'] ) && is_array( $metadata['url_params'] ) ) {
 											echo '<div class="wp-configurator-url-params">';
 											foreach ( $metadata['url_params'] as $key => $value ) {
@@ -229,7 +230,29 @@ final class Quote_Requests_View {
 												echo '<span class="wp-configurator-url-param-badge" title="' . $display_value . '">' . $display_value . '</span> ';
 											}
 											echo '</div>';
-										} else {
+										}
+										// Show page URL and referrer
+										if ( ! empty( $metadata['page_url'] ) || ! empty( $metadata['referrer_url'] ) ) {
+											echo '<div class="wp-configurator-page-context">';
+											if ( ! empty( $metadata['page_url'] ) ) {
+												// Extract just the path from full URL (without query)
+												$page_url = $metadata['page_url'];
+												$parsed = parse_url( $page_url );
+												$display_url = isset( $parsed['path'] ) ? $parsed['path'] : $page_url;
+												echo '<div><span class="label">Page:</span> ' . esc_html( $display_url ) . '</div>';
+											}
+											if ( ! empty( $metadata['referrer_url'] ) ) {
+												// Extract just the path from referrer for brevity
+												$referrer_url = $metadata['referrer_url'];
+												$parsed = parse_url( $referrer_url );
+												$display_ref = isset( $parsed['path'] ) ? $parsed['path'] : ( $referrer_url ?: '' );
+												if ( $display_ref ) {
+													echo '<div><span class="label">From:</span> ' . esc_html( $display_ref ) . '</div>';
+												}
+											}
+											echo '</div>';
+										}
+										if ( empty( $metadata['url_params'] ) && empty( $metadata['page_url'] ) && empty( $metadata['referrer_url'] ) ) {
 											echo '—';
 										}
 										?>
@@ -297,6 +320,18 @@ final class Quote_Requests_View {
 						overflow: hidden;
 						text-overflow: ellipsis;
 						max-width: 100%;
+					}
+					/* Page context styling */
+					.wp-configurator-page-context {
+						font-size: 11px;
+						color: #666;
+					}
+					.wp-configurator-page-context div {
+						margin-bottom: 2px;
+					}
+					.wp-configurator-page-context .label {
+						font-weight: 600;
+						color: #444;
 					}
 					.status-pending { background-color: #f56e28; color: #fff; }
 					.status-quoted { background-color: #2271b1; color: #fff; }

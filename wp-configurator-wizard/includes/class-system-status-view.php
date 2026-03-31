@@ -70,7 +70,6 @@ final class System_Status_View {
 				case 'database_tables':
 				case 'plugin_version':
 				case 'github_release':
-				case 'dashboard_widget':
 					$grouped_checks['core'][$key] = $check;
 					break;
 				case 'caching_plugins':
@@ -79,11 +78,8 @@ final class System_Status_View {
 					$grouped_checks['caching'][$key] = $check;
 					break;
 				case 'email_config':
-				case 'webhook_config':
 					$grouped_checks['comms'][$key] = $check;
 					break;
-				case 'php_version':
-				case 'mysql_version':
 				case 'wp_debug':
 					$grouped_checks['env'][$key] = $check;
 					break;
@@ -428,6 +424,11 @@ final class System_Status_View {
 					$('#purge-results').hide().html('<p>⏳ Loading...</p>').show();
 					$('#purge-error').hide();
 
+					var pageUrl = $('#purge-page-url').val();
+					var pageMatch = $('#purge-page-match').val();
+					var referrerUrl = $('#purge-referrer-url').val();
+					var referrerMatch = $('#purge-referrer-match').val();
+
 					var ajaxData = {
 						action: 'preview_interaction_purge',
 						nonce: wpConfiguratorAdmin.exportNonce,
@@ -437,6 +438,10 @@ final class System_Status_View {
 						param_value: paramValue,
 						match_type: matchType,
 						event_types: eventTypes,
+						page_url: pageUrl,
+						page_match: pageMatch,
+						referrer_url: referrerUrl,
+						referrer_match: referrerMatch,
 						page: page,
 						per_page: perPage
 					};
@@ -465,15 +470,42 @@ final class System_Status_View {
 								// Show sample records if available
 								if (data.samples && data.samples.length > 0) {
 									html += '<p class="sample-count">Showing page ' + currentPreviewPage + ' of ' + totalPreviewPages + ' (samples ' + ((currentPreviewPage-1)*perPage + 1) + '-' + Math.min(currentPreviewPage*perPage, data.count) + ' of ' + data.count + '):</p>';
-									html += '<table><thead><tr><th>ID</th><th>Event Type</th><th>Date</th><th>Feature</th><th>URL Params</th></tr></thead><tbody>';
+									html += '<table><thead><tr><th>ID</th><th>Event Type</th><th>Date</th><th>Feature</th><th>URL Params</th><th>Page</th><th>From</th></tr></thead><tbody>';
 									$.each(data.samples, function(i, rec) {
 										html += '<tr>';
 										html += '<td>' + rec.id + '</td>';
 										html += '<td>' + rec.event_type + '</td>';
 										html += '<td>' + rec.created_at + '</td>';
 										html += '<td>' + (rec.feature_id || '-') + '</td>';
+
+										// URL Params as JSON
 										var urlParams = rec.url_params ? JSON.stringify(rec.url_params) : '-';
 										html += '<td>' + urlParams + '</td>';
+
+										// Page URL (extract path only, without query)
+										var pageDisplay = '-';
+										if (rec.page_url) {
+											try {
+												var url = new URL(rec.page_url);
+												pageDisplay = url.pathname;
+											} catch (e) {
+												pageDisplay = rec.page_url;
+											}
+										}
+										html += '<td>' + pageDisplay + '</td>';
+
+										// Referrer URL (extract path only, without query)
+										var refDisplay = '-';
+										if (rec.referrer_url) {
+											try {
+												var ref = new URL(rec.referrer_url);
+												refDisplay = ref.pathname;
+											} catch (e) {
+												refDisplay = rec.referrer_url;
+											}
+										}
+										html += '<td>' + refDisplay + '</td>';
+
 										html += '</tr>';
 									});
 									html += '</tbody></table>';
@@ -549,6 +581,11 @@ final class System_Status_View {
 						}
 					});
 
+					var pageUrl = $('#purge-page-url').val();
+					var pageMatch = $('#purge-page-match').val();
+					var referrerUrl = $('#purge-referrer-url').val();
+					var referrerMatch = $('#purge-referrer-match').val();
+
 					$.ajax({
 						url: ajaxurl,
 						type: 'POST',
@@ -560,7 +597,11 @@ final class System_Status_View {
 							param_type: paramType,
 							param_value: paramValue,
 							match_type: matchType,
-							event_types: eventTypes
+							event_types: eventTypes,
+							page_url: pageUrl,
+							page_match: pageMatch,
+							referrer_url: referrerUrl,
+							referrer_match: referrerMatch
 						},
 						dataType: 'json'
 					})
@@ -797,6 +838,30 @@ final class System_Status_View {
 				</select>
 			</div>
 
+			<p><strong>Filter by Page URL (optional):</strong></p>
+			<div class="form-row">
+				<label for="purge-page-url">Page Path:</label>
+				<input type="text" id="purge-page-url" placeholder="e.g., /pricing/ or /contact/">
+				<label for="purge-page-match">Match:</label>
+				<select id="purge-page-match">
+					<?php foreach ( $match_types as $key => $label ) : ?>
+						<option value="<?php echo esc_attr( $key ); ?>"<?php selected( $key, 'contains' ); ?>><?php echo esc_html( $label ); ?></option>
+					<?php endforeach; ?>
+				</select>
+			</div>
+
+			<p><strong>Filter by Referrer URL (optional):</strong></p>
+			<div class="form-row">
+				<label for="purge-referrer-url">Referrer Path:</label>
+				<input type="text" id="purge-referrer-url" placeholder="e.g., /blog/ or from external site">
+				<label for="purge-referrer-match">Match:</label>
+				<select id="purge-referrer-match">
+					<?php foreach ( $match_types as $key => $label ) : ?>
+						<option value="<?php echo esc_attr( $key ); ?>"<?php selected( $key, 'contains' ); ?>><?php echo esc_html( $label ); ?></option>
+					<?php endforeach; ?>
+				</select>
+			</div>
+
 			<div class="form-row">
 				<label for="purge-per-page">Samples per page:</label>
 				<select id="purge-per-page">
@@ -857,6 +922,10 @@ final class System_Status_View {
 		$param_value = isset( $_POST['param_value'] ) ? sanitize_text_field( $_POST['param_value'] ) : '';
 		$match_type  = isset( $_POST['match_type'] ) ? sanitize_text_field( $_POST['match_type'] ) : 'exact';
 		$event_types = isset( $_POST['event_types'] ) && is_array( $_POST['event_types'] ) ? array_map( 'sanitize_text_field', $_POST['event_types'] ) : array();
+		$page_url    = isset( $_POST['page_url'] ) ? sanitize_text_field( $_POST['page_url'] ) : '';
+		$page_match  = isset( $_POST['page_match'] ) ? sanitize_text_field( $_POST['page_match'] ) : 'contains';
+		$referrer_url = isset( $_POST['referrer_url'] ) ? sanitize_text_field( $_POST['referrer_url'] ) : '';
+		$referrer_match = isset( $_POST['referrer_match'] ) ? sanitize_text_field( $_POST['referrer_match'] ) : 'contains';
 		$page        = isset( $_POST['page'] ) ? max( 1, intval( $_POST['page'] ) ) : 1;
 		$per_page    = isset( $_POST['per_page'] ) ? max( 1, min( 500, intval( $_POST['per_page'] ) ) ) : 50;
 
@@ -904,6 +973,20 @@ final class System_Status_View {
 			$where_params[] = $pattern;
 		}
 
+		// Page URL filter (matches against path stored in page_url)
+		if ( $page_url !== '' ) {
+			$pattern = $page_match === 'exact' ? $page_url : ( $page_match === 'contains' ? '%' . $page_url . '%' : ( $page_match === 'starts_with' ? $page_url . '%' : '%' . $page_url ) );
+			$where[] = "JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.page_url')) LIKE %s";
+			$where_params[] = $pattern;
+		}
+
+		// Referrer URL filter (matches against path stored in referrer_url)
+		if ( $referrer_url !== '' ) {
+			$pattern = $referrer_match === 'exact' ? $referrer_url : ( $referrer_match === 'contains' ? '%' . $referrer_url . '%' : ( $referrer_match === 'starts_with' ? $referrer_url . '%' : '%' . $referrer_url ) );
+			$where[] = "JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.referrer_url')) LIKE %s";
+			$where_params[] = $pattern;
+		}
+
 		$where_sql = implode( ' AND ', $where );
 
 		// Count total matches
@@ -948,10 +1031,12 @@ final class System_Status_View {
 			ARRAY_A
 		);
 
-		// Extract url_params from metadata for each sample
+		// Extract url_params, page_url, and referrer_url from metadata for each sample
 		foreach ( $samples as &$sample ) {
 			$meta = json_decode( $sample['metadata'], true );
 			$sample['url_params'] = isset( $meta['url_params'] ) ? $meta['url_params'] : null;
+			$sample['page_url'] = isset( $meta['page_url'] ) ? $meta['page_url'] : null;
+			$sample['referrer_url'] = isset( $meta['referrer_url'] ) ? $meta['referrer_url'] : null;
 			// Optionally unset the full metadata to reduce payload
 			unset( $sample['metadata'] );
 		}
@@ -984,6 +1069,10 @@ final class System_Status_View {
 		$param_value = isset( $_POST['param_value'] ) ? sanitize_text_field( $_POST['param_value'] ) : '';
 		$match_type  = isset( $_POST['match_type'] ) ? sanitize_text_field( $_POST['match_type'] ) : 'exact';
 		$event_types = isset( $_POST['event_types'] ) && is_array( $_POST['event_types'] ) ? array_map( 'sanitize_text_field', $_POST['event_types'] ) : array();
+		$page_url    = isset( $_POST['page_url'] ) ? sanitize_text_field( $_POST['page_url'] ) : '';
+		$page_match  = isset( $_POST['page_match'] ) ? sanitize_text_field( $_POST['page_match'] ) : 'contains';
+		$referrer_url = isset( $_POST['referrer_url'] ) ? sanitize_text_field( $_POST['referrer_url'] ) : '';
+		$referrer_match = isset( $_POST['referrer_match'] ) ? sanitize_text_field( $_POST['referrer_match'] ) : 'contains';
 
 		$table = $wpdb->prefix . 'configurator_interactions';
 		$where = array( '1=1' );
@@ -1026,6 +1115,20 @@ final class System_Status_View {
 			}
 			$where[] = "JSON_UNQUOTE(JSON_EXTRACT(metadata, %s)) LIKE %s";
 			$where_params[] = $param_path;
+			$where_params[] = $pattern;
+		}
+
+		// Page URL filter (matches against path stored in page_url)
+		if ( $page_url !== '' ) {
+			$pattern = $page_match === 'exact' ? $page_url : ( $page_match === 'contains' ? '%' . $page_url . '%' : ( $page_match === 'starts_with' ? $page_url . '%' : '%' . $page_url ) );
+			$where[] = "JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.page_url')) LIKE %s";
+			$where_params[] = $pattern;
+		}
+
+		// Referrer URL filter (matches against path stored in referrer_url)
+		if ( $referrer_url !== '' ) {
+			$pattern = $referrer_match === 'exact' ? $referrer_url : ( $referrer_match === 'contains' ? '%' . $referrer_url . '%' : ( $referrer_match === 'starts_with' ? $referrer_url . '%' : '%' . $referrer_url ) );
+			$where[] = "JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.referrer_url')) LIKE %s";
 			$where_params[] = $pattern;
 		}
 
@@ -1456,27 +1559,7 @@ final class System_Status_View {
 			'action'      => $memory_action,
 		);
 
-		// 6. PHP Version
-		$php_version = PHP_VERSION;
-		$php_ok      = version_compare( $php_version, '8.0', '>=' );
-		$checks['php_version'] = array(
-			'status'      => $php_ok ? 'success' : 'warning',
-			'label'       => 'PHP Version',
-			'description' => $php_version . ( $php_ok ? '' : ' - PHP 8.0+ is recommended.' ),
-			'action'      => ! $php_ok ? '<p class="description">Consider upgrading PHP for better performance and security.</p>' : '',
-		);
-
-		// 7. MySQL Version
-		$mysql_version = $wpdb->db_version();
-		$mysql_ok      = version_compare( $mysql_version, '5.7', '>=' ) || ( stripos( $mysql_version, 'mariadb' ) !== false && version_compare( $mysql_version, '10.2', '>=' ) );
-		$checks['mysql_version'] = array(
-			'status'      => $mysql_ok ? 'success' : 'warning',
-			'label'       => 'MySQL Version',
-			'description' => "MySQL/MariaDB version: $mysql_version. JSON support required.",
-			'action'      => ! $mysql_ok ? '<p class="description">Upgrade to MySQL 5.7+ or MariaDB 10.2+ for full JSON support.</p>' : '',
-		);
-
-		// 8. Debug logging
+		// 6. Debug logging
 		$debug_enabled = defined( 'WP_DEBUG' ) && WP_DEBUG;
 		$checks['wp_debug'] = array(
 			'status'      => $debug_enabled ? 'info' : 'success',
@@ -1494,15 +1577,7 @@ final class System_Status_View {
 			'action'      => $github_check['action'],
 		);
 
-		// 10. Dashboard widget registration (just info)
-		$checks['dashboard_widget'] = array(
-			'status'      => 'info',
-			'label'       => 'Dashboard Widget',
-			'description' => 'Interaction stats appear on the Configurator admin dashboard above the tabs.',
-			'action'      => '',
-		);
-
-		// 11. Email & Webhook Configuration Status
+		// 10. Email Configuration Status
 		$admin_email = $options['settings']['notification_email'] ?? '';
 		$test_email = $options['settings']['test_email_address'] ?? '';
 		$send_client_email = ! empty( $options['settings']['send_client_email'] );
@@ -1510,8 +1585,6 @@ final class System_Status_View {
 
 		$email_status = 'success';
 		$email_desc = 'Email notifications are configured. Use the buttons below to send test emails (client and admin formats).';
-		$webhook_status = 'success';
-		$webhook_desc = 'Webhook is configured.';
 
 		if ( ! $admin_email ) {
 			$email_status = 'warning';
@@ -1528,14 +1601,6 @@ final class System_Status_View {
 
 		if ( $test_email && ! is_email( $test_email ) ) {
 			$email_desc .= ' Test email address is invalid.';
-		}
-
-		if ( ! $webhook_url ) {
-			$webhook_status = 'warning';
-			$webhook_desc = 'Webhook URL is not configured. Set it in Miscellaneous settings.';
-		} elseif ( ! filter_var( $webhook_url, FILTER_VALIDATE_URL ) ) {
-			$webhook_status = 'error';
-			$webhook_desc = 'Webhook URL is invalid.';
 		}
 
 		// Build action buttons for test functionality
@@ -1563,14 +1628,7 @@ final class System_Status_View {
 			'action'      => $action_buttons ? '<div class="description" style="background: #f9f9f9; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">' . $action_buttons . '</div>' : '',
 		);
 
-		$checks['webhook_config'] = array(
-			'status'      => $webhook_status,
-			'label'       => 'Webhook',
-			'description' => $webhook_desc,
-			'action'      => '',
-		);
-
-		// 13. Donors Sync
+		// 12. Donors Sync
 		$donors_status = 'info';
 		$sync_status = $this->get_donors_sync_status();
 		$donors_desc = 'Donors list source: ' . $sync_status['source'] . '. Last sync: ' . $sync_status['last_sync'];

@@ -192,7 +192,11 @@ The plugin is fully customizable:
 
 ## Usage
 
-Simply add the shortcode `[wp_configurator_wizard]` to any page or post where you want the configurator to appear.
+Add the shortcode `[wp_configurator_wizard]` to any page or post where you want the configurator to appear.
+
+**Optional attribute:**
+
+- `template`: Load a custom frontend template. Default is the built-in wizard. Example: `[wp_configurator_wizard template="minimal"]`. Custom templates must be placed in `templates/frontend/{template}.php` within the plugin directory.
 
 ## Data Model
 

@@ -1,6 +1,6 @@
 # WP Configurator Wizard - Project Overview
 
-## Current State (v3.5.9 - Stable)
+## Current State (v3.6.2 - Stable)
 **Live**: https://all-tech-plus.com/wizard
 **Shortcode**: `[wp_configurator_wizard]`
 **Stack**: PHP (WordPress), jQuery, custom CSS; no build step
@@ -98,6 +98,20 @@ Key milestones:
   - All filters combine (date, event type, URL params, match type) for precise targeting
   - AJAX handlers updated with pagination support (LIMIT/OFFSET)
   - Better UX: page info, sample range display, disabled state handling
+
+- **v3.6.1 (2026-03-31)**: System Status Cleanup
+  - Removed PHP Version check (users can see PHP version elsewhere)
+  - Removed MySQL Version check (not actionable from plugin)
+  - Removed Webhook configuration status card (users can see webhook URL in settings)
+  - Removed Dashboard Widget card (redundant - widget always active)
+  - Streamlined System Status to focus on actionable diagnostics
+  - "Test Webhook" button retained in Email Notifications card for testing
+
+- **v3.6.2 (2026-04-01)**: Multi-Template Frontend Support
+  - Shortcode now supports `template` attribute to load custom frontend layouts: `[wp_configurator_wizard template="custom"]`
+  - Custom templates placed in `templates/frontend/{template}.php`
+  - Default behavior unchanged: `[wp_configurator_wizard]` uses classic `templates/wizard.php`
+  - Extensible architecture for future layout variations without core modifications
 
 - **v3.5.9 (2026-03-30)**: Bug Fix for Interaction Data Purge
   - Fixed form not displaying: moved HTML from `description` to `raw_html` field

@@ -5,37 +5,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working on this
 ## Session Management
 - **Always** read `TODO.md` at the start of every session to understand the current state.
 - **Update** `TODO.md` after completing a sub-task (mark `[x]`) or if project state changes.
-- **Prioritize**: Follow the "Next Up" items in `TODO.md` unless user specifies otherwise.
+- **Update** 'README.md' before making any commits and releases.
 
 ## Context Management Rules
-- **Conciseness**: Be concise and direct. Provide only the necessary information, code changes, or summaries. 
-Avoid conversational filler.
-- **Tool Output**: Do not repeat entire file contents when providing a fix. Only show the changed lines (diff) or 
-the relevant function.
-- **History**: When you have completed a task or reached a natural checkpoint, summarize the key decisions and 
-discard the verbose back-and-forth.
-- **Noisy Tools**: If a tool (like `git status` or a linter) returns a lot of text, summarize the essential 
-output rather than pasting the whole log.
-
+- **Conciseness**: Be concise and direct. Provide only the necessary information, code changes, or summaries. Avoid conversational filler.
+- **Tool Output**: Do not repeat entire file contents when providing a fix. Only show the changed lines (diff) or the relevant function.
+- **History**: When you have completed a task or reached a natural checkpoint, summarize the key decisions and discard the verbose back-and-forth.
+- **Noisy Tools**: If a tool (like `git status` or a linter) returns a lot of text, summarize the essential output rather than pasting the whole log.
 
 ## Token Saving Rules
 - **Lazy Loading**: Only read files needed for the current task.
 - **Brief Responses**: Concise explanations; avoid resending large files.
-- **Ask**: If a task requires >3 file reads, confirm with user before proceeding.
 
-## Compact Instructions
-When compacting history or running out of context, prioritize in this order:
-1. Current file changes.
-2. Core task objectives.
-3. Git status/Branch context.
-Discard: Original file contents, detailed tool execution logs, and conversational text.
+## Auto-Compact Instructions
+When compacting, always preserve:
+- Current project structure
+- Active task goals
+- All file modifications with exact paths
+- Git status/Branch context.
+- Discard: Original file contents, detailed tool execution logs, and conversational text.
 
 ## Response Guidelines
 - Use short, descriptive commit messages.
 - Prefer code diffs over full file re-writes.
-- If an operation is successful, just say "Done" and show the change.
-
-
+- If an operation is successful, just say "Done".
 
 ## Plugin Development
 
@@ -43,7 +36,7 @@ Discard: Original file contents, detailed tool execution logs, and conversationa
 - Edit files directly in `wp-configurator-wizard/`.
 - **Git Workflow**: Do NOT automatically commit or push changes to GitHub unless explicitly instructed by the user. Development can proceed without committing.
 - **When Ready for Release/Commit**:
-  1. Test changes thoroughly on WordPress site
+  1. Ask user to Test changes thoroughly on WordPress site - they'll need a new zip file for this
   2. Bump version in two places:
      - Plugin header (`wp-configurator-wizard.php`, line 5): `* Version: X.Y.Z`
      - Constant `VERSION` (around line 22 in same file)

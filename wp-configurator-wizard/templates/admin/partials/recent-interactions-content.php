@@ -57,6 +57,7 @@
 			display: flex;
 			flex-wrap: wrap;
 			gap: 2px;
+			margin-bottom: 4px;
 		}
 		.wp-configurator-url-param-badge {
 			background: #f0f0f1;
@@ -67,6 +68,17 @@
 			white-space: nowrap;
 			overflow: hidden;
 			text-overflow: ellipsis;
+		}
+		.wp-configurator-page-context {
+			font-size: 11px;
+			color: #666;
+		}
+		.wp-configurator-page-context div {
+			margin-bottom: 2px;
+		}
+		.wp-configurator-page-context .label {
+			font-weight: 600;
+			color: #444;
 		}
 	</style>
 	<table class="widefat fixed striped" style="font-size: 13px; margin-bottom: 24px;">
@@ -105,6 +117,7 @@
 						<td>
 							<?php
 							$metadata = ! empty( $event->metadata ) ? json_decode( $event->metadata, true ) : array();
+							// Show URL params as badges
 							if ( ! empty( $metadata['url_params'] ) && is_array( $metadata['url_params'] ) ) {
 								echo '<div class="wp-configurator-url-params">';
 								foreach ( $metadata['url_params'] as $key => $value ) {
@@ -112,7 +125,29 @@
 									echo '<span class="wp-configurator-url-param-badge" title="' . $display_value . '">' . $display_value . '</span> ';
 								}
 								echo '</div>';
-							} else {
+							}
+							// Show page URL and referrer
+							if ( ! empty( $metadata['page_url'] ) || ! empty( $metadata['referrer_url'] ) ) {
+								echo '<div class="wp-configurator-page-context">';
+								if ( ! empty( $metadata['page_url'] ) ) {
+									// Extract just the path from full URL (without query)
+									$page_url = $metadata['page_url'];
+									$parsed = parse_url( $page_url );
+									$display_url = isset( $parsed['path'] ) ? $parsed['path'] : $page_url;
+									echo '<div><span class="label">Page:</span> ' . esc_html( $display_url ) . '</div>';
+								}
+								if ( ! empty( $metadata['referrer_url'] ) ) {
+									// Extract just the path from referrer for brevity
+									$referrer_url = $metadata['referrer_url'];
+									$parsed = parse_url( $referrer_url );
+									$display_ref = isset( $parsed['path'] ) ? $parsed['path'] : ( $referrer_url ?: '' );
+									if ( $display_ref ) {
+										echo '<div><span class="label">From:</span> ' . esc_html( $display_ref ) . '</div>';
+									}
+								}
+								echo '</div>';
+							}
+							if ( empty( $metadata['url_params'] ) && empty( $metadata['page_url'] ) && empty( $metadata['referrer_url'] ) ) {
 								echo '—';
 							}
 							?>

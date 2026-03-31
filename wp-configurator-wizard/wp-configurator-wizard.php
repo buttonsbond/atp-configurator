@@ -2,7 +2,7 @@
 /**
  * Plugin Name: ATP Quote Configurator
  * Description: Comprehensive cost estimation wizard with real-time analytics. Track interactions, manage quote requests, and gain insights with engagement metrics, revenue trends, and feature popularity.
- * Version: 3.6.0
+ * Version: 3.6.2
  * Author: All Tech Plus, Rojales (https://all-tech-plus.com)
  * License: GPL v3 or later
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -29,7 +29,7 @@ class WP_Configurator_Wizard {
 	/**
 	 * Plugin version
 	 */
-	const VERSION = '3.6.0';
+	const VERSION = '3.6.2';
 
 	/**
 	 * Database manager instance
@@ -176,8 +176,10 @@ class WP_Configurator_Wizard {
 		// Load text domain
 		load_plugin_textdomain( 'wp-configurator', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 
-		// Register shortcode
-		add_shortcode( 'wp_configurator_wizard', array( $this, 'render_wizard' ) );
+		// Register shortcode with attribute support
+		add_shortcode( 'wp_configurator_wizard', function( $atts ) {
+			return $this->render_wizard( $atts );
+		} );
 
 		// Register settings
 		add_action( 'admin_init', array( $this->settings_manager, 'register_settings' ) );
@@ -561,9 +563,14 @@ class WP_Configurator_Wizard {
 	/**
 	 * Render the wizard via shortcode
 	 *
+	 * Supports attributes:
+	 * - `template` (string): Custom template name to load from `templates/frontend/{template}.php`.
+	 *   If not provided, uses the classic template at `templates/wizard.php` (backward compatible).
+	 *
+	 * @param array $atts Shortcode attributes
 	 * @return string
 	 */
-	public function render_wizard() {
+	public function render_wizard( $atts = [] ) {
 		$options = $this->settings_manager->get_options();
 		// Validate structure; if corrupted, reset to defaults
 		if ( ! is_array( $options ) || ! isset( $options['categories'] ) || ! isset( $options['features'] ) ) {
@@ -593,8 +600,25 @@ class WP_Configurator_Wizard {
 		}
 		unset($feat); // Break the reference to prevent corruption later
 
+		// Determine template path
+		$template_file = '';
+
+		// If template attribute is provided, try to load from frontend subdirectory
+		if ( isset( $atts['template'] ) && ! empty( $atts['template'] ) ) {
+			$template = sanitize_file_name( $atts['template'] );
+			$candidate = plugin_dir_path( __FILE__ ) . 'templates/frontend/' . $template . '.php';
+			if ( file_exists( $candidate ) ) {
+				$template_file = $candidate;
+			}
+		}
+
+		// Fallback to classic wizard template if no custom template specified or not found
+		if ( empty( $template_file ) ) {
+			$template_file = plugin_dir_path( __FILE__ ) . 'templates/wizard.php';
+		}
+
 		ob_start();
-		include plugin_dir_path( __FILE__ ) . 'templates/wizard.php';
+		include $template_file;
 		return ob_get_clean();
 	}
 

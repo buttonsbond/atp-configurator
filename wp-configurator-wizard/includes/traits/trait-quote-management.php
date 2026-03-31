@@ -34,6 +34,8 @@ trait Quote_Management {
 		$selected_items = isset( $_POST['selected_items'] ) ? $_POST['selected_items'] : array();
 		$totals = isset( $_POST['totals'] ) ? $_POST['totals'] : array();
 		$url_params = isset( $_POST['url_params'] ) && is_array( $_POST['url_params'] ) ? $_POST['url_params'] : array();
+		$page_url = isset( $_POST['page_url'] ) ? sanitize_text_field( $_POST['page_url'] ) : '';
+		$referrer_url = isset( $_POST['referrer_url'] ) ? sanitize_text_field( $_POST['referrer_url'] ) : '';
 
 		// Debug logging
 		error_log( 'Quote request received: name=' . $name . ', email=' . $email . ', selected_items count=' . ( is_array( $selected_items ) ? count( $selected_items ) : 'not array' ) );
@@ -79,6 +81,10 @@ trait Quote_Management {
 			$sanitized_url_params[ sanitize_text_field( $key ) ] = sanitize_text_field( $value );
 		}
 
+		// Sanitize page URL and referrer URL (already sanitized above, but ensure they're strings)
+		$sanitized_page_url = sanitize_text_field( $page_url );
+		$sanitized_referrer_url = sanitize_text_field( $referrer_url );
+
 		// Store in database
 		global $wpdb;
 		$table_name = $this->database_manager->get_quote_requests_table();
@@ -105,7 +111,11 @@ trait Quote_Management {
 				'client_email_sent'  => 0,
 				'webhook_sent'       => 0,
 				'webhook_response'   => null,
-				'metadata'           => wp_json_encode( array( 'url_params' => $sanitized_url_params ) ),
+				'metadata'           => wp_json_encode( array(
+					'url_params'    => $sanitized_url_params,
+					'page_url'      => $sanitized_page_url,
+					'referrer_url'  => $sanitized_referrer_url,
+				) ),
 			),
 			array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%d', '%s', '%s' )
 		);
