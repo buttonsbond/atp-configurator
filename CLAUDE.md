@@ -78,7 +78,9 @@ wp-configurator-wizard/
 │       ├── trait-interaction-tracking.php
 │       └── trait-data-io.php
 ├── templates/
-│   ├── wizard.php               # Frontend HTML (dynamic rendering)
+│   ├── wizard.php               # Frontend HTML (default template)
+│   ├── frontend/                # Custom frontend templates (optional)
+│   │   └── {template}.php       # Place custom templates here
 │   └── admin/
 │       ├── page-wrapper.php
 │       ├── tabs/ (categories-features, miscellaneous, quote-requests, stats, system-status)
@@ -113,7 +115,8 @@ wp-configurator-wizard/
 - Global "Save Features" persists all changes; data stored in hidden containers then serialized to options
 
 ### Frontend
-- `wizard.js`: tiles organized by category; click or drag to add to drop zone; pricing computed client-side using localized options
+- **Shortcode**: `[wp_configurator_wizard]` loads `templates/wizard.php`. Optional attribute: `[wp_configurator_wizard template="name"]` loads `templates/frontend/{name}.php`.
+- **wizard.js**: tiles organized by category; click or drag to add to drop zone; pricing computed client-side using localized options
 - Sticky header adjustment: JS reads computed header height to offset drop zone
 - Interaction tracking sends events via AJAX
 
@@ -128,11 +131,11 @@ wp-configurator-wizard/
 - Always regenerate ZIP and bump version after updates
 
 ## Current Version
-- **3.5.2** (stable - GPLv3 licensed)
+- **3.6.2** (stable - GPLv3 licensed)
 
 ## Development Workflow Notes
-- **Current State**: Version 3.5.2 released and stable.
-- **Next**: Continue development for v3.5.3 following the standard workflow.
+- **Current State**: Version 3.6.2 released and stable.
+- **Next**: Continue development for v3.6.3 or next feature following the standard workflow.
 - **Workflow**: All changes are made locally; debugging happens on the test site; documentation updated incrementally.
 - **When Ready**: Follow the "When Ready for Release/Commit" steps below (version bump already done in code, just test and package).
 

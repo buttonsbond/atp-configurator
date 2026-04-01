@@ -62,6 +62,11 @@ final class Asset_Manager {
 			return;
 		}
 
+		// Only load if the shortcode is present on the current page
+		if ( ! $this->is_shortcode_present() ) {
+			return;
+		}
+
 		// Enqueue frontend styles
 		wp_enqueue_style(
 			'wp-configurator-style',
@@ -117,6 +122,39 @@ final class Asset_Manager {
 				),
 			)
 		);
+	}
+
+	/**
+	 * Check if the configurator shortcode is present on the current page
+	 *
+	 * @return bool
+	 */
+	private function is_shortcode_present(): bool {
+		// Check global $post for singular pages/posts
+		global $post;
+		if ( isset( $post->post_content ) && has_shortcode( $post->post_content, 'wp_configurator_wizard' ) ) {
+			return true;
+		}
+
+		// Additional check: scan the main query for any post containing shortcode
+		// (useful for archives where $post might not be set yet)
+		if ( function_exists( 'have_posts' ) && have_posts() ) {
+			$original_post = $post; // Backup current post
+			while ( have_posts() ) {
+				the_post();
+				if ( has_shortcode( get_the_content(), 'wp_configurator_wizard' ) ) {
+					// Restore original post
+					$post = $original_post;
+					wp_reset_postdata();
+					return true;
+				}
+			}
+			// Restore original post
+			$post = $original_post;
+			wp_reset_postdata();
+		}
+
+		return false;
 	}
 
 	/**
@@ -282,6 +320,11 @@ final class Asset_Manager {
 	public function output_responsive_css() {
 		// Only output on frontend where wizard may appear
 		if ( is_admin() ) {
+			return;
+		}
+
+		// Only output CSS if the shortcode is present on the current page
+		if ( ! $this->is_shortcode_present() ) {
 			return;
 		}
 
